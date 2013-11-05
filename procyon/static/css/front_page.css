@@ -1,0 +1,18 @@
+.navbar-inner, .topbar .fill {
+    background-color: red;
+    background-image: -webkit-linear-gradient(top, #333, #FF4242);
+    background-image: -o-linear-gradient(top, #333, #FF4242);
+    background-image: linear-gradient(top, #333, #FF4242);
+}
+body {
+    background-color: #000;
+}
+.navbar .brand {
+    color: #fff;
+    text-shadow: none;
+}
+.navbar .nav > li > a {
+    color: #fff;
+    text-shadow: none;
+
+}
