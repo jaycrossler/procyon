@@ -1,7 +1,11 @@
 CACHE/*
-idea/*
+.idea/*
+.idea/
+procyon/.idea
+procyon/.idea/*
+
 *.log
 *.pot
 *.pyc
-local_settings.py
+procyon/local_settings.py
 

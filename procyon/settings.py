@@ -22,16 +22,6 @@ MANAGERS = ADMINS
 #    }
 #}
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'procyon',
-        'USER': 'procyon',
-        'PASSWORD': 'procyon_pass',
-        'HOST': ''
-    }
-}
-
 
 
 # Local time zone for this installation. Choices can be found here:
@@ -203,3 +193,11 @@ ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 2
 AUTHENTICATION_BACKENDS = [
     "account.auth_backends.UsernameAuthenticationBackend",
 ]
+
+# Override production settings with local settings if they exist
+try:
+    from local_settings import *
+
+except ImportError, e:
+    # local_settings does not exist
+    pass
