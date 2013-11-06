@@ -22,6 +22,15 @@ MANAGERS = ADMINS
 #    }
 #}
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'procyon',
+        'USER': 'procyon',
+        'PASSWORD': 'changeme',
+        'HOST': ''
+    }
+}
 
 
 # Local time zone for this installation. Choices can be found here:
@@ -144,6 +153,7 @@ INSTALLED_APPS = [
 
     # project
     "procyon",
+    "starcatalog",
 ]
 
 # A sample logging configuration. The only tangible logging

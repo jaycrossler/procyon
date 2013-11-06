@@ -4,6 +4,8 @@ Procyon, built upon pinax-project-account
 
 Startup steps:
 
+    Install XCode, update to latest, From Preferences->Downloads, install command line tools (or will get clang errors)
+
     sudo easy_install pip
     Download Postgres.app
     cd ~/Sites
@@ -15,16 +17,16 @@ Startup steps:
         source ~/Sites/stardev/bin/activate
 
     pip install psycopg2
+    pip install numpy
+    brew install postgis
+    brew install gdal
+    brew install libgeoip
 
     pip install virtualenv
-    virtualenv mysiteenv
-    source mysiteenv/bin/activate
+    virtualenv stardev
+    source stardev/bin/activate
     pip install Django==1.4.5
-    django-admin.py startproject --template=https://github.com/pinax/pinax-project-account/zipball/master mysite
-    cd mysite
-    pip install -r requirements.txt
-    python manage.py syncdb
-    python manage.py runserver
+    django-admin.py startproject --template=https://github.com/pinax/pinax-project-account/zipball/master procyon
 
     pip install Paver
     add custom pavement.py
