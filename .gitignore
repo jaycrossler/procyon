@@ -1,10 +1,6 @@
 CACHE/*
 .idea
 .idea/*
-.idea/
-procyon/.idea
-procyon/.idea/*
-
 *.log
 *.pot
 *.pyc
