@@ -17,18 +17,16 @@
     <h1>{% trans "Welcome to " %}Procyon</h1>
     <p>
         {% blocktrans %}
-        <b>Procyon</b> is a MMO RPG browser-based resource management game. Players colonize planets and solar systems
-        and engage in trading or combat with other players.
+        <b>Procyon</b> is a tool for listing known stars and planets and making the data more discoverable.
         {% endblocktrans %}
     </p>
     
-    <h2>Game Options</h2>
+    <h2>Options</h2>
     <p>
         {% blocktrans %}
         <ul>
-            <li>Create a system</li>
-            <li>See your systems</li>
-            <li>Colonize space</li>
+            <li><a href="admin/starcatalog/star">Search Known Stars</a></li>
+            <li><a href="admin/starcatalog/planet">Search Known Planets</a></li>
 
         </ul>
         {% endblocktrans %}
@@ -45,13 +43,10 @@
 {% endblock %}
 
 {% block column-1 %}
-        A
 {% endblock %}
 
 {% block column-2 %}
-        B
 {% endblock %}
 
 {% block column-3 %}
-        C
 {% endblock %}

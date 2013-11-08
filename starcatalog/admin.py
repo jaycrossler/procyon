@@ -5,13 +5,13 @@ from starcatalog.models import *
 
 class StarAdmin(admin.ModelAdmin):
     model = Star
-    list_display = ['id', 'gliese', 'HIP', 'HD', 'proper_name', 'distance_parsecs', ]
-    list_filter = ['proper_name', 'distance_parsecs']
+    list_display = ['id', 'proper_name', 'gliese', 'HIP', 'HD', 'distance_parsecs', ]
+    search_fields = ['gliese', 'HIP', 'HD', 'proper_name', 'distance_parsecs']
 
 class PlanetAdmin(admin.ModelAdmin):
     model = Planet
     list_display = ['name', 'mass', 'gliese', 'HIP', 'HD', ]
-    list_filter = ['name', ]
+    search_fields = ['name', 'gliese', 'HIP', 'HD', ]
 
 
 admin.site.register(Star, StarAdmin)
