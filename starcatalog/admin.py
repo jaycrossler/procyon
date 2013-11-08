@@ -5,8 +5,8 @@ from starcatalog.models import *
 
 class StarAdmin(admin.ModelAdmin):
     model = Star
-    list_display = ['id', 'proper_name', 'gliese', 'HIP', 'HD', 'distance_parsecs', ]
-    search_fields = ['gliese', 'HIP', 'HD', 'proper_name', 'distance_parsecs']
+    list_display = ['id', 'proper_name', 'gliese', 'HIP', 'HD', 'distance_ly', 'known_planet_count', 'possibly_habitable', ]
+    search_fields = ['gliese', 'HIP', 'HD', 'proper_name', ]
 
 class PlanetAdmin(admin.ModelAdmin):
     model = Planet

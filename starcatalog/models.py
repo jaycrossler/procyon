@@ -6,6 +6,13 @@ from django.utils import simplejson
 from django.core import serializers
 
 
+class StarPossiblyHabitable(models.Model):
+    """
+    Extracted from HabHYG at: http://www.projectrho.com/public_html/starmaps/supplement/HabHYG.zip
+    """
+    HIP = models.PositiveIntegerField(db_index=True, help_text="Hipparcos Catalog number of Potentially Habitable System", blank=True, null=True)
+
+
 class Star(models.Model):
     """
     It's full of stars.
@@ -37,7 +44,6 @@ class Star(models.Model):
 
     #TODO: List all known planets
     #TODO: Calculate web color
-    #TODO: List known planets
     #TODO: Generate notional planetary system using known planets
     #TODO: When searching, list nearest stars and planets
 
@@ -46,12 +52,14 @@ class Star(models.Model):
         if not name:
             if self.bayer_flamsteed:
                 name = self.bayer_flamsteed
+            elif self.HD:
+                name = 'HD: {0}'.format(self.HD)
+            elif self.HR:
+                name = 'HR: {0}'.format(self.HR)
             elif self.gliese:
                 name = 'Gliese: {0}'.format(self.gliese)
             elif self.HIP:
                 name = 'HIP: {0}'.format(self.HIP)
-            elif self.HD:
-                name = 'HD: {0}'.format(self.HD)
             else:
                 name = 'Star: {0}'.format(self.id)
         return name
@@ -59,6 +67,42 @@ class Star(models.Model):
     class Meta:
         verbose_name_plural = 'Stars in the Galaxy'
         ordering = ['distance_parsecs']
+
+    def known_planets(self):
+        """
+        Returns a list of all related planets.
+        """
+        planet_list = []
+        if self.HIP:
+            planets = Planet.objects.filter(HIP=self.HIP)
+            for p in planets.all():
+                planet_list.append(p)
+        if self.HD:
+            planets = Planet.objects.filter(HD=self.HD)
+            for p in planets.all():
+                planet_list.append(p)
+        if self.HR:
+            planets = Planet.objects.filter(HD=self.HR)
+            for p in planets.all():
+                planet_list.append(p)
+        if self.gliese:
+            planets = Planet.objects.filter(gliese=self.gliese)
+            for p in planets.all():
+                planet_list.append(p)
+
+        return planet_list
+
+    def known_planet_count(self):
+        return len(self.known_planets())
+
+    def distance_ly(self):
+        return self.distance_parsecs * 3.26163344
+
+    def possibly_habitable(self):
+        result = False
+        if self.HIP:
+            result = StarPossiblyHabitable.objects.filter(HIP=self.HIP).exists()
+        return result
 
 class Planet(models.Model):
     """
