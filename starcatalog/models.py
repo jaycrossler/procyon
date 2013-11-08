@@ -35,6 +35,12 @@ class Star(models.Model):
     VY = models.FloatField(help_text="Annual change in Galactic Y Coordinate", blank=True, null=True)
     VZ = models.FloatField(help_text="Annual change in Galactic Z Coordinate", blank=True, null=True)
 
+    #TODO: List all known planets
+    #TODO: Calculate web color
+    #TODO: List known planets
+    #TODO: Generate notional planetary system using known planets
+    #TODO: When searching, list nearest stars and planets
+
     def __unicode__(self):
         name = self.proper_name
         if not name:
