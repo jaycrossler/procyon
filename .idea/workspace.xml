@@ -2,19 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4f9a8a3c-594f-4c49-85c8-82f520dca729" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/migrations/0002_auto__del_field_star_name__add_field_star_star_id__add_field_star_HIP_.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/migrations/0003_auto__del_field_star_star_id.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/migrations/0004_auto__add_planets.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/migrations/0005_auto__del_planets__add_planet.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/migrations/0006_auto__add_field_planet_planet_id.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/migrations/0007_auto__del_field_planet_planet_id.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/fixtures/exoplanets.csv" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/fixtures/hygxyz.csv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/migrations/0009_auto__add_index_star_HR__add_index_star_HD__add_index_star_HIP__add_in.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/migrations/0010_auto__add_index_planet_HIP__add_index_planet_name__add_index_planet_HR.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/starcatalog/admin.py" afterPath="$PROJECT_DIR$/starcatalog/admin.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/starcatalog/models.py" afterPath="$PROJECT_DIR$/starcatalog/models.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pavement.py" afterPath="$PROJECT_DIR$/pavement.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/starcatalog/templates/star_list.html" afterPath="$PROJECT_DIR$/starcatalog/templates/star_list.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="procyon.iws" />
@@ -38,19 +29,28 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="README.md" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/README.md">
+      <file leaf-file-name="settings.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/procyon/settings.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="48" column="0" selection-start="1596" selection-end="1596" vertical-scroll-proportion="0.0" vertical-offset="470" max-vertical-offset="855">
+            <state line="140" column="4" selection-start="4316" selection-end="4316" vertical-scroll-proportion="0.0" vertical-offset="1968" max-vertical-offset="3285">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="models.py" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="README.md" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/README.md">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="48" column="0" selection-start="1596" selection-end="1596" vertical-scroll-proportion="0.6619718" vertical-offset="485" max-vertical-offset="855">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="models.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/starcatalog/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="85" column="27" selection-start="6206" selection-end="6206" vertical-scroll-proportion="0.49295774" vertical-offset="1070" max-vertical-offset="1425">
+            <state line="77" column="48" selection-start="5908" selection-end="5908" vertical-scroll-proportion="0.0" vertical-offset="905" max-vertical-offset="1410">
               <folding />
             </state>
           </provider>
@@ -68,7 +68,7 @@
       <file leaf-file-name="admin.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/starcatalog/admin.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="13" column="6" selection-start="460" selection-end="460" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="330">
+            <state line="14" column="0" selection-start="459" selection-end="459" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="330">
               <folding />
             </state>
           </provider>
@@ -86,7 +86,7 @@
       <file leaf-file-name="forms.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/starcatalog/forms.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="4" column="0" selection-start="96" selection-end="96" vertical-scroll-proportion="0.0" vertical-offset="60" max-vertical-offset="180">
+            <state line="4" column="0" selection-start="96" selection-end="96" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="165">
               <folding />
             </state>
           </provider>
@@ -95,7 +95,7 @@
       <file leaf-file-name="views.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/starcatalog/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="23" column="26" selection-start="834" selection-end="834" vertical-scroll-proportion="0.0" vertical-offset="72" max-vertical-offset="525">
+            <state line="23" column="26" selection-start="834" selection-end="834" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="345">
               <folding />
             </state>
           </provider>
@@ -104,7 +104,7 @@
       <file leaf-file-name="star_list.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/starcatalog/templates/star_list.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="2" column="0" selection-start="71" selection-end="71" vertical-scroll-proportion="0.0" vertical-offset="30" max-vertical-offset="120">
+            <state line="2" column="10" selection-start="81" selection-end="81" vertical-scroll-proportion="-1.25" vertical-offset="0" max-vertical-offset="120">
               <folding />
             </state>
           </provider>
@@ -138,12 +138,12 @@
         <option value="$PROJECT_DIR$/starcatalog/forms.py" />
         <option value="$PROJECT_DIR$/starcatalog/urls.py" />
         <option value="$PROJECT_DIR$/starcatalog/views.py" />
-        <option value="$PROJECT_DIR$/starcatalog/templates/star_list.html" />
         <option value="$PROJECT_DIR$/fixtures/exoplanets.csv.orig" />
         <option value="$PROJECT_DIR$/fixtures/exoplanets.csv" />
-        <option value="$PROJECT_DIR$/README.md" />
+        <option value="$PROJECT_DIR$/starcatalog/templates/star_list.html" />
         <option value="$PROJECT_DIR$/starcatalog/admin.py" />
         <option value="$PROJECT_DIR$/starcatalog/models.py" />
+        <option value="$PROJECT_DIR$/README.md" />
       </list>
     </option>
   </component>
@@ -189,6 +189,28 @@
             <PATH_ELEMENT>
               <option name="myItemId" value="External Libraries" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="&lt; Python 2.7.2 (/System/Library/Frameworks/Python.framework/Versions/2.7/bin/python) &gt;" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="procyon" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="External Libraries" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="&lt; Python 2.7.2 (/System/Library/Frameworks/Python.framework/Versions/2.7/bin/python) &gt;" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="site-packages" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
           <PATH>
@@ -446,14 +468,23 @@
       <created>1383742341617</created>
       <updated>1383742341617</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Added initial starcatalog for known planets">
+      <created>1383882818354</created>
+      <updated>1383882818354</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Consistent model attribute names for HIP">
+      <created>1383883788996</created>
+      <updated>1383883788996</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="31" y="44" width="1148" height="675" extended-state="0" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
-      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24504505" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24504505" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -467,7 +498,6 @@
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.328125" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -483,7 +513,9 @@
     <MESSAGE value="Added .gitignore" />
     <MESSAGE value="Update settings to add local_settings" />
     <MESSAGE value="Added initial starcatalog" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added initial starcatalog" />
+    <MESSAGE value="Added initial starcatalog for known planets" />
+    <MESSAGE value="Consistent model attribute names for HIP" />
+    <option name="LAST_COMMIT_MESSAGE" value="Consistent model attribute names for HIP" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -517,13 +549,6 @@
         <state line="0" column="0" selection-start="0" selection-end="208" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="225" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/procyon/settings.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="140" column="4" selection-start="4316" selection-end="4316" vertical-scroll-proportion="0.0" vertical-offset="1968" max-vertical-offset="3285">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/requirements.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state line="8" column="12" selection-start="186" selection-end="186" vertical-scroll-proportion="0.26490065" vertical-offset="0" max-vertical-offset="453">
@@ -534,27 +559,6 @@
     <entry file="file://$PROJECT_DIR$/procyon/urls.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="13" column="0" selection-start="437" selection-end="437" vertical-scroll-proportion="0.0" vertical-offset="195" max-vertical-offset="345">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/starcatalog/templates/star_list.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="0" selection-start="71" selection-end="71" vertical-scroll-proportion="0.0" vertical-offset="30" max-vertical-offset="120">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/starcatalog/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="23" column="26" selection-start="834" selection-end="834" vertical-scroll-proportion="0.0" vertical-offset="72" max-vertical-offset="525">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/starcatalog/forms.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="4" column="0" selection-start="96" selection-end="96" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="180">
           <folding />
         </state>
       </provider>
@@ -580,23 +584,51 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
+    <entry file="file://$PROJECT_DIR$/procyon/settings.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="48" column="0" selection-start="1596" selection-end="1596" vertical-scroll-proportion="0.0" vertical-offset="470" max-vertical-offset="855">
+        <state line="140" column="4" selection-start="4316" selection-end="4316" vertical-scroll-proportion="0.0" vertical-offset="1968" max-vertical-offset="3285">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/starcatalog/forms.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="4" column="0" selection-start="96" selection-end="96" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="180">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/starcatalog/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="23" column="26" selection-start="834" selection-end="834" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="345">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/starcatalog/templates/star_list.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="2" column="10" selection-start="81" selection-end="81" vertical-scroll-proportion="-1.25" vertical-offset="0" max-vertical-offset="120">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/starcatalog/admin.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="6" selection-start="460" selection-end="460" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="330">
+        <state line="14" column="0" selection-start="459" selection-end="459" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="330">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/starcatalog/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="85" column="27" selection-start="6206" selection-end="6206" vertical-scroll-proportion="0.49295774" vertical-offset="1070" max-vertical-offset="1425">
+        <state line="77" column="48" selection-start="5908" selection-end="5908" vertical-scroll-proportion="0.0" vertical-offset="905" max-vertical-offset="1410">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="48" column="0" selection-start="1596" selection-end="1596" vertical-scroll-proportion="0.6619718" vertical-offset="485" max-vertical-offset="855">
           <folding />
         </state>
       </provider>
