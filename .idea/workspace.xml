@@ -1,29 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4f9a8a3c-594f-4c49-85c8-82f520dca729" name="Default" comment="Update settings to add">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/migrations/0001_initial.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/__init__.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/migrations/__init__.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/admin.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/forms.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/models.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/templates/star_list.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/urls.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/views.py" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/.name" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/dictionaries/jay.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/encodings.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/procyon.iml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/scopes/scope_settings.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="" />
+    <list default="true" id="4f9a8a3c-594f-4c49-85c8-82f520dca729" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/migrations/0002_auto__del_field_star_name__add_field_star_star_id__add_field_star_HIP_.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/migrations/0003_auto__del_field_star_star_id.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/migrations/0004_auto__add_planets.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/migrations/0005_auto__del_planets__add_planet.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/migrations/0006_auto__add_field_planet_planet_id.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/starcatalog/migrations/0007_auto__del_field_planet_planet_id.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/fixtures/exoplanets.csv" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/fixtures/hygxyz.csv" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/requirements.txt" afterPath="$PROJECT_DIR$/requirements.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/procyon/settings.py" afterPath="$PROJECT_DIR$/procyon/settings.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/procyon/urls.py" afterPath="$PROJECT_DIR$/procyon/urls.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/starcatalog/admin.py" afterPath="$PROJECT_DIR$/starcatalog/admin.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/starcatalog/models.py" afterPath="$PROJECT_DIR$/starcatalog/models.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pavement.py" afterPath="$PROJECT_DIR$/pavement.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/starcatalog/templates/star_list.html" afterPath="$PROJECT_DIR$/starcatalog/templates/star_list.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="procyon.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -46,40 +38,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="settings.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/procyon/settings.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="140" column="4" selection-start="4316" selection-end="4316" vertical-scroll-proportion="0.0" vertical-offset="1968" max-vertical-offset="3285">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="local_settings.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/procyon/local_settings.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="208" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="225">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="README.md" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/README.md">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="9" column="22" selection-start="251" selection-end="251" vertical-scroll-proportion="0.0" vertical-offset="45" max-vertical-offset="705">
+            <state line="48" column="0" selection-start="1596" selection-end="1596" vertical-scroll-proportion="0.0" vertical-offset="470" max-vertical-offset="855">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="models.py" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="models.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/starcatalog/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="18" column="1" selection-start="512" selection-end="512" vertical-scroll-proportion="-10.8" vertical-offset="0" max-vertical-offset="375">
-              <folding>
-                <element signature="e#0#40#0" expanded="true" />
-              </folding>
+            <state line="85" column="27" selection-start="6206" selection-end="6206" vertical-scroll-proportion="0.49295774" vertical-offset="1070" max-vertical-offset="1425">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -87,10 +59,8 @@
       <file leaf-file-name="urls.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/procyon/urls.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="13" column="0" selection-start="437" selection-end="437" vertical-scroll-proportion="-7.8" vertical-offset="0" max-vertical-offset="345">
-              <folding>
-                <element signature="e#0#32#0" expanded="true" />
-              </folding>
+            <state line="13" column="0" selection-start="437" selection-end="437" vertical-scroll-proportion="0.0" vertical-offset="195" max-vertical-offset="345">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -98,10 +68,8 @@
       <file leaf-file-name="admin.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/starcatalog/admin.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="10" column="0" selection-start="238" selection-end="238" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="240">
-              <folding>
-                <element signature="e#0#47#0" expanded="true" />
-              </folding>
+            <state line="13" column="6" selection-start="460" selection-end="460" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="330">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -109,10 +77,8 @@
       <file leaf-file-name="urls.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/starcatalog/urls.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="7" column="31" selection-start="324" selection-end="324" vertical-scroll-proportion="-4.2" vertical-offset="0" max-vertical-offset="270">
-              <folding>
-                <element signature="e#0#51#0" expanded="true" />
-              </folding>
+            <state line="11" column="0" selection-start="411" selection-end="411" vertical-scroll-proportion="0.0" vertical-offset="165" max-vertical-offset="270">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -120,10 +86,8 @@
       <file leaf-file-name="forms.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/starcatalog/forms.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="4" column="0" selection-start="96" selection-end="96" vertical-scroll-proportion="-2.4" vertical-offset="0" max-vertical-offset="180">
-              <folding>
-                <element signature="e#0#34#0" expanded="true" />
-              </folding>
+            <state line="4" column="0" selection-start="96" selection-end="96" vertical-scroll-proportion="0.0" vertical-offset="60" max-vertical-offset="180">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -131,18 +95,16 @@
       <file leaf-file-name="views.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/starcatalog/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="23" column="26" selection-start="834" selection-end="834" vertical-scroll-proportion="-6.96" vertical-offset="171" max-vertical-offset="525">
-              <folding>
-                <element signature="e#0#35#0" expanded="true" />
-              </folding>
+            <state line="23" column="26" selection-start="834" selection-end="834" vertical-scroll-proportion="0.0" vertical-offset="72" max-vertical-offset="525">
+              <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="star_list.html" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="star_list.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/starcatalog/templates/star_list.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="1" column="17" selection-start="41" selection-end="41" vertical-scroll-proportion="0.034965035" vertical-offset="0" max-vertical-offset="429">
+            <state line="2" column="0" selection-start="71" selection-end="71" vertical-scroll-proportion="0.0" vertical-offset="30" max-vertical-offset="120">
               <folding />
             </state>
           </provider>
@@ -166,30 +128,30 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/.gitignore" />
-        <option value="$PROJECT_DIR$/fixtures/initial_data.json" />
         <option value="$PROJECT_DIR$/procyon/starcatalog/urls.py" />
         <option value="$PROJECT_DIR$/procyon/starcatalog/models.py" />
         <option value="$PROJECT_DIR$/procyon/starcatalog/admin.py" />
         <option value="$PROJECT_DIR$/procyon/starcatalog/views.py" />
         <option value="$PROJECT_DIR$/procyon/settings.py" />
-        <option value="$PROJECT_DIR$/starcatalog/admin.py" />
-        <option value="$PROJECT_DIR$/README.md" />
-        <option value="$PROJECT_DIR$/starcatalog/models.py" />
         <option value="$PROJECT_DIR$/requirements.txt" />
         <option value="$PROJECT_DIR$/procyon/urls.py" />
         <option value="$PROJECT_DIR$/starcatalog/forms.py" />
         <option value="$PROJECT_DIR$/starcatalog/urls.py" />
         <option value="$PROJECT_DIR$/starcatalog/views.py" />
         <option value="$PROJECT_DIR$/starcatalog/templates/star_list.html" />
+        <option value="$PROJECT_DIR$/fixtures/exoplanets.csv.orig" />
+        <option value="$PROJECT_DIR$/fixtures/exoplanets.csv" />
+        <option value="$PROJECT_DIR$/README.md" />
+        <option value="$PROJECT_DIR$/starcatalog/admin.py" />
+        <option value="$PROJECT_DIR$/starcatalog/models.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="85" />
-    <option name="y" value="52" />
+    <option name="x" value="31" />
+    <option name="y" value="44" />
     <option name="width" value="1148" />
-    <option name="height" value="760" />
+    <option name="height" value="675" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <OptionsSetting value="true" id="Add" />
@@ -308,8 +270,9 @@
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="options.lastSelected" value="project.propVCSSupport.Mappings" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../r3-landing-page" />
-    <property name="options.searchVisible" value="true" />
+    <property name="FullScreen" value="false" />
     <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="options.searchVisible" value="true" />
   </component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
@@ -318,6 +281,7 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/fixtures" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/procyon/static" />
     </key>
@@ -478,31 +442,35 @@
       <created>1383684704969</created>
       <updated>1383684704969</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Added initial starcatalog">
+      <created>1383742341617</created>
+      <updated>1383742341617</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="85" y="52" width="1148" height="760" extended-state="0" />
-    <editor active="false" />
+    <frame x="31" y="44" width="1148" height="675" extended-state="0" />
+    <editor active="true" />
     <layout>
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Changes" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2125" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24504505" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.328125" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.28" sideWeight="0.7875" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.28" sideWeight="0.75495493" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.328125" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="VcsContentAnnotationSettings">
@@ -514,7 +482,8 @@
     </option>
     <MESSAGE value="Added .gitignore" />
     <MESSAGE value="Update settings to add local_settings" />
-    <option name="LAST_COMMIT_MESSAGE" value="Update settings to add local_settings" />
+    <MESSAGE value="Added initial starcatalog" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added initial starcatalog" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -528,71 +497,30 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/procyon/templates/_footer.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="1" column="0" selection-start="16" selection-end="16" vertical-scroll-proportion="0.025423728" vertical-offset="0" max-vertical-offset="590">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/procyon/templates/site_base.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="17" column="0" selection-start="330" selection-end="330" vertical-scroll-proportion="-10.625" vertical-offset="0" max-vertical-offset="345">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/procyon/templates/homepage.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="1" column="0" selection-start="33" selection-end="33" vertical-scroll-proportion="-0.625" vertical-offset="0" max-vertical-offset="945">
-          <folding>
-            <marker date="1383679739000" expanded="true" signature="-1:-1" placeholder="..." />
-            <marker date="1383679739000" expanded="true" signature="-1:-1" placeholder="..." />
-          </folding>
-        </state>
+        <state line="1" column="0" selection-start="33" selection-end="33" vertical-scroll-proportion="-0.625" vertical-offset="0" max-vertical-offset="945" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="0" selection-start="53" selection-end="53" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="255">
-          <folding />
-        </state>
+        <state line="5" column="0" selection-start="53" selection-end="53" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="255" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/fixtures/initial_data.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="13" selection-start="271" selection-end="271" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="360">
-          <folding />
-        </state>
+        <state line="13" column="13" selection-start="271" selection-end="271" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="360" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/procyon/local_settings.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="208" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="225">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="9" column="22" selection-start="251" selection-end="251" vertical-scroll-proportion="0.0" vertical-offset="45" max-vertical-offset="705">
-          <folding />
-        </state>
+        <state line="0" column="0" selection-start="0" selection-end="208" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="225" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/procyon/settings.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="140" column="4" selection-start="4316" selection-end="4316" vertical-scroll-proportion="0.0" vertical-offset="1968" max-vertical-offset="3285">
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/starcatalog/admin.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="10" column="0" selection-start="238" selection-end="238" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="240">
-          <folding>
-            <element signature="e#0#47#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -605,52 +533,70 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/procyon/urls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="0" selection-start="437" selection-end="437" vertical-scroll-proportion="-7.8" vertical-offset="0" max-vertical-offset="345">
-          <folding>
-            <element signature="e#0#32#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/starcatalog/forms.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="4" column="0" selection-start="96" selection-end="96" vertical-scroll-proportion="-2.4" vertical-offset="0" max-vertical-offset="180">
-          <folding>
-            <element signature="e#0#34#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/starcatalog/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="18" column="1" selection-start="512" selection-end="512" vertical-scroll-proportion="-10.8" vertical-offset="0" max-vertical-offset="375">
-          <folding>
-            <element signature="e#0#40#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/starcatalog/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="31" selection-start="324" selection-end="324" vertical-scroll-proportion="-4.2" vertical-offset="0" max-vertical-offset="270">
-          <folding>
-            <element signature="e#0#51#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/starcatalog/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="23" column="26" selection-start="834" selection-end="834" vertical-scroll-proportion="-6.96" vertical-offset="171" max-vertical-offset="525">
-          <folding>
-            <element signature="e#0#35#0" expanded="true" />
-          </folding>
+        <state line="13" column="0" selection-start="437" selection-end="437" vertical-scroll-proportion="0.0" vertical-offset="195" max-vertical-offset="345">
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/starcatalog/templates/star_list.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="1" column="17" selection-start="41" selection-end="41" vertical-scroll-proportion="0.034965035" vertical-offset="0" max-vertical-offset="429">
+        <state line="2" column="0" selection-start="71" selection-end="71" vertical-scroll-proportion="0.0" vertical-offset="30" max-vertical-offset="120">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/starcatalog/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="23" column="26" selection-start="834" selection-end="834" vertical-scroll-proportion="0.0" vertical-offset="72" max-vertical-offset="525">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/starcatalog/forms.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="4" column="0" selection-start="96" selection-end="96" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="180">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/starcatalog/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="11" column="0" selection-start="411" selection-end="411" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="270">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fixtures/exoplanets.csv">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="2" column="10" selection-start="186" selection-end="186" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="11415">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///Library/Python/2.7/site-packages/django/contrib/admin/options.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="310" column="4" selection-start="13426" selection-end="13426" vertical-scroll-proportion="0.12112676" vertical-offset="4172" max-vertical-offset="21705">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="48" column="0" selection-start="1596" selection-end="1596" vertical-scroll-proportion="0.0" vertical-offset="470" max-vertical-offset="855">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/starcatalog/admin.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="13" column="6" selection-start="460" selection-end="460" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="330">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/starcatalog/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="85" column="27" selection-start="6206" selection-end="6206" vertical-scroll-proportion="0.49295774" vertical-offset="1070" max-vertical-offset="1425">
           <folding />
         </state>
       </provider>

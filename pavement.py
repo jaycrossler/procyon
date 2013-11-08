@@ -60,6 +60,7 @@ def stop():
 @task
 def start():
     """ Syncs the database and then starts the development server. """
+    stop()
     sync()
     start_django()
     info("The Procyon Pages are now available.")
