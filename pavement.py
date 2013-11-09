@@ -26,7 +26,7 @@ def install_dependencies():
 def install_dev_fixtures():
     """ Installs development fixtures in the correct order """
     fixtures = [
-        'fixtures/initial_data.json',  # Users and site-wide data
+        'procyon/fixtures/initial_data.json',  # Users and site-wide data
         ]
 
     for fixture in fixtures:
