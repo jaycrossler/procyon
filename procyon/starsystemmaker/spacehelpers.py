@@ -63,15 +63,14 @@ def is_x_closer_to_mid_then_y(x, y, mid):
 
 def image_from_array(request, list_to_plot):
     from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-    #from matplotlib.figure import Figure
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plot
 
-    x = np.linspace(0, 1, 100)
     list_to_plot.sort()
 
-    plt.plot(x, list_to_plot)
-    canvas = FigureCanvas(plt.figure(1))
+    plot.hist(list_to_plot, bins=20, normed=1)       # matplotlib version (plot)
+    canvas = FigureCanvas(plot.figure(1))
 
+    #from matplotlib.figure import Figure
     #fig=Figure()
     #ax=fig.add_subplot(111)
     #x=[]
