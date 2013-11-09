@@ -39,18 +39,9 @@ Startup steps:
     paver createdb
     python manage.py createsuperuser
     paver create_db_user
-    paver install_dev_fixtures
     paver sync
 
-    Import star information (update with proper file locations and counts):
-        psql -d procyon -c "COPY starcatalog_star FROM '/Users/jay/Sites/procyon/fixtures/hygxyz.csv' DELIMITER ',' CSV header;"
-        psql -d procyon -c "alter sequence starcatalog_star_id_seq restart with 119618;"
-        psql -d procyon -c "COPY starcatalog_planet FROM '/Users/jay/Sites/procyon/fixtures/exoplanets.csv' DELIMITER ',' CSV header;"
-        psql -d procyon -c "alter sequence starcatalog_planet_id_seq restart with 756;"
-        psql -d procyon -c "COPY starcatalog_starpossiblyhabitable FROM '/Users/jay/Sites/procyon/fixtures/HabHYG_extracted.csv' DELIMITER ',' CSV header;"
-        psql -d procyon -c "alter sequence starcatalog_planet_id_seq restart with 17132;"
-
-
-
+    # Import star information (update with proper file locations and counts)
+    paver install_dev_fixtures
     paver start
 

@@ -32,7 +32,14 @@ def install_dev_fixtures():
     for fixture in fixtures:
         sh("python manage.py loaddata {fixture}".format(fixture=fixture))
 
+    fixture = lambda filename: os.path.join(os.path.dirname(os.path.abspath(__file__)), 'procyon/fixtures', filename)
 
+    sh('psql -d {db} -c "COPY starcatalog_star FROM \'{file}\' DELIMITER \',\' CSV header;"'.format(db='procyon', file=fixture('hygxyz.csv')))
+    sh('psql -d procyon -c "alter sequence starcatalog_star_id_seq restart with 119618;"')
+    sh('psql -d procyon -c "COPY starcatalog_planet FROM \'{file}\' DELIMITER \',\' CSV header;"'.format(db='procyon', file=fixture('exoplanets.csv')))
+    sh('psql -d procyon -c "alter sequence starcatalog_planet_id_seq restart with 756;"')
+    sh('psql -d procyon -c "COPY starcatalog_starpossiblyhabitable FROM \'{file}\' DELIMITER \',\' CSV header;"'.format(db='procyon', file=fixture('HabHYG_extracted.csv')))
+    sh('psql -d procyon -c "alter sequence starcatalog_planet_id_seq restart with 17132;"')
 
 @task
 def sync():
