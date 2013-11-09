@@ -1,0 +1,18 @@
+[
+    {
+        "pk": 1, 
+        "model": "sites.site", 
+        "fields": {
+            "domain": "localhost:8000", 
+            "name": "Procyon.com [localhost]"
+        }
+    },
+    {
+        "pk": 2, 
+        "model": "sites.site", 
+        "fields": {
+            "domain": "procyon.com",
+            "name": "Procyon.com"
+        }
+    }
+]
