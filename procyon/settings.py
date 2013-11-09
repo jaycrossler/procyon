@@ -154,6 +154,7 @@ INSTALLED_APPS = [
     # project
     "procyon",
     "procyon.starcatalog",
+    "procyon.starsystemmaker",
 ]
 
 # A sample logging configuration. The only tangible logging

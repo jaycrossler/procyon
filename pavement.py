@@ -21,6 +21,8 @@ def install_dependencies():
     sh('pip install --upgrade -r requirements.txt')
 
 @task
+def shell():
+    sh('python manage.py shell')
 
 @task
 def install_dev_fixtures():
