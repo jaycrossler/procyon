@@ -4,8 +4,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.views.generic.edit import DeleteView, UpdateView
 
 #from starcatalog.models import *
-from starcatalog.forms import *
-from starcatalog.views import *
+from procyon.starcatalog.views import *
 
 urlpatterns = patterns('',
     url(r'^$', StarViewList.as_view(), name='star-list'),

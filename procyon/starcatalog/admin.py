@@ -1,6 +1,6 @@
 from django.contrib.contenttypes import generic
 from django.contrib.gis import admin
-from starcatalog.models import *
+from procyon.starcatalog.models import *
 
 
 class StarAdmin(admin.ModelAdmin):

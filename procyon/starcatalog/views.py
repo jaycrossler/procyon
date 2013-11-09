@@ -10,7 +10,7 @@ from django.views.generic.edit import CreateView, DeleteView
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.db.models.loading import get_model
 
-from starcatalog.models import *
+from procyon.starcatalog.models import *
 #from datetime import datetime
 #import logging
 #import json

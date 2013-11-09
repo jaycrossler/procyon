@@ -1,5 +1,5 @@
 from django.forms import ModelForm
-from starcatalog.models import *
+from procyon.starcatalog.models import *
 
 class StarForm(ModelForm):
     class Meta:
