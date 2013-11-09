@@ -1,5 +1,5 @@
-Procyon, built upon pinax-project-account
-=====================
+Procyon
+=======
 
 
 Startup steps:
@@ -25,7 +25,7 @@ Startup steps:
     pip install virtualenv
     virtualenv stardev
     source stardev/bin/activate
-    pip install Django==1.4.5
+    pip install Django==1.5.5
     pip install Paver
 
     NOTES: Created the page using pinax template:
@@ -42,7 +42,7 @@ Startup steps:
     paver install_dev_fixtures
     paver sync
 
-    Import star information (update with propoer file locations and counts):
+    Import star information (update with proper file locations and counts):
         psql -d procyon -c "COPY starcatalog_star FROM '/Users/jay/Sites/procyon/fixtures/hygxyz.csv' DELIMITER ',' CSV header;"
         psql -d procyon -c "alter sequence starcatalog_star_id_seq restart with 119618;"
         psql -d procyon -c "COPY starcatalog_planet FROM '/Users/jay/Sites/procyon/fixtures/exoplanets.csv' DELIMITER ',' CSV header;"
