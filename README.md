@@ -18,6 +18,7 @@ Startup steps:
 
     pip install psycopg2
     pip install numpy
+    brew install freetype
     brew install postgis
     brew install gdal
     brew install libgeoip

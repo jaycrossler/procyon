@@ -7,5 +7,6 @@ from procyon.starsystemmaker.views import *
 from procyon.starsystemmaker.spacehelpers import *
 
 urlpatterns = patterns('',
-    url(r'^test/(?P<id>.*)$', generate_system),
+    url(r'^test1/(?P<mean>.*)$', test_generate_rand_nums),
+    url(r'^(?P<mean>.*)/test2.png$', test_generate_rand_nums_as_image),
     )
