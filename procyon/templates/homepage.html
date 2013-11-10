@@ -23,13 +23,11 @@
     
     <h2>Options</h2>
     <p>
-        {% blocktrans %}
         <ul>
-            <li><a href="admin/starcatalog/star">Search Known Stars</a></li>
-            <li><a href="admin/starcatalog/planet">Search Known Planets</a></li>
+            <li><a href="{% url 'star-list' %}">{% trans "Search Known Stars"%}</a></li>
+            <li><a href="admin/starcatalog/planet">{% trans "Search Known Planets" %}</a></li>
 
         </ul>
-        {% endblocktrans %}
     </p>
     
     {% if user.is_authenticated %}
