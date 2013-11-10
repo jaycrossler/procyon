@@ -4,7 +4,8 @@ from django.core.urlresolvers import reverse_lazy
 from django.views.generic.edit import DeleteView, UpdateView
 
 from procyon.starsystemmaker.views import *
-from procyon.starsystemmaker.spacehelpers import *
+from procyon.starsystemmaker.space_helpers import *
+from procyon.starsystemmaker.test_helpers import *
 
 urlpatterns = patterns('',
     url(r'^test1/(?P<mean>.*)$', test_generate_rand_nums),

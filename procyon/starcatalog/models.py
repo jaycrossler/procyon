@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 #import json
 from django.utils import simplejson
 from django.core import serializers
+from procyon.starsystemmaker.space_helpers import *
 
 
 class StarPossiblyHabitable(models.Model):
@@ -43,7 +44,6 @@ class Star(models.Model):
     VZ = models.FloatField(help_text="Annual change in Galactic Z Coordinate", blank=True, null=True)
 
     #TODO: List all known planets
-    #TODO: Calculate web color
     #TODO: Generate notional planetary system using known planets
     #TODO: When searching, list nearest stars and planets
 
@@ -103,6 +103,9 @@ class Star(models.Model):
         if self.HIP:
             result = StarPossiblyHabitable.objects.filter(HIP=self.HIP).exists()
         return result
+
+    def web_color(self):
+        return color_of_star(self.spectrum)
 
 class Planet(models.Model):
     """

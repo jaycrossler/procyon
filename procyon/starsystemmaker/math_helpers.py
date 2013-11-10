@@ -1,36 +1,7 @@
-import random
 import numpy as np
 from django.http import HttpResponse
 
-
-def test_generate_rand_nums(request, mean):
-    content = ""
-    avg = 0
-    times = 400
-    for n in range(0, times):
-        num = rand_weighted(float(mean) or .3)
-        content += " {0}".format(num)
-        avg += num
-
-    content += "<p>Avg:{0}".format(avg/times)
-
-    status_code = 200
-    mimetype='text/html'
-
-    return HttpResponse(content, status=status_code, mimetype=mimetype)
-
-
-def test_generate_rand_nums_as_image(request, mean):
-    times = 100
-    nums = []
-    for n in range(0, times):
-        num = rand_weighted(float(mean) or .3)
-        nums.append(num)
-
-    return image_from_array(request, nums)
-
-
-#--- Maths functions for planetary things ----------------
+#--- Mathy functions for planetary things ----------------
 
 
 def rand_weighted(midpoint=0.5, weight=3):
@@ -61,29 +32,24 @@ def is_x_closer_to_mid_then_y(x, y, mid):
     return is_x_closer
 
 
-def image_from_array(request, list_to_plot):
+def image_histogram_from_array(request, list_to_plot, bins=50):
+    """
+    Builds a png image from a list passed into it, shown as a histogram
+    """
     from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
     import matplotlib.pyplot as plot
 
     list_to_plot.sort()
-
-    plot.hist(list_to_plot, bins=20, normed=1)       # matplotlib version (plot)
+    plot.hist(list_to_plot, bins=bins, normed=1)
     canvas = FigureCanvas(plot.figure(1))
-
-    #from matplotlib.figure import Figure
-    #fig=Figure()
-    #ax=fig.add_subplot(111)
-    #x=[]
-    #y=[]
-    #x_count=0
-    #list_to_plot.sort()
-    #for i in list_to_plot:
-    #    x_count+=1
-    #    x.append(x_count)
-    #    y.append(i)
-    #ax.plot_date(x, y, '-')
-    #canvas=FigureCanvas(fig)
 
     response=HttpResponse(content_type='image/png')
     canvas.print_png(response)
+    plot.clf()
+
     return response
+
+
+def parse_int(str):
+    import re
+    return int(re.match(r'\d+', str).group())
