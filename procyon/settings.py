@@ -142,6 +142,7 @@ INSTALLED_APPS = [
     # theme
     "pinax_theme_bootstrap",
     "django_forms_bootstrap",
+    'bootstrap-pagination',
     
     # external
     "account",
