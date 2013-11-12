@@ -8,11 +8,24 @@ class StarAdmin(admin.ModelAdmin):
     list_display = ['id', 'proper_name', 'gliese', 'HIP', 'HD', 'distance_ly', 'known_planet_count', 'possibly_habitable', 'spectrum', 'web_color', ]
     search_fields = ['gliese', 'HIP', 'HD', 'proper_name', ]
 
+
 class PlanetAdmin(admin.ModelAdmin):
     model = Planet
     list_display = ['name', 'mass', 'gliese', 'HIP', 'HD', ]
     search_fields = ['name', 'gliese', 'HIP', 'HD', ]
 
 
+class StarTypeAdmin(admin.ModelAdmin):
+    model = StarType
+    list_display = ['symbol', 'name', 'base_color', 'mass_range', ]
+
+
+class StarModelAdmin(admin.ModelAdmin):
+    model = StarModel
+    list_display = ['star_id', 'star_type', 'base_color', ]
+
+
 admin.site.register(Star, StarAdmin)
+admin.site.register(StarModel, StarModelAdmin)
+admin.site.register(StarType, StarTypeAdmin)
 admin.site.register(Planet, PlanetAdmin)

@@ -1,0 +1,182 @@
+[
+{
+  "pk": 3, 
+  "model": "starcatalog.startype", 
+  "fields": {
+    "base_color": "#AABFFF", 
+    "name": "massive", 
+    "luminosity_range": "54-52,500", 
+    "symbol": "B", 
+    "surface_temp_range": "10000-30000", 
+    "mass_range": "2.9-18", 
+    "radius_range": "1.8-6.6", 
+    "age": "72.00", 
+    "description": null
+  }
+},
+{
+  "pk": 4, 
+  "model": "starcatalog.startype", 
+  "fields": {
+    "base_color": "#CAD8FF", 
+    "name": "large", 
+    "luminosity_range": "6.5-54", 
+    "symbol": "A", 
+    "surface_temp_range": "7300-10000", 
+    "mass_range": "1.6-2.9", 
+    "radius_range": "1.4-1.8", 
+    "age": "1100.00", 
+    "description": null
+  }
+},
+{
+  "pk": 5, 
+  "model": "starcatalog.startype", 
+  "fields": {
+    "base_color": "#FBF8FF", 
+    "name": "solar type", 
+    "luminosity_range": "1.5-6.5", 
+    "symbol": "F", 
+    "surface_temp_range": "6000-7300", 
+    "mass_range": "1.05-1.6", 
+    "radius_range": "1.15-1.4", 
+    "age": "3500.00", 
+    "description": null
+  }
+},
+{
+  "pk": 6, 
+  "model": "starcatalog.startype", 
+  "fields": {
+    "base_color": "#FFF4E8", 
+    "name": "solar type", 
+    "luminosity_range": "0.4-1.5", 
+    "symbol": "G", 
+    "surface_temp_range": "5300-6000", 
+    "mass_range": "0.8-1.05", 
+    "radius_range": "0.96-1.15", 
+    "age": "15000.00", 
+    "description": null
+  }
+},
+{
+  "pk": 7, 
+  "model": "starcatalog.startype", 
+  "fields": {
+    "base_color": "#FFDDBE", 
+    "name": "solar type", 
+    "luminosity_range": "0.08-0.4", 
+    "symbol": "K", 
+    "surface_temp_range": "3800-5300", 
+    "mass_range": "0.5-0.8", 
+    "radius_range": "0.7-0.96", 
+    "age": "53000.00", 
+    "description": null
+  }
+},
+{
+  "pk": 8, 
+  "model": "starcatalog.startype", 
+  "fields": {
+    "base_color": "#FFBB7B", 
+    "name": "sub solar", 
+    "luminosity_range": "10-0.08", 
+    "symbol": "M", 
+    "surface_temp_range": "2500-3800", 
+    "mass_range": "0.07-0.5", 
+    "radius_range": "0.1-0.7", 
+    "age": "190000.00", 
+    "description": null
+  }
+},
+{
+  "pk": 9, 
+  "model": "starcatalog.startype", 
+  "fields": {
+    "base_color": "#FF5300", 
+    "name": "carbon star", 
+    "luminosity_range": "0.0001-0.001", 
+    "symbol": "C", 
+    "surface_temp_range": "2400-3200", 
+    "mass_range": "0.5-1.1", 
+    "radius_range": "220-550", 
+    "age": null, 
+    "description": null
+  }
+},
+{
+  "pk": 10, 
+  "model": "starcatalog.startype", 
+  "fields": {
+    "base_color": "#FF932C", 
+    "name": "sub carbon star", 
+    "luminosity_range": "0.0001-0.001", 
+    "symbol": "S", 
+    "surface_temp_range": "2400-3500", 
+    "mass_range": "0.2-0.8", 
+    "radius_range": "0.1-0.7", 
+    "age": null, 
+    "description": null
+  }
+},
+{
+  "pk": 11, 
+  "model": "starcatalog.startype", 
+  "fields": {
+    "base_color": "#8D1400", 
+    "name": "hot brown dwarf", 
+    "luminosity_range": "0.0001-0.001", 
+    "symbol": "L", 
+    "surface_temp_range": "1300-2100", 
+    "mass_range": "0.075-0.45", 
+    "radius_range": "0.01-0.2", 
+    "age": null, 
+    "description": null
+  }
+},
+{
+  "pk": 12, 
+  "model": "starcatalog.startype", 
+  "fields": {
+    "base_color": "#51001A", 
+    "name": "cool brown dwarf", 
+    "luminosity_range": "0.00001-0.001", 
+    "symbol": "T", 
+    "surface_temp_range": "600-1300", 
+    "mass_range": "0.012-0.075", 
+    "radius_range": "0.01-0.2", 
+    "age": null, 
+    "description": null
+  }
+},
+{
+  "pk": 13, 
+  "model": "starcatalog.startype", 
+  "fields": {
+    "base_color": "#FFDDBE", 
+    "name": "gas giant", 
+    "luminosity_range": "0.0000001-0.00001", 
+    "symbol": "Y", 
+    "surface_temp_range": "200-600", 
+    "mass_range": "0.0001-0.012", 
+    "radius_range": "0.001-0.15", 
+    "age": null, 
+    "description": null
+  }
+},
+{
+  "pk": 14, 
+  "model": "starcatalog.startype", 
+  "fields": {
+    "base_color": "#828BA4", 
+    "name": "white dwarf", 
+    "luminosity_range": "0.000001-0.0001", 
+    "symbol": "D", 
+    "surface_temp_range": "200-100000", 
+    "mass_range": "0.17-1.3", 
+    "radius_range": "0.008-0.02", 
+    "age": null, 
+    "description": null
+  }
+}
+]

@@ -1,9 +1,4 @@
 from django.contrib.gis.db import models
-from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse, reverse_lazy
-#import json
-from django.utils import simplejson
-from django.core import serializers
 from procyon.starsystemmaker.space_helpers import *
 
 
@@ -14,9 +9,30 @@ class StarPossiblyHabitable(models.Model):
     HIP = models.PositiveIntegerField(db_index=True, help_text="Hipparcos Catalog number of Potentially Habitable System", blank=True, null=True)
 
 
+class StarType(models.Model):
+    """
+    Stellar Types (from Morgan-Keenan Main Sequence types)
+    """
+    symbol = models.CharField(db_index=True, max_length=2, help_text="Morgan-Keenan Main Sequence Symbol", default="K")
+    name = models.CharField(max_length=30, help_text="Short description", blank=True, null=True)
+    description = models.TextField(help_text="Details", blank=True, null=True)
+    surface_temp_range = models.CharField(max_length=30, help_text="Temp Range in K (eg 2000-5000)", blank=True, null=True)
+    base_color = models.CharField(max_length=8, help_text="Basic RBG Color", default="#ffddbe", blank=True, null=True)
+    mass_range = models.CharField(max_length=30, help_text="Mass Range compared to Sol", blank=True, null=True)
+    radius_range = models.CharField(max_length=30, help_text="Radius Range compared to Sol", blank=True, null=True)
+    luminosity_range = models.CharField(max_length=30, help_text="Luminosity Range compared to Sol", blank=True, null=True)
+    age = models.CharField(max_length=30, help_text="Approx Age in Millions of Years of a Type V star", blank=True, null=True, default="5300")
+
+    def __unicode__(self):
+        return '{0}: {1}'.format(self.symbol, self.name)
+
+    class Meta:
+        verbose_name_plural = 'Stellar Classifications'
+
+
 class Star(models.Model):
     """
-    It's full of stars.
+    It's full of stars. (Mainly Hipparcos, Yale Bright Star, ana Gilese catalog stars within 50 parsecs)
     Current version imported from the HYG Stellar database http://www.astronexus.com/node/34
     CSV maintained at https://github.com/astronexus/HYG-Database/blob/master/hygfull.csv
     """
@@ -39,9 +55,9 @@ class Star(models.Model):
     X = models.FloatField(help_text="Galactic X Coordinate", blank=True, null=True)
     Y = models.FloatField(help_text="Galactic Y Coordinate", blank=True, null=True)
     Z = models.FloatField(help_text="Galactic Z Coordinate", blank=True, null=True)
-    VX = models.FloatField(help_text="Annual change in Galactic X Coordinate", blank=True, null=True)
-    VY = models.FloatField(help_text="Annual change in Galactic Y Coordinate", blank=True, null=True)
-    VZ = models.FloatField(help_text="Annual change in Galactic Z Coordinate", blank=True, null=True)
+    VX = models.FloatField(help_text="Annual parsec change in Galactic X Coordinate", blank=True, null=True)
+    VY = models.FloatField(help_text="Annual parsec change in Galactic Y Coordinate", blank=True, null=True)
+    VZ = models.FloatField(help_text="Annual parsec change in Galactic Z Coordinate", blank=True, null=True)
 
     #TODO: List all known planets
     #TODO: Generate notional planetary system using known planets
@@ -65,7 +81,7 @@ class Star(models.Model):
         return name
 
     class Meta:
-        verbose_name_plural = 'Stars in the Galaxy'
+        verbose_name_plural = 'Official Star Data'
         ordering = ['distance_parsecs']
 
     def known_planets(self):
@@ -107,6 +123,7 @@ class Star(models.Model):
     def web_color(self):
         return color_of_star(self.spectrum)
 
+
 class Planet(models.Model):
     """
     Current version imported from the exoplanets table: http://exoplanets.org/table
@@ -142,3 +159,18 @@ class Planet(models.Model):
     class Meta:
         verbose_name_plural = 'Known Planets'
         ordering = ['name']
+
+
+class StarModel(models.Model):
+    """
+    Additional data and simulated info about stars.
+    Data will be generated through a long-running task
+    """
+    star_id = models.OneToOneField(Star, db_index=True, help_text="The star with real data")
+    star_type = models.ForeignKey(StarType, help_text="Stellar Classification", blank=True, null=True)
+    base_color = models.CharField(max_length=8, help_text="Basic RBG Color", default="#ffddbe", blank=True, null=True)
+
+    class Meta:
+        verbose_name_plural = 'Stars in the galaxy'
+        ordering = ['star_id']
+
