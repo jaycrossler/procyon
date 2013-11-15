@@ -1,20 +1,17 @@
-from django.contrib import messages
-from django.core import serializers
-from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render_to_response
-from django.template import RequestContext
-from django.views.generic import ListView, DetailView
-from django.views.generic.edit import CreateView, DeleteView
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from django.db.models.loading import get_model
+import json
 
-from procyon.starsystemmaker.models import *
-#from datetime import datetime
-#import logging
-#import json
+from procyon.starcatalog.models import *
 
-# Get an instance of a logger
-#logger = logging.getLogger(__name__)
+
+def process_star_colors(request, force):
+
+    result_info = "Results:<br/>"
+    for s in Star.objects.filter(pk__lt=1000):
+        result = s.create_star_model(force)
+        result_info += str(s.id) + ":" + result + "<br/>"
+
+    return HttpResponse(result_info, content_type="text/html")
+
 

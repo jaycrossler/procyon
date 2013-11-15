@@ -22,7 +22,8 @@ class StarTypeAdmin(admin.ModelAdmin):
 
 class StarModelAdmin(admin.ModelAdmin):
     model = StarModel
-    list_display = ['star_id', 'star_type', 'base_color', ]
+    list_display = ['star', 'star_type', 'base_color', ]
+    exclude = ['star']
 
 
 admin.site.register(Star, StarAdmin)

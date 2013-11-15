@@ -149,7 +149,7 @@ INSTALLED_APPS = [
     "metron",
     "eventlog",
 
-    #added
+    # project management
     "south",
 
     # project

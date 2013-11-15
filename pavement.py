@@ -38,12 +38,20 @@ def install_dev_fixtures():
     fixture = lambda filename: os.path.join(os.path.dirname(os.path.abspath(__file__)), 'procyon/fixtures', filename)
     db = 'procyon'
 
-    sh('psql -d {db} -c "COPY starcatalog_star FROM \'{file}\' DELIMITER \',\' CSV header;"'.format(db=db, file=fixture('hygxyz.csv')))
-    sh('psql -d {db} -c "alter sequence starcatalog_star_id_seq restart with 119618;"'.format(db=db))
-    sh('psql -d {db} -c "COPY starcatalog_planet FROM \'{file}\' DELIMITER \',\' CSV header;"'.format(db=db, file=fixture('exoplanets.csv')))
-    sh('psql -d {db} -c "alter sequence starcatalog_planet_id_seq restart with 756;"'.format(db=db))
-    sh('psql -d {db} -c "COPY starcatalog_starpossiblyhabitable FROM \'{file}\' DELIMITER \',\' CSV header;"'.format(db=db, file=fixture('HabHYG_extracted.csv')))
-    sh('psql -d {db} -c "alter sequence starcatalog_planet_id_seq restart with 17132;"'.format(db=db))
+    filename='hygxyz.csv'
+    num_lines = sum(1 for line in open(fixture(filename)))
+    sh('psql -d {db} -c "COPY starcatalog_star FROM \'{file}\' DELIMITER \',\' CSV header;"'.format(db=db, file=fixture(filename)))
+    sh('psql -d {db} -c "alter sequence starcatalog_star_id_seq restart with {linecount};"'.format(db=db, linecount=num_lines+1))
+
+    filename='exoplanets.csv'
+    num_lines = sum(1 for line in open(fixture('hygxyz.csv')))
+    sh('psql -d {db} -c "COPY starcatalog_planet FROM \'{file}\' DELIMITER \',\' CSV header;"'.format(db=db, file=fixture(filename)))
+    sh('psql -d {db} -c "alter sequence starcatalog_planet_id_seq restart with {linecount};"'.format(db=db, linecount=num_lines+1))
+
+    filename='HabHYG_extracted.csv'
+    num_lines = sum(1 for line in open(fixture(filename)))
+    sh('psql -d {db} -c "COPY starcatalog_starpossiblyhabitable FROM \'{file}\' DELIMITER \',\' CSV header;"'.format(db=db, file=fixture(filename)))
+    sh('psql -d {db} -c "alter sequence starcatalog_planet_id_seq restart with {linecount};"'.format(db=db, linecount=num_lines+1))
 
 @task
 def sync():
@@ -62,11 +70,16 @@ def start_django(options):
     sh('python manage.py runserver %s &' % bind)
 
 @task
-def stop():
+def stop_django():
     """
     Stop the GeoNode Django application
     """
     kill('python', 'runserver')
+
+@task
+def stop():
+    """ Syncs the database and then starts the development server. """
+    stop_django()
 
 @task
 def start():

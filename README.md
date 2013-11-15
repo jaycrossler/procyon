@@ -46,3 +46,9 @@ Startup steps:
     paver install_dev_fixtures
     paver start
 
+Currently, you can build new "model stars" that extend the base star information by hitting:
+    http://127.0.0.1:8000/maker/task_colors/
+You might want to rewrite the "model" data with:
+    http://127.0.0.1:8000/maker/task_colors/True
+
+    TODO - this needs to be turned into a background task, as 10k items takes 2 minutes or so.

@@ -1,6 +1,6 @@
 from django.contrib.gis.db import models
 from procyon.starsystemmaker.space_helpers import *
-
+import json
 
 class StarPossiblyHabitable(models.Model):
     """
@@ -108,11 +108,21 @@ class Star(models.Model):
 
         return planet_list
 
+    def create_star_model(self, force=False):
+        status = "exists"
+        star_model, created = StarModel.objects.get_or_create(star=self)
+        if not created:
+            star_model.save()
+        if created or force:
+            star_model.build_model()
+            status = "built"
+        return status
+
     def known_planet_count(self):
         return len(self.known_planets())
 
     def distance_ly(self):
-        return self.distance_parsecs * 3.26163344
+        return float(self.distance_parsecs) * 3.26163344
 
     def possibly_habitable(self):
         result = False
@@ -165,12 +175,41 @@ class StarModel(models.Model):
     """
     Additional data and simulated info about stars.
     Data will be generated through a long-running task
+
+    TODO: Maybe should move to systemmaker?
     """
-    star_id = models.OneToOneField(Star, db_index=True, help_text="The star with real data")
+    star = models.OneToOneField(Star, db_index=True, help_text="The star with real data", default=1)
     star_type = models.ForeignKey(StarType, help_text="Stellar Classification", blank=True, null=True)
     base_color = models.CharField(max_length=8, help_text="Basic RBG Color", default="#ffddbe", blank=True, null=True)
 
+    def build_model(self):
+        star_a, star_b, star_c = get_star_type(self.star.spectrum)
+        self.add_type(star_a)
+        self.add_color(star_a, star_b, star_c)
+
+    def add_type(self, star_a):
+        result = "ok"
+        try:
+            star_type = StarType.objects.get(symbol=star_a)
+            self.star_type = star_type
+        except StarType.DoesNotExist:
+            result = "unknown"
+        return result
+
+    def add_color(self, star_a="K", star_b="", star_c=""):
+        star = self
+        found_color = ""
+        if star_a or star_b or star_c:
+            found_color = color_of_star(star_a, star_b, star_c)
+        if not found_color and star.star and star.star.spectrum:
+            star_a, star_b, star_c = get_star_type(star.star.spectrum)
+            found_color = color_of_star(star_a, star_b, star_c)
+        if not found_color:
+            if star.star_type and star.star_type.base_color:
+                found_color = star.star_type.base_color
+        star.base_color = found_color
+        star.save()
+
     class Meta:
         verbose_name_plural = 'Stars in the galaxy'
-        ordering = ['star_id']
-
+        ordering = ['star']
