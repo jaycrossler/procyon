@@ -1,7 +1,32 @@
 import numpy as np
 from django.http import HttpResponse
+import re
 
 #--- Mathy functions for planetary things ----------------
+
+
+def rand_range(low=0, high=1, weight=1):
+    rand = rand_weighted(0.5, weight)
+    if low == 0 and high == 1:
+        return rand
+
+    num_range = high-low
+    rand = low + (num_range*rand)
+    return rand
+
+
+def rand_range_from_text(rand_text=""):
+    if rand_text:
+        parts = re.findall(r'([0-9.]*)[ -]*([0-9.]*)', str(rand_text))
+        if parts and len(parts) > 0 and len(parts[0]) > 0:
+            low = parse_num(parts[0][0])
+            high = parse_num(parts[0][1])
+            if low:
+                if high:
+                    return rand_range(low, high, 2)
+                else:
+                    return rand_range(low*0.5, low*1.5, 3)
+    return rand_range()
 
 
 def rand_weighted(midpoint=0.5, weight=3):
@@ -43,7 +68,7 @@ def image_histogram_from_array(request, list_to_plot, bins=50):
     plot.hist(list_to_plot, bins=bins, normed=1)
     canvas = FigureCanvas(plot.figure(1))
 
-    response=HttpResponse(content_type='image/png')
+    response = HttpResponse(content_type='image/png')
     canvas.print_png(response)
     plot.clf()
 
@@ -53,3 +78,15 @@ def image_histogram_from_array(request, list_to_plot, bins=50):
 def parse_int(str):
     import re
     return int(re.match(r'\d+', str).group())
+
+
+def parse_num(s, force_int=False):
+    try:
+        return int(s)
+    except ValueError:
+        if force_int:
+            return 0
+        try:
+            return float(s)
+        except Exception:
+            return 0
