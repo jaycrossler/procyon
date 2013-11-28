@@ -1,11 +1,12 @@
+from procyon.starsystemmaker.models import *
+from procyon.starsystemmaker.math_helpers import *
 import csv
 import re
-from procyon.starsystemmaker.math_helpers import *
 
 #This loads a list of info into memory, maybe should be a DB table instead?
 with open('procyon/fixtures/star_spectrums.csv', mode='rU') as infile:
     reader = csv.reader(infile,)
-    STAR_DICT = {rows[0]:rows[1] for rows in reader if len(rows) == 2}
+    STAR_DICT = {rows[0]: rows[1] for rows in reader if len(rows) == 2}
 
 
 def get_star_type(stellar):

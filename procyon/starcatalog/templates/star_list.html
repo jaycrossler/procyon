@@ -25,7 +25,7 @@
     <p>
         <ul>
             {% for item in items %}
-            <li>HD {{item.HD}} - {{item.proper_name}}</li>
+            <li>Star #{{item.id}} - HD #{{item.HD}} - {% if item.proper_name %}<b>{{item.proper_name}}</b> -{%  endif %} {{item.distance_ly}} LY from Sol</li>
             {% endfor %}
         </ul>
     </p>

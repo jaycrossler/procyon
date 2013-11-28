@@ -40,6 +40,7 @@ class SearchView(object):
 
         return queryset
 
+
 class StarViewList(SearchView, ListView):
     model = Star
     paginate_by = 25
