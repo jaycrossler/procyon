@@ -130,10 +130,14 @@ class Star(models.Model):
         """
         Converts parameters to json.
         """
+        additional_methods = ['known_planet_count', 'possibly_habitable', 'web_color', '__unicode__']
         dumps = dict()
         model_fields = [field.name for field in self._meta.fields]
+
         for field in model_fields:
             dumps[str(field)] = str(self.__getattribute__(field))
+        for func in additional_methods:
+            dumps[func] = getattr(self, func)()
 
         return dumps
 

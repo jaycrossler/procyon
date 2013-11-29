@@ -23,6 +23,10 @@
     table.dataTable th {
         border: 1px solid gray;
     }
+    table.dataTable tr.row_selected{
+        background-color: yellow;
+        border: 1px solid black;
+    }
 </style>
 {% endblock %}
 
@@ -38,7 +42,13 @@ $().ready(function(){
 
     var columnInfo = [
         {sTitle: 'ID', mData:'id', sDefaultContent:""},
-        {sTitle: 'Name', mData:'proper_name', sDefaultContent:""},
+        {sTitle: 'Name', mData:'__unicode__', sDefaultContent:"", mRender:function(data,type,full){
+            var out = data;
+            if (full.web_color){
+                out = "<span style='background-color:"+full.web_color+"'>"+out+"</span>";
+            }
+            return out;
+        }},
         {sTitle: 'Draper#', mData:'HD', sDefaultContent:""},
         {sTitle: 'Hipparcos#', mData:'HIP', sDefaultContent:""},
         {sTitle: 'Harvard#', mData:'HR', sDefaultContent:""},
@@ -50,13 +60,28 @@ $().ready(function(){
         }, sDefaultContent:""},
     ];
 
+    var aSelected = null;
     $table.dataTable( {
-        "aaData": items,
-        "bJQueryUI": true,
-        "sProcessing":true,
-        "aaSorting": [[7, 'asc']],
-        "sDom": 't<"clear">',
-        aoColumns:columnInfo
+        aaData: items,
+        bJQueryUI: true,
+        sProcessing:true,
+        aaSorting: [[7, 'asc']],
+        sDom: 't<"clear">',
+        aoColumns:columnInfo,
+        fnRowCallback: function (nRow, aData, iDisplayIndex){
+            if (aSelected != nRow.DT_RowId){
+                $(nRow).removeClass('row_selected');
+            }
+
+        }
+    });
+
+    $table.find('tbody tr').live('click',function(){
+        aSelected == this.id;
+
+        $table.find('tbody tr').removeClass('row_selected');
+
+        $(this).addClass('row_selected');
     });
 });
 
