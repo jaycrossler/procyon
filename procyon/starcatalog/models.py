@@ -1,6 +1,6 @@
 from procyon.starsystemmaker.space_helpers import *
 from django.contrib.gis.db import models
-
+import json
 
 class StarPossiblyHabitable(models.Model):
     """
@@ -125,6 +125,22 @@ class Star(models.Model):
     def web_color(self):
         star_a, star_b, star_c = get_star_type(self.spectrum)
         return color_of_star(star_a, star_b, star_c)
+
+    def get_params(self):
+        """
+        Converts parameters to json.
+        """
+        dumps = dict()
+        model_fields = [field.name for field in self._meta.fields]
+        for field in model_fields:
+            dumps[str(field)] = str(self.__getattribute__(field))
+
+        return dumps
+
+    def get_json(self):
+        return json.dumps(self.get_params(), ensure_ascii=True)
+
+
 
 
 class Planet(models.Model):

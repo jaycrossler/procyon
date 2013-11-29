@@ -9,8 +9,59 @@
 
 {% block body_class %}home{% endblock %}
 
-{% block extra_head %}
+{% block extra_style %}
 <link rel="stylesheet" href="{{ STATIC_URL }}css/front_page.css">
+<link href="{{STATIC_URL}}datatables.net/css/demo_table.css" rel="stylesheet" />
+<style>
+    table.dataTable {
+        font-size:.8em;
+        white-space: nowrap;
+    }
+    table.dataTable td {
+        padding: 0px 8px;
+    }
+    table.dataTable th {
+        border: 1px solid gray;
+    }
+</style>
+{% endblock %}
+
+{% block extra_script %}
+<script type="text/javascript" src="{{STATIC_URL}}datatables.net/js/jquery.dataTables.min.js"></script>
+<script language="JavaScript">
+var items = [];
+{% for item in items %}
+    items.push({{item.get_json|safe}});{% endfor %}
+
+$().ready(function(){
+    var $table = $('#data_holder');
+
+    var columnInfo = [
+        {sTitle: 'ID', mData:'id', sDefaultContent:""},
+        {sTitle: 'Name', mData:'proper_name', sDefaultContent:""},
+        {sTitle: 'Draper#', mData:'HD', sDefaultContent:""},
+        {sTitle: 'Hipparcos#', mData:'HIP', sDefaultContent:""},
+        {sTitle: 'Harvard#', mData:'HR', sDefaultContent:""},
+        {sTitle: 'Gliese#', mData:'gliese', sDefaultContent:""},
+        {sTitle: 'Spectrum', mData:'spectrum', sDefaultContent:""},
+        {sTitle: 'Light Years', mData:function(data){
+            var parsecs = data.distance_parsecs * 3.26163344;
+            return parseInt(parsecs * 100) /100;
+        }, sDefaultContent:""},
+    ];
+
+    $table.dataTable( {
+        "aaData": items,
+        "bJQueryUI": true,
+        "sProcessing":true,
+        "aaSorting": [[7, 'asc']],
+        "sDom": 't<"clear">',
+        aoColumns:columnInfo
+    });
+});
+
+</script>
+
 {% endblock %}
 
 {% block banner %}
@@ -22,14 +73,7 @@
         </form>
     </div>
 
-    <p>
-        <ul>
-            {% for item in items %}
-            <li>Star #{{item.id}} - HD #{{item.HD}} - {% if item.proper_name %}<b>{{item.proper_name}}</b> -{%  endif %} {{item.distance_ly}} LY from Sol</li>
-            {% endfor %}
-        </ul>
-    </p>
-
+    <table id="data_holder"></table>
     {% bootstrap_paginate page_obj range=10%}
 
 {% endblock %}
