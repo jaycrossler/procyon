@@ -1,0 +1,38 @@
+table.dataTable {
+    font-size:.8em;
+    white-space: nowrap;
+}
+table.dataTable td {
+    padding: 0px 8px;
+}
+table.dataTable th {
+    border: 1px solid gray;
+    border-radius: 2px;
+}
+table.dataTable tr.row_selected{
+    background-color: yellow;
+    border: 1px solid black;
+}
+#data_details {
+    display: inline-block;
+    background-color: #aba2af;
+    vertical-align: top;
+    border: 1px solid gray;
+    border-radius: 6px;
+    padding:10px;
+}
+.hero-unit {
+    padding: 40px 60px;
+}
+#data_display, #data_details  {
+    display: inline-block;
+}
+span .center {
+    text-align: center;
+    width: 100%;
+    display: inherit;
+}
+p.small {
+    font-size:0.8em;
+    line-height: 1.3em;
+}

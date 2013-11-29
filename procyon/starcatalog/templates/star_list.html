@@ -10,81 +10,26 @@
 {% block body_class %}home{% endblock %}
 
 {% block extra_style %}
-<link rel="stylesheet" href="{{ STATIC_URL }}css/front_page.css">
-<link href="{{STATIC_URL}}datatables.net/css/demo_table.css" rel="stylesheet" />
+<link rel="stylesheet" href="{{STATIC_URL}}css/front_page.css">
+<link rel="stylesheet" href="{{STATIC_URL}}datatables.net/css/demo_table.css" />
+<link rel="stylesheet" href="{{STATIC_URL}}css/star_list.css">
 <style>
-    table.dataTable {
-        font-size:.8em;
-        white-space: nowrap;
-    }
-    table.dataTable td {
-        padding: 0px 8px;
-    }
-    table.dataTable th {
-        border: 1px solid gray;
-    }
-    table.dataTable tr.row_selected{
-        background-color: yellow;
-        border: 1px solid black;
-    }
+
 </style>
 {% endblock %}
 
 {% block extra_script %}
 <script type="text/javascript" src="{{STATIC_URL}}datatables.net/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/star_list.js"></script>
 <script language="JavaScript">
-var items = [];
-{% for item in items %}
+    var items = [];
+    {% for item in items %}
     items.push({{item.get_json|safe}});{% endfor %}
 
-$().ready(function(){
-    var $table = $('#data_holder');
-
-    var columnInfo = [
-        {sTitle: 'ID', mData:'id', sDefaultContent:""},
-        {sTitle: 'Name', mData:'__unicode__', sDefaultContent:"", mRender:function(data,type,full){
-            var out = data;
-            if (full.web_color){
-                out = "<span style='background-color:"+full.web_color+"'>"+out+"</span>";
-            }
-            return out;
-        }},
-        {sTitle: 'Draper#', mData:'HD', sDefaultContent:""},
-        {sTitle: 'Hipparcos#', mData:'HIP', sDefaultContent:""},
-        {sTitle: 'Harvard#', mData:'HR', sDefaultContent:""},
-        {sTitle: 'Gliese#', mData:'gliese', sDefaultContent:""},
-        {sTitle: 'Spectrum', mData:'spectrum', sDefaultContent:""},
-        {sTitle: 'Light Years', mData:function(data){
-            var parsecs = data.distance_parsecs * 3.26163344;
-            return parseInt(parsecs * 100) /100;
-        }, sDefaultContent:""},
-    ];
-
-    var aSelected = null;
-    $table.dataTable( {
-        aaData: items,
-        bJQueryUI: true,
-        sProcessing:true,
-        aaSorting: [[7, 'asc']],
-        sDom: 't<"clear">',
-        aoColumns:columnInfo,
-        fnRowCallback: function (nRow, aData, iDisplayIndex){
-            if (aSelected != nRow.DT_RowId){
-                $(nRow).removeClass('row_selected');
-            }
-
-        }
+    $().ready(function(){
+        star_list.init();
+        star_list.buildTable(items);
     });
-
-    $table.find('tbody tr').live('click',function(){
-        aSelected == this.id;
-
-        $table.find('tbody tr').removeClass('row_selected');
-
-        $(this).addClass('row_selected');
-    });
-});
-
 </script>
 
 {% endblock %}
@@ -98,7 +43,13 @@ $().ready(function(){
         </form>
     </div>
 
-    <table id="data_holder"></table>
+    <div>
+        <span id="data_display">
+            <table id="data_holder"></table>
+        </span>
+        <span id="data_details"></span>
+    </div>
+
     {% bootstrap_paginate page_obj range=10%}
 
 {% endblock %}
