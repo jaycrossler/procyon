@@ -18,6 +18,7 @@ star_list.buildTable=function(items){
         {sTitle: 'Light Years', mData:function(data){
             return star_list.parsecs_to(data.distance_parsecs,'ly',true);
         }, sDefaultContent:""}
+//        ,{sTitle: 'Planets', mData:'known_planet_count', sDefaultContent:""} //TODO: Not returning planets correctly
     ];
 
     var aSelected = null;
@@ -26,6 +27,9 @@ star_list.buildTable=function(items){
         bJQueryUI: true,
         sProcessing:true,
         aaSorting: [[7, 'asc']],
+        bScrollCollapse: true,
+        bScrollInfinite: true,
+        sScrollY:250,
         sDom: 't<"clear">',
         aoColumns:columnInfo,
         fnRowCallback: function (nRow){
@@ -52,7 +56,7 @@ star_list.showDetails=function(item){
         .css({backgroundColor:item.web_color});
 
     var width = parseInt($details.parent().css('width'))-parseInt($details.parent().children().first().css('width'));
-    $details.css({width:width-30}).empty();
+    $details.css({width:width-34}).empty();
 
     $('<b>')
         .text(item.__unicode__)
@@ -99,7 +103,7 @@ star_list.showDetails=function(item){
 
     if (item.possibly_habitable){
         $('<p>')
-            .html("Likely Habitable?: <b>Yes</b>")
+            .html("<b>Likely Planet in Habitable Zone</b>")
             .addClass('small')
             .appendTo($details);
     }
@@ -162,7 +166,7 @@ star_list.parsecs_to=function(parsecs, distance_name, hideTitle){
     if (result){
         var title = hideTitle?"":("<b>"+result.title+"</b>: ");
         var suffix = result.suffix?(" "+result.suffix):"";
-        var val = result.roundUp? parseInt(parsecs*result.mult) : star_list.round(parsecs * result.mult,2);
+        var val = result.roundUp? parseInt(parsecs*result.mult) : star_list.round(parsecs * result.mult,1);
         if (val==1 && suffix) suffix=suffix.replace(/s$/,"");
 
         output = title + val + suffix;

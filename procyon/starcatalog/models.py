@@ -108,6 +108,9 @@ class Star(models.Model):
 
         return planet_list
 
+    def known_planet_json(self):
+        planets = self.known_planets()
+
     def known_planet_count(self):
         return len(self.known_planets())
 
@@ -130,7 +133,7 @@ class Star(models.Model):
         """
         Converts parameters to json.
         """
-        additional_methods = ['known_planet_count', 'possibly_habitable', 'web_color', '__unicode__']
+        additional_methods = ['known_planet_count', 'possibly_habitable', 'web_color', '__unicode__', 'known_planets']
         dumps = dict()
         model_fields = [field.name for field in self._meta.fields]
 
@@ -143,8 +146,6 @@ class Star(models.Model):
 
     def get_json(self):
         return json.dumps(self.get_params(), ensure_ascii=True)
-
-
 
 
 class Planet(models.Model):

@@ -33,7 +33,10 @@ class SearchView(object):
         queryset = super(SearchView, self).get_queryset()
 
         for field in self.search_fields:
-            search_query.append(Q(**{field+'__{search_type}'.format(search_type=self.search_type): search_term}))
+            if field == 'id':
+                search_query.append(Q(**{field+'__{search_type}'.format(search_type='iexact'): search_term}))
+            else:
+                search_query.append(Q(**{field+'__{search_type}'.format(search_type=self.search_type): search_term}))
 
         if search_query and search_term:
             queryset = queryset.filter(reduce(operator.or_, search_query))
@@ -43,10 +46,10 @@ class SearchView(object):
 
 class StarViewList(SearchView, ListView):
     model = Star
-    paginate_by = 25
+    paginate_by = 200
     template_name = 'star_list.html'
     context_object_name = 'items'
-    search_fields = ['proper_name', 'gliese', 'HIP', 'HD', ]
+    search_fields = ['id', 'HD', 'proper_name', 'gliese', 'HIP', 'HR', ]
 
     def get_context_data(self, **kwargs):
         cv = super(StarViewList, self).get_context_data(**kwargs)
