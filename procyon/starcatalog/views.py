@@ -35,7 +35,7 @@ class SearchView(object):
             search_query = []
             for field in self.search_fields:
                 if field == 'id':
-                    search_query.append(Q(**{field+'__{search_type}'.format(search_type='iexact'): search_term}))
+                    search_query.append(Q(**{field+'__{search_type}'.format(search_type='exact'): search_term}))
                 else:
                     search_query.append(Q(**{field+'__{search_type}'.format(search_type=self.search_type): search_term}))
 
@@ -66,5 +66,22 @@ def StarTypeView(request):
         output = '{0}({1});'.format(callback, json.dumps(dumps))
     else:
         output = json.dumps(dumps)
+
+    return HttpResponse(output, content_type="application/json")
+
+
+def lookup_star_info(request, pk):
+    callback = request.GET.get('callback')
+
+    try:
+        star = get_object_or_404(Star, id=pk)
+        dumps = star.get_params(['nearby_stars', ])
+
+    except Exception as e:
+        dumps = {'status': 'error', 'details': str(e)}
+
+    output = json.dumps(dumps)
+    if callback:
+        output = '{0}({1});'.format(callback, output)
 
     return HttpResponse(output, content_type="application/json")

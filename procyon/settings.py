@@ -138,6 +138,7 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.gis",
     
     # theme
     "pinax_theme_bootstrap",

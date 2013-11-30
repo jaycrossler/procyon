@@ -7,8 +7,6 @@ class StarModel(models.Model):
     """
     Additional data and simulated info about stars.
     Data needs to be generated using 'build_model' before being accessed
-
-    TODO: Build getter that generates info if not yet created
     """
     star = models.OneToOneField(Star, db_index=True, help_text="The star with real data", default=1)
     star_type = models.ForeignKey(StarType, help_text="Stellar Classification", blank=True, null=True)
@@ -83,23 +81,37 @@ class StarModel(models.Model):
         star.base_color = found_color
         star.save()
 
-    def get_params(self):
+    class Meta:
+        verbose_name_plural = 'Stars (Simulated)'
+        ordering = ['star']
+
+    additional_methods = []
+
+    def get_params(self, requested_methods=None, only_variables=None):
         """
         Converts parameters to object.
+
+        Options:
+            requested_methods = ['__unicode__', ] (to also call these functions and return results)
+            only_variables = ['name', 'title', ] (to only return values of these model variables)
+
         """
-        additional_methods = []
+        additional_methods = self.additional_methods
+
+        if requested_methods:
+            additional_methods = requested_methods + additional_methods
         dumps = dict()
-        model_fields = [field.name for field in self._meta.fields]
+
+        if not only_variables:
+            model_fields = [field.name for field in self._meta.fields]
+        else:
+            model_fields = only_variables
 
         for field in model_fields:
             dumps[str(field)] = str(self.__getattribute__(field))
         for func in additional_methods:
-            dumps[func] = str(getattr(self, func)())
+            dumps[func] = getattr(self, func)()
         return dumps
-
-    class Meta:
-        verbose_name_plural = 'Stars (Simulated)'
-        ordering = ['star']
 
 
 class PlanetType(models.Model):
@@ -186,3 +198,31 @@ class PlanetModel(models.Model):
     class Meta:
         verbose_name_plural = 'Planets (Simulated)'
         ordering = ['name']
+
+    additional_methods = ['__unicode__', ]
+
+    def get_params(self, requested_methods=None, only_variables=None):
+        """
+        Converts parameters to object.
+
+        Options:
+            requested_methods = ['__unicode__', ] (to also call these functions and return results)
+            only_variables = ['name', 'title', ] (to only return values of these model variables)
+
+        """
+        additional_methods = self.additional_methods
+
+        if requested_methods:
+            additional_methods = requested_methods + additional_methods
+        dumps = dict()
+
+        if not only_variables:
+            model_fields = [field.name for field in self._meta.fields]
+        else:
+            model_fields = only_variables
+
+        for field in model_fields:
+            dumps[str(field)] = str(self.__getattribute__(field))
+        for func in additional_methods:
+            dumps[func] = getattr(self, func)()
+        return dumps

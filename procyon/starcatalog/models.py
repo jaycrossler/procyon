@@ -26,11 +26,16 @@ class StarType(models.Model):
     def __unicode__(self):
         return '{0}: {1}'.format(self.symbol, self.name)
 
-    def get_params(self):
+    additional_methods = ['__unicode__', ]
+
+    def get_params(self, requested_methods=None):
         """
         Converts parameters to object.
         """
-        additional_methods = []
+        additional_methods = self.additional_methods
+
+        if requested_methods:
+            additional_methods = requested_methods + additional_methods
         dumps = dict()
         model_fields = [field.name for field in self._meta.fields]
 
@@ -76,7 +81,6 @@ class Star(models.Model):
     VY = models.FloatField(help_text="Annual parsec change in Galactic Y Coordinate", blank=True, null=True)
     VZ = models.FloatField(help_text="Annual parsec change in Galactic Z Coordinate", blank=True, null=True)
 
-    #TODO: List all known planets
     #TODO: Generate notional planetary system using known planets
     #TODO: When searching, list nearest stars and planets
 
@@ -149,19 +153,40 @@ class Star(models.Model):
         star_a, star_b, star_c = get_star_type(self.spectrum)
         return color_of_star(star_a, star_b, star_c)
 
-    def get_params(self):
+    def nearby_stars(self):
+        star_list = []
+
+        return star_list
+
+    additional_methods = ['known_planet_count', 'possibly_habitable', 'web_color', '__unicode__', 'known_planets']
+
+    def get_params(self, requested_methods=None, only_variables=None):
         """
-        Converts parameters to json.
+        Converts parameters to object.
+
+        Options:
+            requested_methods = ['__unicode__', ] (to also call these functions and return results)
+            only_variables = ['name', 'title', ] (to only return values of these model variables)
+
         """
-        additional_methods = ['known_planet_count', 'possibly_habitable', 'web_color', '__unicode__', 'known_planets']
+        try:
+            additional_methods = self.additional_methods
+        except:
+            additional_methods = []
+
+        if requested_methods:
+            additional_methods = requested_methods + additional_methods
         dumps = dict()
-        model_fields = [field.name for field in self._meta.fields]
+
+        if not only_variables:
+            model_fields = [field.name for field in self._meta.fields]
+        else:
+            model_fields = only_variables
 
         for field in model_fields:
             dumps[str(field)] = str(self.__getattribute__(field))
         for func in additional_methods:
             dumps[func] = getattr(self, func)()
-
         return dumps
 
     def get_json(self):
@@ -176,6 +201,8 @@ class Planet(models.Model):
     -- Remove second line of CSV that has subtitles
     -- Add a new column at beginning that has ids of ascending numbers
     """
+    additional_methods = ['__unicode__', ]
+
     name = models.CharField(db_index=True, max_length=60, help_text="Planet Common Name", blank=True, null=True)
     mass = models.FloatField(db_index=True, help_text="Estimated Mass compared to Jupiter", blank=True, null=True)
     semi_major_axis = models.FloatField(help_text="Semi-major Axis in au", blank=True, null=True)
@@ -200,18 +227,30 @@ class Planet(models.Model):
             name = '{0} [{1}]'.format(self.name, self.other_name)
         return name
 
-    def get_params(self):
+    def get_params(self, requested_methods=None, only_variables=None):
         """
         Converts parameters to object.
+
+        Options:
+            requested_methods = ['__unicode__', ] (to also call these functions and return results)
+            only_variables = ['name', 'title', ] (to only return values of these model variables)
+
         """
-        additional_methods = ['__unicode__', ]
+        additional_methods = self.additional_methods
+
+        if requested_methods:
+            additional_methods = requested_methods + additional_methods
         dumps = dict()
-        model_fields = [field.name for field in self._meta.fields]
+
+        if not only_variables:
+            model_fields = [field.name for field in self._meta.fields]
+        else:
+            model_fields = only_variables
 
         for field in model_fields:
             dumps[str(field)] = str(self.__getattribute__(field))
         for func in additional_methods:
-            dumps[func] = str(getattr(self, func)())
+            dumps[func] = getattr(self, func)()
         return dumps
 
     def get_json(self):
