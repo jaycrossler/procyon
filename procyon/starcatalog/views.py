@@ -27,26 +27,27 @@ class SearchView(object):
     search_term_parameter = 'q'
 
     def get_queryset(self):
-        search_query = []
         search_term = self.request.GET.get(self.search_term_parameter, self.search_term)
 
         queryset = super(SearchView, self).get_queryset()
 
-        for field in self.search_fields:
-            if field == 'id':
-                search_query.append(Q(**{field+'__{search_type}'.format(search_type='iexact'): search_term}))
-            else:
-                search_query.append(Q(**{field+'__{search_type}'.format(search_type=self.search_type): search_term}))
+        if search_term:
+            search_query = []
+            for field in self.search_fields:
+                if field == 'id':
+                    search_query.append(Q(**{field+'__{search_type}'.format(search_type='iexact'): search_term}))
+                else:
+                    search_query.append(Q(**{field+'__{search_type}'.format(search_type=self.search_type): search_term}))
 
-        if search_query and search_term:
-            queryset = queryset.filter(reduce(operator.or_, search_query))
+            if search_query:
+                queryset = queryset.filter(reduce(operator.or_, search_query))
 
         return queryset
 
 
 class StarViewList(SearchView, ListView):
     model = Star
-    paginate_by = 200
+    paginate_by = 100
     template_name = 'star_list.html'
     context_object_name = 'items'
     search_fields = ['id', 'HD', 'proper_name', 'gliese', 'HIP', 'HR', ]
@@ -54,3 +55,16 @@ class StarViewList(SearchView, ListView):
     def get_context_data(self, **kwargs):
         cv = super(StarViewList, self).get_context_data(**kwargs)
         return cv
+
+@csrf_exempt
+def StarTypeView(request):
+    callback = request.GET.get('callback')
+    dumps = []
+    for star in StarType.objects.all():
+        dumps.append(star.get_params())
+    if callback:
+        output = '{0}({1});'.format(callback, json.dumps(dumps))
+    else:
+        output = json.dumps(dumps)
+
+    return HttpResponse(output, content_type="application/json")

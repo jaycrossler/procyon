@@ -26,6 +26,23 @@ class StarType(models.Model):
     def __unicode__(self):
         return '{0}: {1}'.format(self.symbol, self.name)
 
+    def get_params(self):
+        """
+        Converts parameters to object.
+        """
+        additional_methods = []
+        dumps = dict()
+        model_fields = [field.name for field in self._meta.fields]
+
+        for field in model_fields:
+            dumps[str(field)] = str(self.__getattribute__(field))
+        for func in additional_methods:
+            dumps[func] = str(getattr(self, func)())
+        return dumps
+
+    def get_json(self):
+        return json.dumps(self.get_params(), ensure_ascii=True)
+
     class Meta:
         verbose_name_plural = 'Types of Stars'
 
@@ -96,20 +113,23 @@ class Star(models.Model):
         if self.HD:
             planets = Planet.objects.filter(HD=self.HD)
             for p in planets.all():
-                planet_list.append(p)
+                if p not in planet_list:
+                    planet_list.append(p)
         if self.HR:
             planets = Planet.objects.filter(HD=self.HR)
             for p in planets.all():
-                planet_list.append(p)
+                if p not in planet_list:
+                    planet_list.append(p)
         if self.gliese:
             planets = Planet.objects.filter(gliese=self.gliese)
             for p in planets.all():
-                planet_list.append(p)
+                if p not in planet_list:
+                    planet_list.append(p)
 
-        return planet_list
-
-    def known_planet_json(self):
-        planets = self.known_planets()
+        results = []
+        for p in planet_list:
+            results.append(p.get_params())
+        return results
 
     def known_planet_count(self):
         return len(self.known_planets())
@@ -179,6 +199,23 @@ class Planet(models.Model):
         if self.other_name:
             name = '{0} [{1}]'.format(self.name, self.other_name)
         return name
+
+    def get_params(self):
+        """
+        Converts parameters to object.
+        """
+        additional_methods = ['__unicode__', ]
+        dumps = dict()
+        model_fields = [field.name for field in self._meta.fields]
+
+        for field in model_fields:
+            dumps[str(field)] = str(self.__getattribute__(field))
+        for func in additional_methods:
+            dumps[func] = str(getattr(self, func)())
+        return dumps
+
+    def get_json(self):
+        return json.dumps(self.get_params(), ensure_ascii=True)
 
     class Meta:
         verbose_name_plural = 'Planets (Discovered)'

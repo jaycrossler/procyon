@@ -1,5 +1,5 @@
 table.dataTable {
-    font-size:.8em;
+    font-size:.7em;
     white-space: nowrap;
 }
 table.dataTable td {
@@ -33,6 +33,6 @@ span .center {
     display: inherit;
 }
 p.small {
-    font-size:0.8em;
-    line-height: 1.3em;
+    font-size:0.7em;
+    line-height: 1.2em;
 }

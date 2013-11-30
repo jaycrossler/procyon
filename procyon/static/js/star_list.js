@@ -1,6 +1,9 @@
 var star_list = {};
+star_list.star_types=[];
 star_list.init=function(){
-
+    $.ajax('/stars/starmodels/').success(function(data){
+        star_list.star_types = data;
+    })
 };
 star_list.buildTable=function(items){
     var $table = $('#data_holder');
@@ -15,10 +18,10 @@ star_list.buildTable=function(items){
             return out;
         }},
         {sTitle: 'Spectrum', mData:'spectrum', sDefaultContent:""},
-        {sTitle: 'Light Years', mData:function(data){
-            return star_list.parsecs_to(data.distance_parsecs,'ly',true);
+        {sTitle: 'LY', mData:function(data){
+            return star_list.parsecs_to_ly(data.distance_parsecs);
         }, sDefaultContent:""}
-//        ,{sTitle: 'Planets', mData:'known_planet_count', sDefaultContent:""} //TODO: Not returning planets correctly
+        ,{sTitle: 'Planets', mData:'known_planet_count', sDefaultContent:""}
     ];
 
     var aSelected = null;
@@ -55,6 +58,20 @@ star_list.showDetails=function(item){
     var $details = $('#data_details')
         .css({backgroundColor:item.web_color});
 
+    var text = "";
+    $.ajax('/maker/star/prime/'+item.id)
+        .success(function(data){
+            text=""
+            if (data.guessed_age) text+="<b>Age</b>: "+star_list.round(data.guessed_age)+" Million years old</br>";
+            if (data.guessed_mass) text+="<b>Solar Masses</b>: "+star_list.round(data.guessed_mass)+"</br>";
+            if (text){
+                $('<p>')
+                    .html("<b><i>Simulated Data</i></b><br/>"+text)
+                    .addClass('small')
+                    .appendTo($details);
+            }
+        });
+
     var width = parseInt($details.parent().css('width'))-parseInt($details.parent().children().first().css('width'));
     $details.css({width:width-34}).empty();
 
@@ -63,7 +80,6 @@ star_list.showDetails=function(item){
         .addClass('center')
         .appendTo($details);
 
-    var text = "";
     if (item.HIP && item.HIP!="None") {
         text+="Hipparcos ID: <a href='http://www.rssd.esa.int/hipparcos_scripts/HIPcatalogueSearch.pl?hipId="+item.HIP+"' target='_blank'>"+item.HIP+"</a><br/>";
     }
@@ -87,7 +103,7 @@ star_list.showDetails=function(item){
 
     if (text){
         $('<p>')
-            .html("<b>Identifiers</b>:<br>"+text)
+            .html("<b><i>Identifiers</i></b>:<br>"+text)
             .addClass('small')
             .appendTo($details);
     }
@@ -95,7 +111,7 @@ star_list.showDetails=function(item){
     if (item.distance_parsecs){
         text = star_list.distance_from_parsecs_to_text(item.distance_parsecs,3);
         $('<p>')
-            .html("<b>Distance</b>:<br>"+text)
+            .html("<b><i>Distance</i></b>:<br>"+text)
             .addClass('small')
             .appendTo($details);
     }
@@ -108,13 +124,20 @@ star_list.showDetails=function(item){
             .appendTo($details);
     }
 
-    if (item.known_planet_count){
+    if (item.known_planets && item.known_planets.length){
+        text = "";
+        _.each(item.known_planets,function(planet){
+            text+="<b>"+planet.name+"</b>: ";
+//            if (planet.other_name) text+="("+planet.other_name+") ";
+            if (planet.radius && planet.radius!="None") text+="Radius: "+star_list.round(planet.radius,1);
+            if (planet.mass && planet.mass!="None") text+="Mass: "+star_list.round(planet.mass,2);
+            text+="<br/>";
+        });
         $('<p>')
-            .html("<b>Known Planets</b>: "+item.known_planet_count)
+            .html("<b><i>Known Planets</i></b><br/>"+text)
             .addClass('small')
             .appendTo($details);
     }
-
 
 };
 star_list.round=function(num,digits){

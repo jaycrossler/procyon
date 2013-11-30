@@ -21,15 +21,21 @@ class StarModel(models.Model):
     guessed_luminosity = models.FloatField(help_text="Guessed at Luminosity", blank=True, null=True, default=0)
     guessed_age = models.FloatField(help_text="Guessed at Age", blank=True, null=True, default=0)
 
-    def build_model(self, star_id):
+    def build_model(self, star_id, star_prime=None):
+        #TODO: If not star_id, search through stars and find one
         self.add_rand_seed(True)
-        self.star = Star.objects.get(id=star_id)
+        if star_prime:
+            self.star = star_prime
+        else:
+            self.star = Star.objects.get(id=star_id)
+        if self.star:
+            star_a, star_b, star_c = get_star_type(self.star.spectrum)
+            self.add_type(star_a)
+            self.add_color(star_a, star_b, star_c)
 
         self.add_rand_variables(True)
 
-        star_a, star_b, star_c = get_star_type(self.star.spectrum)
-        self.add_type(star_a)
-        self.add_color(star_a, star_b, star_c)
+        self.save()
 
     def add_rand_seed(self, forced=False):
         add_it = True
@@ -76,6 +82,20 @@ class StarModel(models.Model):
                 found_color = star.star_type.base_color
         star.base_color = found_color
         star.save()
+
+    def get_params(self):
+        """
+        Converts parameters to object.
+        """
+        additional_methods = []
+        dumps = dict()
+        model_fields = [field.name for field in self._meta.fields]
+
+        for field in model_fields:
+            dumps[str(field)] = str(self.__getattribute__(field))
+        for func in additional_methods:
+            dumps[func] = str(getattr(self, func)())
+        return dumps
 
     class Meta:
         verbose_name_plural = 'Stars (Simulated)'

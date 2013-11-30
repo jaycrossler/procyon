@@ -9,4 +9,5 @@ from procyon.starcatalog.views import *
 urlpatterns = patterns('',
     url(r'^$', StarViewList.as_view(), name='star-list'),
     url(r'^star/$', StarViewList.as_view(), name='star-list-no-id'),
+    url(r'^starmodels/$', StarTypeView, name='star-type-list'),
     )
