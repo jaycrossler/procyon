@@ -59,7 +59,7 @@ star_list.showDetails=function(item){
         .css({backgroundColor:item.web_color});
 
     var text = "";
-    $.ajax('/maker/star/prime/'+item.id)
+    $.ajax('/maker/star/'+item.id)
         .success(function(data){
             text=""
             if (data.guessed_age) text+="<b>Age</b>: "+star_list.round(data.guessed_age)+" Million years old</br>";
