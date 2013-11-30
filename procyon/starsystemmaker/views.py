@@ -68,7 +68,7 @@ def lookup_star_info_prime(request, pk):
             star = StarModel.objects.get(star=star_prime)
 
         dumps = star.get_params()
-        dump2 = star_prime.get_params()
+        dump2 = star_prime.get_params(['nearby_stars', ])
         dumps = dict(dump2.items()+dumps.items())
 
     except Exception as e:
