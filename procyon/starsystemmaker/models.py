@@ -19,10 +19,16 @@ class StarModel(models.Model):
     guessed_luminosity = models.FloatField(help_text="Guessed at Luminosity", blank=True, null=True, default=0)
     guessed_age = models.FloatField(help_text="Guessed at Age", blank=True, null=True, default=0)
 
-    def build_model(self, star_id, star_prime=None, forced=False):
+    location = models.PointField(dim=3, blank=True, null=True)
+
+    def build_model(self, star_id=None, star_prime=None, forced=False):
         np.random.seed()
 
         self.add_rand_seed(forced)
+
+        if not star_prime and not star_id:
+            star_prime = self.star
+
         if star_prime:
             self.star = star_prime
         else:
