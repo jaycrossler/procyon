@@ -161,8 +161,8 @@ class Star(models.Model):
 
         origin = Point(self.X, self.Y, self.Z)
 
-        distance_m = 100
-        #Something like: Star.objects.filter(point__distance_lte=(origin, D(m=distance_m))).distance(origin).order_by('distance')[:1][20]
+        distance = 100
+        #Something like: Star.objects.filter(point__distance_lte=(origin, D(m=distance))).distance(origin).order_by('distance')[:1][20]
 
         for s in Star.objects.filter(id__lte=5):
             star_handle = dict()

@@ -8,7 +8,20 @@ from django.core import exceptions
 import json
 
 
-@timeit
+def create_star_extended_data(request, pk):
+    create_star_model(pk, True)
+    result_info = "Done"
+
+    return HttpResponse(result_info, content_type="text/html")
+
+
+def create_star_extended_data_rerandomize(request, pk):
+    create_star_model(pk, False)
+    result_info = "Done"
+
+    return HttpResponse(result_info, content_type="text/html")
+
+
 def create_some_star_colors(request, force):
     for i in [7, 8, 9]:
         create_star_model(i, force)
@@ -18,12 +31,12 @@ def create_some_star_colors(request, force):
 
 
 def create_star_model(star_id, force=False):
-    status = "Finished. "
+    status = "Done"
     try:
         star = Star.objects.get(id=star_id)
         star_model, created = StarModel.objects.get_or_create(star=star)
         if created or force:
-            star_model.build_model(star_id)
+            star_model.build_model(star_id, forced=force)
             star_model.save()
 
     except exceptions.ObjectDoesNotExist:

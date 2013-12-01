@@ -19,9 +19,10 @@ class StarModel(models.Model):
     guessed_luminosity = models.FloatField(help_text="Guessed at Luminosity", blank=True, null=True, default=0)
     guessed_age = models.FloatField(help_text="Guessed at Age", blank=True, null=True, default=0)
 
-    def build_model(self, star_id, star_prime=None):
-        #TODO: If not star_id, search through stars and find one
-        self.add_rand_seed(True)
+    def build_model(self, star_id, star_prime=None, forced=False):
+        np.random.seed()
+
+        self.add_rand_seed(forced)
         if star_prime:
             self.star = star_prime
         else:
@@ -31,7 +32,7 @@ class StarModel(models.Model):
             self.add_type(star_a)
             self.add_color(star_a, star_b, star_c)
 
-        self.add_rand_variables(True)
+        self.add_rand_variables(forced)
 
         self.save()
 
@@ -40,17 +41,17 @@ class StarModel(models.Model):
         if not forced and self.rand_seed:
             add_it = False
         if add_it:
-            self.rand_seed = rand_range(0, 1)
+            self.rand_seed = np.random.random() #rand_range(0, 1)
             self.save()
 
     def add_rand_variables(self, forced=False):
-        #TODO: How to use the Rand Seed as the proper seed variable so that all numbers are derived from that?
         add_it = True
         if not forced and self.guessed_temp:
             add_it = False
         if add_it:
             star_type = self.star_type
             if star_type:
+                np.random.seed(int(self.rand_seed*100000000))
                 self.guessed_temp = rand_range_from_text(star_type.surface_temp_range)
                 self.guessed_mass = rand_range_from_text(star_type.mass_range)
                 self.guessed_radius = rand_range_from_text(star_type.radius_range)
