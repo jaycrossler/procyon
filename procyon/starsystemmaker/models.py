@@ -3,7 +3,7 @@ from django.contrib.gis.measure import D
 from procyon.starsystemmaker.space_helpers import *
 from django.contrib.gis.db import models
 from procyon.starcatalog.models import Star, StarType
-
+import json
 
 class StarModel(models.Model):
     """
@@ -20,6 +20,8 @@ class StarModel(models.Model):
     guessed_radius = models.FloatField(help_text="Guessed at Radius", blank=True, null=True, default=0)
     guessed_luminosity = models.FloatField(help_text="Guessed at Luminosity", blank=True, null=True, default=0)
     guessed_age = models.FloatField(help_text="Guessed at Age", blank=True, null=True, default=0)
+
+    json_of_closest_stars = models.TextField(help_text="List of Stars, will be filled in automatically on first calculation", blank=True, null=True)
 
     location = models.PointField(dim=3, blank=True, null=True)
     objects = models.GeoManager()
@@ -98,26 +100,32 @@ class StarModel(models.Model):
     def nearby_stars(self):
         star_list = []
 
-        origin = self.location
+        if self.json_of_closest_stars:
+            star_list = json.loads(self.json_of_closest_stars)
 
-        distance = 500000
+        else:
+            origin = self.location
 
-        close_by_stars = StarModel.objects.filter(location__distance_lte=(origin, D(m=distance))).distance(origin).order_by('distance')
-        for s in close_by_stars:
-            if not s == self:
-                star_handle = dict()
-                star_handle['name'] = s.star.__unicode__()
-                star_handle['id'] = s.star.id
-                star_handle['web_color'] = s.star.web_color()
-                star_handle['x']= s.location.x
-                star_handle['y'] = s.location.y
-                star_handle['z'] = s.location.z
-                star_list.append(star_handle)
+            distance = 500000
+            close_by_stars = StarModel.objects.filter(location__distance_lte=(origin, D(m=distance))).distance(origin).order_by('distance')
+            for s in close_by_stars:
+                if not s == self:
+                    star_handle = dict()
+                    star_handle['name'] = s.star.__unicode__()
+                    star_handle['id'] = s.star.id
+                    star_handle['web_color'] = s.star.web_color()
+                    star_handle['x']= s.location.x
+                    star_handle['y'] = s.location.y
+                    star_handle['z'] = s.location.z
+                    star_list.append(star_handle)
+
+            self.json_of_closest_stars = json.dumps(star_list)
+            self.save()
 
         return star_list
 
 
-    additional_methods = ['nearby_stars',]
+    additional_methods = ['nearby_stars', ]
 
     def get_params(self, requested_methods=None, only_variables=None):
         """

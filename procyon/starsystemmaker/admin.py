@@ -2,7 +2,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.gis import admin
 from procyon.starsystemmaker.models import *
 import locale
-
+from django.http import HttpResponseRedirect
 
 class PlanetModelAdmin(admin.ModelAdmin):
     model = PlanetModel
@@ -22,13 +22,21 @@ def make_randomized(modeladmin, request, queryset):
 make_randomized.short_description = "Randomize variables of selected stars based on random seed"
 
 
+def view_star_as_json(modeladmin, request, queryset):
+    star = queryset[0].star
+    if star and star.id:
+        star_id = star.id
+        return HttpResponseRedirect("/maker/star/{0}".format(star_id))
+view_star_as_json.short_description = "View star JSON info"
+
+
 class StarModelAdmin(admin.ModelAdmin):
     model = StarModel
     list_display = ['id', 'real_star_id', 'star', 'star_type', 'base_color', 'star_type_name', 'mass_in_sol', 'radius_in_sol', 'age_in_my']
     exclude = ['star', ]
     search_fields = ['star', ]
     list_filter = ['star_type', ]
-    actions = [make_initialized, make_randomized]
+    actions = [make_initialized, make_randomized, view_star_as_json]
 
     def star_type_name(self, obj):
         star_type = obj.star_type

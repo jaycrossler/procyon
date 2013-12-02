@@ -1,6 +1,27 @@
 Procyon
 =======
 
+Procyon is both a Star System search tool as well as a Star System simulator. It's originally loaded with 120,000 of the "most interesting" stars, but can have other databases loaded as well. It uses Postgres and PostGIS for quick "geospatial" searching of stars (as well as caching results for quicker lookups).  In addition, the starsystemmaker module simulates details about stars and planetary systems based on best guesses.  All of this information is available as JSON/JSONP data requests to make details sharable.
+
+![alt tag](https://raw.github.com/jaycrossler/procyon/master/doc/doc_search_screen.png)
+
+API
+===
+
+JSON of real star data (for star ID # 70667, Proxima Centauri):
+    http://127.0.0.1:8000/stars/star/70667
+JSONP of real star data:
+    http://127.0.0.1:8000/stars/star/70667?callback=myFunction
+
+JSON of generated star data, along with nearest stars:
+    http://127.0.0.1:8000/maker/star/70667
+JSONP of generated star data:
+    http://127.0.0.1:8000/maker/star/70667
+
+
+
+Installation
+============
 
 Startup steps: (about 1 hour total)
 
@@ -42,17 +63,6 @@ Startup steps: (about 1 hour total)
     # Import star information (update with proper file locations and counts)
     paver install_dev_fixtures
     paver start
-
-
-Making new Star Systems
-=======================
-
-Currently, you can build new "model stars" that extend the base star information by hitting:
-    http://127.0.0.1:8000/maker/task_colors/
-You might want to rewrite the "model" data with:
-    http://127.0.0.1:8000/maker/task_colors/True
-
-    TODO - this needs to be turned into a background task, as 10k items takes 2 minutes or so.
 
 
 Notes on Project Config
