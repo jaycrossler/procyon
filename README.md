@@ -8,14 +8,16 @@ Procyon is both a Star System search tool as well as a Star System simulator. It
 API
 ===
 
-JSON of real star data (for star ID # 70667, Proxima Centauri):
+    JSON of real star data (for star ID # 70667, Proxima Centauri):
     http://127.0.0.1:8000/stars/star/70667
-JSONP of real star data:
+
+    JSONP of real star data:
     http://127.0.0.1:8000/stars/star/70667?callback=myFunction
 
-JSON of generated star data, along with nearest stars:
+    JSON of generated star data, along with nearest stars:
     http://127.0.0.1:8000/maker/star/70667
-JSONP of generated star data:
+
+    JSONP of generated star data:
     http://127.0.0.1:8000/maker/star/70667
 
 
@@ -25,7 +27,7 @@ Installation
 
 Startup steps: (about 1 hour total)
 
-    Install XCode, update to latest, From Preferences->Downloads, install command line tools (or will get clang errors)
+    For older macs, Install XCode, update to latest, From Preferences->Downloads, install command line tools (or will get clang errors)
 
     (open terminal window)
     sudo easy_install pip
