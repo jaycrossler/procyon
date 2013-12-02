@@ -49,10 +49,10 @@ def lookup_star_info(request, pk):
     callback = request.GET.get('callback')
 
     try:
-        star = get_object_or_404(StarModel, id=pk)
-        dumps = star.get_params()
+        star_model = get_object_or_404(StarModel, id=pk)
+        dumps = star_model.get_params()
 
-        star_prime = star.star
+        star_prime = star_model.star
         if star_prime:
             dump2 = star_prime.get_params()
             dumps = dict(dump2.items()+dumps.items())
@@ -73,15 +73,21 @@ def lookup_star_info_prime(request, pk):
 
     try:
         star_prime = get_object_or_404(Star, id=pk)
+        star_initialized = True
         try:
-            star = StarModel.objects.get(star=star_prime)
+            star_model = StarModel.objects.get(star=star_prime)
+            if star_model.guessed_age == 0 or star_model.guessed_age == None or star_model.guessed_mass == 0:
+                star_initialized = False
         except exceptions.ObjectDoesNotExist:
-            star = StarModel.objects.create(star=star_prime)
-            star.build_model(pk, star_prime)
-            star = StarModel.objects.get(star=star_prime)
+            StarModel.objects.create(star=star_prime)
+            star_model = StarModel.objects.get(star=star_prime)
+            star_initialized = False
 
-        dumps = star.get_params()
-        dump2 = star_prime.get_params(['nearby_stars', ])
+        if not star_initialized:
+            star_model.build_model(pk, star_prime)
+
+        dumps = star_model.get_params()
+        dump2 = star_prime.get_params()
         dumps = dict(dump2.items()+dumps.items())
 
     except Exception as e:

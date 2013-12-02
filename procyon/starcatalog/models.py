@@ -1,5 +1,3 @@
-from django.contrib.gis.geos import *
-from django.contrib.gis.measure import D
 from procyon.starsystemmaker.space_helpers import *
 from django.contrib.gis.db import models
 import json
@@ -155,26 +153,6 @@ class Star(models.Model):
     def web_color(self):
         star_a, star_b, star_c = get_star_type(self.spectrum)
         return color_of_star(star_a, star_b, star_c)
-
-    def nearby_stars(self):
-        star_list = []
-
-        origin = Point(self.X, self.Y, self.Z)
-
-        distance = 100
-        #Something like: Star.objects.filter(point__distance_lte=(origin, D(m=distance))).distance(origin).order_by('distance')[:1][20]
-
-        for s in Star.objects.filter(id__lte=5):
-            star_handle = dict()
-            star_handle['name'] = s.__unicode__()
-            star_handle['id'] = s.id
-            star_handle['web_color'] = s.web_color()
-            star_handle['x']= s.X
-            star_handle['y'] = s.Y
-            star_handle['z'] = s.Z
-            star_list.append(star_handle)
-
-        return star_list
 
     additional_methods = ['known_planet_count', 'possibly_habitable', 'web_color', '__unicode__', 'known_planets', ]
 

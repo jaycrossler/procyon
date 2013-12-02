@@ -62,8 +62,8 @@ star_list.showDetails=function(item){
     $.ajax('/maker/star/'+item.id)
         .success(function(data){
             text=""
-            if (data.guessed_age) text+="<b>Age</b>: "+star_list.round(data.guessed_age)+" Million years old</br>";
-            if (data.guessed_mass) text+="<b>Solar Masses</b>: "+star_list.round(data.guessed_mass)+"</br>";
+            if (data.guessed_age && data.guessed_age!="None") text+="<b>Age</b>: "+star_list.round(data.guessed_age)+" Million years old</br>";
+            if (data.guessed_mass && data.guessed_mass!="None") text+="<b>Solar Masses</b>: "+star_list.round(data.guessed_mass)+"</br>";
             if (text){
                 $('<p>')
                     .html("<b><i>Simulated Data</i></b><br/>"+text)

@@ -75,7 +75,7 @@ def lookup_star_info(request, pk):
 
     try:
         star = get_object_or_404(Star, id=pk)
-        dumps = star.get_params(['nearby_stars', ])
+        dumps = star.get_params()
 
     except Exception as e:
         dumps = {'status': 'error', 'details': str(e)}

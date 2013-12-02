@@ -70,8 +70,6 @@ class StarModelAdmin(admin.ModelAdmin):
             return "Unknown"
 
 
-
-
 class PlanetTypeAdmin(admin.ModelAdmin):
     model = PlanetType
     list_display = ['name', 'mass_range', 'radius_range', 'temperature_range', ]
