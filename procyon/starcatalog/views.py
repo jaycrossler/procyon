@@ -35,7 +35,7 @@ class SearchView(object):
             search_query = []
             for field in self.search_fields:
                 if field == 'id':
-                    search_query.append(Q(**{field+'__{search_type}'.format(search_type='exact'): search_term}))
+                    search_query.append(Q(**{field+'__{search_type}'.format(search_type='iexact'): search_term}))
                 else:
                     search_query.append(Q(**{field+'__{search_type}'.format(search_type=self.search_type): search_term}))
 

@@ -189,6 +189,14 @@ class PlanetType(models.Model):
         verbose_name_plural = 'Types of Planets'
 
 
+class PlanetFeatures(models.Model):
+    """
+    Major features of a planetary body
+    """
+    short_name = models.CharField(db_index=True, max_length=60, help_text="Short Description of Planetary Feature", blank=True, null=True)
+    details = models.CharField(db_index=True, max_length=60, help_text="Detailed Description of Planetary Feature", blank=True, null=True)
+
+
 class PlanetModel(models.Model):
     """
     Simulated Planets
@@ -197,7 +205,7 @@ class PlanetModel(models.Model):
     planet_type = models.ForeignKey(PlanetType, help_text="Type of planet", default=1, blank=True, null=True)
 
     mass = models.FloatField(db_index=True, help_text="Estimated Mass compared to Jupiter", blank=True, null=True)
-    radius = models.FloatField(help_text="Radius in jupiters", blank=True, null=True)
+    radius = models.FloatField(help_text="Radius in Jupiters", blank=True, null=True)
     density = models.FloatField(help_text="Density in g/cm^3", blank=True, null=True)
     gravity = models.FloatField(help_text="Surface Gravity", blank=True, null=True)
 
@@ -218,10 +226,11 @@ class PlanetModel(models.Model):
     minerals_specific = models.CharField(max_length=100, help_text="Comma-separated list of specific notable minerals", blank=True, null=True, default="")
 
     solid_core_size = models.FloatField(help_text="Percentage size of planet that is core (0 to 1)", blank=True, null=True)
-    solid_corex_type = models.CharField(max_length=30, help_text="Type of Core", blank=True, null=True, default="Iron")
+    solid_core_type = models.CharField(max_length=30, help_text="Type of Core", blank=True, null=True, default="Iron")
     plate_tectonics_amount = models.FloatField(help_text="Amount of tectonics and plate movement (Earth=1, Io=20)", blank=True, null=True)
 
     surface_ocean_amount = models.FloatField(help_text="% surface is covered with water (0 to 1)", blank=True, null=True)
+    surface_ocean_chemicals = models.CharField(max_length=100, help_text="Main composition of surface oceans (Earth=Salt Water, Titan=Ethane and Methane", blank=True, null=True, default="")
     subsurface_ocean_amount = models.FloatField(help_text="% of subsurface that is water (0 to 1)", blank=True, null=True)
     ice_amount = models.FloatField(help_text="% surface is covered with ice (0 to 1)", blank=True, null=True)
 
@@ -233,9 +242,23 @@ class PlanetModel(models.Model):
     periastron_time = models.FloatField(help_text="Time of Periastron in JD", blank=True, null=True)
     velocity_semi_amplitude = models.FloatField(help_text="Semiamplitude of doppler variation", blank=True, null=True)
 
+    ring_size = models.FloatField(help_text="Size of rings (as percentage of radius)", blank=True, null=True)
+    ring_numbers = models.IntegerField(help_text="Number of ring groups", blank=True, null=True)
+
+    atmosphere_millibars = models.FloatField(help_text="Pressure of atmosphere (Mars=7, Earth=1000)", blank=True, null=True)
+    atmosphere_main_gas = models.CharField(max_length=30, help_text="Major gas (70%), if any", blank=True, null=True)
+    atmosphere_secondary_gas = models.CharField(max_length=30, help_text="Second gas (20%), if any", blank=True, null=True)
+    atmosphere_tertiary_gas = models.CharField(max_length=30, help_text="Tertiary gas (9%), if any", blank=True, null=True)
+    atmosphere_dust_amount = models.FloatField(help_text="Grams of dust/m^2 (Earth=1, Moon=1000, Mars=500)", blank=True, null=True)
+
+    surface_wind_speeds_avg = models.FloatField(help_text="Average Wind Speeds in km/hr (Mars=108, Earth=17, Neptune=700)", blank=True, null=True)
+    surface_wind_speeds_max = models.FloatField(help_text="Max Wind Speeds in km/hr (Mars=288, Earth=400, Neptune=2100)", blank=True, null=True)
+
     other_name = models.CharField(db_index=True, max_length=60, help_text="Alternate Planet Common Name", blank=True, null=True)
     parent_star = models.ForeignKey(Star, db_index=True, help_text="The star that it orbits", blank=True, null=True)
     parent_planet = models.ForeignKey('self', db_index=True, help_text="A planet that it orbits",  blank=True, null=True)
+
+    major_features = models.ManyToManyField(PlanetFeatures, help_text="What features are significant on this planet", blank=True, null=True)
 
     def __unicode__(self):
         name = self.name
