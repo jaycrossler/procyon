@@ -93,7 +93,7 @@ function init_object_points(show_amount, isRedder, isHideDwarfs) {
         }
         //TODO: Scale based on size
         var sprite = ImageUtils.loadTexture( "textures/sprites/sun2.png" );
-        var material = new THREE.ParticleBasicMaterial( { size: (10 + Math.random()*10), map: sprite, blending: THREE.AdditiveBlending, vertexColors: true } );
+        var material = new THREE.ParticleBasicMaterial( { size: (.5 + Math.random()*2), map: sprite, blending: THREE.AdditiveBlending, vertexColors: true } );
 
         particles = new THREE.ParticleSystem( geometry, material );
         particles.sortParticles = true;

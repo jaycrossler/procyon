@@ -23,7 +23,7 @@ class StarModel(models.Model):
 
     json_of_closest_stars = models.TextField(help_text="List of Stars, will be filled in automatically on first calculation", blank=True, null=True)
 
-    location = models.PointField(dim=3, blank=True, null=True)
+    location = models.PointField(dim=3, blank=True, null=True, srid=900913)
     objects = models.GeoManager()
 
     def build_model(self, star_id=None, star_prime=None, forced=False):
@@ -99,25 +99,25 @@ class StarModel(models.Model):
 
     def nearby_stars(self):
         star_list = []
+        force_regenerate = False
 
-        if self.json_of_closest_stars:
+        if self.json_of_closest_stars and not force_regenerate:
             star_list = json.loads(self.json_of_closest_stars)
 
         else:
             origin = self.location
 
-            distance = 500000
+            distance = 1000
             close_by_stars = StarModel.objects.filter(location__distance_lte=(origin, D(m=distance))).distance(origin).order_by('distance')
-            for s in close_by_stars:
-                if not s == self:
-                    star_handle = dict()
-                    star_handle['name'] = s.star.__unicode__()
-                    star_handle['id'] = s.star.id
-                    star_handle['web_color'] = s.star.web_color()
-                    star_handle['x'] = s.location.x
-                    star_handle['y'] = s.location.y
-                    star_handle['z'] = s.location.z
-                    star_list.append(star_handle)
+            for s in close_by_stars[:200]:
+                star_handle = dict()
+                star_handle['name'] = s.star.__unicode__()
+                star_handle['id'] = s.star.id
+                star_handle['web_color'] = s.star.web_color()
+                star_handle['x'] = s.location.x
+                star_handle['y'] = s.location.y
+                star_handle['z'] = s.location.z
+                star_list.append(star_handle)
 
             self.json_of_closest_stars = json.dumps(star_list)
             self.save()
@@ -125,6 +125,7 @@ class StarModel(models.Model):
         return star_list
 
     def nearby_stars_json(self):
+        self.nearby_stars()
         return self.json_of_closest_stars
 
 
