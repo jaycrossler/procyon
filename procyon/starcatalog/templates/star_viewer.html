@@ -1,0 +1,55 @@
+<!DOCTYPE HTML>
+<html lang="en">
+	<head>
+		<title>StarPad</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+		<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" /> 
+		<meta name="description" content="HTML5 Canvas rendering using Three.js - by Jay Crossler" /> 
+		<meta name="keywords" content="html5, canvas, ipad, three.js, ios, android, gestures" /> 
+		<meta name="robots" content="index, follow" /> 
+
+        <link rel="stylesheet" href="{{STATIC_URL}}css/star_viewer.css">
+
+		<script type="text/javascript" src="{{STATIC_URL}}js/three/Stats.js"></script>
+		<script type="text/javascript" src="{{STATIC_URL}}js/three/Three.js"></script>
+		<script type="text/javascript" src="{{STATIC_URL}}js/three/Ray.js"></script>
+		<script type="text/javascript" src="{{STATIC_URL}}js/three/Color.js"></script>
+		<script type="text/javascript" src="{{STATIC_URL}}js/three/CameraControl.js"></script>
+		<script type="text/javascript" src="{{STATIC_URL}}js/three/RequestAnimationFrame.js"></script>
+        <script type="text/javascript" src="{{STATIC_URL}}js/star_viewer.js"></script>
+
+	</head>
+	<body>
+
+		<div id="container"></div> 
+		<div id="info"></div>
+		<div id="infoleft">
+			<div id="infolefttitle" class="infotabtitle"></div>
+			<div id="infotab1" class="infotab"></div>
+			<div id="infotab2" class="infotab"></div>
+			<div id="infotab3" class="infotab"></div>
+			<div id="infotab4" class="infotab"></div>
+		</div>
+
+		<div id="details">
+			100*<span onclick="init_object_points(100,false,false);">ALL</span>
+			500*<span onclick="init_object_points(500,false,false);">ALL</span>
+			2K**<span onclick="init_object_points(3000,false,false);">ALL</span>
+<!--
+			<a href="?renderer=webgl">WEBGL</a>
+			<a href="?renderer=canvas">CANVAS</a>
+	Particles not working		<a href="?renderer=svg">SVG</a>  -->
+		</div>
+
+<script type="text/javascript">
+    var star_init_list = {{ item.nearby_stars_json|safe }};
+
+    preloader();
+
+</script>
+
+	</body>
+</html>

@@ -114,7 +114,7 @@ class StarModel(models.Model):
                     star_handle['name'] = s.star.__unicode__()
                     star_handle['id'] = s.star.id
                     star_handle['web_color'] = s.star.web_color()
-                    star_handle['x']= s.location.x
+                    star_handle['x'] = s.location.x
                     star_handle['y'] = s.location.y
                     star_handle['z'] = s.location.z
                     star_list.append(star_handle)
@@ -123,6 +123,9 @@ class StarModel(models.Model):
             self.save()
 
         return star_list
+
+    def nearby_stars_json(self):
+        return self.json_of_closest_stars
 
 
     additional_methods = ['nearby_stars', ]

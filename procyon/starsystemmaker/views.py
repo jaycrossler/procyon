@@ -3,6 +3,7 @@ from procyon.starsystemmaker.space_helpers import *
 from procyon.starsystemmaker.models import *
 from procyon.starcatalog.models import Star
 from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.views.generic import ListView, DetailView
 from django.shortcuts import get_object_or_404, render_to_response
 from django.core import exceptions
 import json
@@ -43,6 +44,16 @@ def create_star_model(star_id, force=False):
         status = "{0} #{1} {2}".format(status, star_id, "star does not exist")
 
     return status
+
+
+class StarViewer(DetailView):
+    template_name = 'star_viewer.html'
+    model = StarModel
+    context_object_name = 'item'
+
+    def get_context_data(self, **kwargs):
+        cv = super(StarViewer, self).get_context_data(**kwargs)
+        return cv
 
 
 def lookup_star_info(request, pk):

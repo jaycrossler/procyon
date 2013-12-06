@@ -13,5 +13,5 @@ urlpatterns = patterns('',
     url(r'^initialize/(?P<pk>\d+)$', create_star_extended_data, name='maker-star-build' ),
     url(r'^star/(?P<pk>\d+)$', lookup_star_info_prime, name='maker-star-info' ),
     url(r'^star/created/(?P<pk>\d+)$', lookup_star_info, name='maker-star-info-createdid' ),
-
+    url(r'^viewer/(?P<pk>\d+)$', StarViewer.as_view(), name='maker-star-viewer' ),
     )

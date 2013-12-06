@@ -70,6 +70,15 @@ star_list.showDetails=function(item){
                     .addClass('small')
                     .appendTo($details);
             }
+            $('<p>')
+                .html("<b><i>Link To Viewer</i></b>")
+                .on('click',function(){
+                    document.location.href="/maker/viewer/"+data.id;
+                })
+                .addClass('small')
+                .css({cursor:'pointer',color:'blue'})
+                .appendTo($details);
+
         });
 
     var width = parseInt($details.parent().css('width'))-parseInt($details.parent().children().first().css('width'));

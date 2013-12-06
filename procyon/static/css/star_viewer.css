@@ -1,0 +1,70 @@
+body {
+    color: #000000;
+    font-family:Monospace;
+    font-size:13px;
+    text-align:center;
+
+    background-color: #000;
+    margin: 0px;
+    padding:0;
+    height:100%;
+    overflow: hidden;
+}
+
+#info {
+    position: absolute;
+    top: 0px; width: 100%;
+    padding: 5px;
+    color: #ffff00;
+}
+
+#details {
+    position: absolute;
+    width: 130px; height: 70px;
+    color: #ffffff;
+    background-color: #200;
+    padding: 3px;
+    right: 10px; bottom: 10px;
+    -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+    filter: alpha(opacity=50);
+    opacity: 0.7;
+}
+
+#infoleft {
+    position: absolute;
+    color: #ffffff;
+    background-color: #200;
+    padding: 3px;
+    left: 10px; bottom: 10px;
+    opacity: 0.7;
+}
+
+.infotabtitle {
+    color: white;
+    font-weight: bold;
+}
+
+.infotab {
+    line-break: strict;
+    font-family: arial;
+    font-size: 10px;
+    color: black;
+    font-weight: bold;
+    padding : 3px;
+}
+
+a, span {
+    color: #0000ff;
+    cursor: pointer; cursor: hand;
+}
+
+#details a,span {
+    color: #ffff00;
+}
+
+* {
+  -webkit-touch-callout: none;
+  -webkit-text-size-adjust: none;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-user-select: none;
+}
