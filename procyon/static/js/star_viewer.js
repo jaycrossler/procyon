@@ -93,7 +93,7 @@ function init_object_points(show_amount, isRedder, isHideDwarfs) {
         }
         //TODO: Scale based on size
         var sprite = ImageUtils.loadTexture( "textures/sprites/sun2.png" );
-        var material = new THREE.ParticleBasicMaterial( { size: (.5 + Math.random()*2), map: sprite, blending: THREE.AdditiveBlending, vertexColors: true } );
+        var material = new THREE.ParticleBasicMaterial( { size: (.1 + Math.random()*.1), map: sprite, blending: THREE.AdditiveBlending, vertexColors: true } );
 
         particles = new THREE.ParticleSystem( geometry, material );
         particles.sortParticles = true;
@@ -136,7 +136,7 @@ function init_object_points(show_amount, isRedder, isHideDwarfs) {
 
             var particle = new THREE.Particle( material );
             particle.position = new THREE.Vector3( obj.x, obj.y, obj.z );
-            particle.scale.x = particle.scale.y = .5 + (Math.random()*.1);  //TODO: Scale proportionally
+            particle.scale.x = particle.scale.y = .1 + (Math.random()*.1);  //TODO: Scale proportionally
             particle.isClickable = true;
             particle.color = (color);
             particle.starid = i;
