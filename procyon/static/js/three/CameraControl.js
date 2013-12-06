@@ -54,10 +54,10 @@ CameraControlWASD = function ( camera, movement_speed, look_speed, nofly, look_v
 
 		//Look for what was clicked on
 		var vector = new THREE.Vector3( ( x / window.innerWidth ) * 2 - 1, - ( y / window.innerHeight ) * 2 + 1, 0.5 );
-		projector.unprojectVector( vector, camera );
+		star_viewer.projector.unprojectVector( vector, camera );
 		var ray = new THREE.Ray( camera.position, vector.subSelf( camera.position ).normalize() );
 
-		var intersects = ray.intersectScene( scene, true );
+		var intersects = ray.intersectScene( star_viewer.scene, true );
 
 		return (intersects[ 0 ]) ? intersects[ 0 ] : null;
 	}
@@ -70,7 +70,7 @@ CameraControlWASD = function ( camera, movement_speed, look_speed, nofly, look_v
 		if (intersectClicked) { 
 			objectWasClicked(intersectClicked);
 		} else {
-			div_info.innerHTML='';
+			star_viewer.div_info.innerHTML='';
 			//Object not clicked, handle move instead
 			if (this.zoom_on_click) {
 				event.stopPropagation();
@@ -423,7 +423,7 @@ CameraControlWASD = function ( camera, movement_speed, look_speed, nofly, look_v
 	}
 
 	this.move = function(type,length,message) {
-		div_info.innerHTML= (message) ? message : "";
+		star_viewer.div_info.innerHTML= (message) ? message : "";
  		switch(type) {
 		case 'rot_right':	this.camera.position=this.rotateAroundPoint(  length,'y');break;
 		case 'rot_left':	this.camera.position=this.rotateAroundPoint(- length,'y');break;

@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html lang="en">
 	<head>
-		<title>StarPad</title>
+		<title>Star Viewer: {{ item.star }}</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 		<meta name="apple-mobile-web-app-capable" content="yes" />
@@ -45,10 +45,9 @@
 		</div>
 
 <script type="text/javascript">
-    var star_init_list = {{ item.nearby_stars_json|safe }};
+    var stars = {{ item.nearby_stars_json_force_recalc|safe }};
 
-    preloader();
-
+    star_viewer.preloader();
 </script>
 
 	</body>

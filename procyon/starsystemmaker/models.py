@@ -97,9 +97,8 @@ class StarModel(models.Model):
         verbose_name_plural = 'Stars (Simulated)'
         ordering = ['star']
 
-    def nearby_stars(self):
+    def nearby_stars(self, force_regenerate=False, num_results=200):
         star_list = []
-        force_regenerate = False
 
         if self.json_of_closest_stars and not force_regenerate:
             star_list = json.loads(self.json_of_closest_stars)
@@ -107,16 +106,19 @@ class StarModel(models.Model):
         else:
             origin = self.location
 
-            distance = 1000
+            distance = 10000
             close_by_stars = StarModel.objects.filter(location__distance_lte=(origin, D(m=distance))).distance(origin).order_by('distance')
-            for s in close_by_stars[:200]:
+            for s in close_by_stars[:num_results]:
                 star_handle = dict()
+                if s == self:
+                    star_handle['centered'] = True
                 star_handle['name'] = s.star.__unicode__()
                 star_handle['id'] = s.star.id
                 star_handle['web_color'] = s.star.web_color()
                 star_handle['x'] = s.location.x
                 star_handle['y'] = s.location.y
                 star_handle['z'] = s.location.z
+                star_handle['mass'] = s.guessed_mass or 0
                 star_list.append(star_handle)
 
             self.json_of_closest_stars = json.dumps(star_list)
@@ -126,6 +128,10 @@ class StarModel(models.Model):
 
     def nearby_stars_json(self):
         self.nearby_stars()
+        return self.json_of_closest_stars
+
+    def nearby_stars_json_force_recalc(self):
+        self.nearby_stars(force_regenerate=True, num_results=40)
         return self.json_of_closest_stars
 
 
