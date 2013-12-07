@@ -22,6 +22,7 @@ THREE.Color.prototype = {
 		this.hex = color.hex;
 		this.__styleString = color.__styleString;
 		this.rgbaString = color.rgbaString;
+		this.rgbaPrefixString = color.rgbaPrefixString;
 
 	},
 
@@ -120,6 +121,7 @@ THREE.Color.prototype = {
 
 		this.__styleString = 'rgb(' + ~~ ( this.r * 255 ) + ',' + ~~ ( this.g * 255 ) + ',' + ~~ ( this.b * 255 ) + ')';
 		this.rgbaString = 'rgba(' + ~~ ( this.r * 255 ) + ',' + ~~ ( this.g * 255 ) + ',' + ~~ ( this.b * 255 ) + ',' + (this.a) + ')';
+		this.rgbaPrefixString = 'rgba(' + ~~ ( this.r * 255 ) + ',' + ~~ ( this.g * 255 ) + ',' + ~~ ( this.b * 255 ) + ',';
 	},
 
 	clone : function () {

@@ -31,10 +31,11 @@ view_star_as_json.short_description = "View star JSON info"
 
 
 class StarModelAdmin(admin.ModelAdmin):
+    #TODO: Editing doesn't work when saving from admin menu
     model = StarModel
     list_display = ['id', 'real_star_id', 'star', 'star_type', 'base_color', 'star_type_name', 'mass_in_sol', 'radius_in_sol', 'age_in_my']
     exclude = ['star', ]
-    search_fields = ['star', ]
+    search_fields = ['id', ]
     list_filter = ['star_type', ]
     actions = [make_initialized, make_randomized, view_star_as_json]
 

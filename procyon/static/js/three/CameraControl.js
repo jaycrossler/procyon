@@ -128,7 +128,7 @@ CameraControlWASD = function ( camera, movement_speed, look_speed, nofly, look_v
 			this.moveShouldStop = true;
 		}		
 		if (event.preventDefault) event.preventDefault();
-		event.returnValue = false;				
+//		event.returnValue = false;
 	};
 	this.onDocumentKeyDown = function ( event ) {
 
@@ -238,12 +238,12 @@ CameraControlWASD = function ( camera, movement_speed, look_speed, nofly, look_v
 		e.preventDefault ();
 //		div_info.innerHTML='EDIT:  scale:'+e.scale+' rot:' + e.rotation +'<br/>';
 		this.touchState.gestureInProgress = true;
-	}
+	};
 	this.gestureChange = function(e) {
 		var target = e.target;
 		e.preventDefault ();
 
-//		div_info.innerHTML='CHANGE:  scale:'+e.scale+' rot:' + e.rotation +'<br/>';
+		//console.log('CHANGE:  scale:'+e.scale+' rot:' + e.rotation);
 
 
 		if (e.scale > 1.1) {
@@ -292,7 +292,7 @@ CameraControlWASD = function ( camera, movement_speed, look_speed, nofly, look_v
 		this.touchState.startY = this.touchState.y;
 		this.touchState.target = e.target;
 		this.touchState.duration = 0;
-	}
+	};
 	this.touchMove = function(e) {
 		if (this.touchState.gestureInProgress) return;
 		e.preventDefault ();
@@ -361,7 +361,7 @@ CameraControlWASD = function ( camera, movement_speed, look_speed, nofly, look_v
 			}
 		}
 
-	}
+	};
 	this.touchEnd = function(e) {
 		var touches = e.changedTouches,
 			first = touches[0],
@@ -385,7 +385,7 @@ CameraControlWASD = function ( camera, movement_speed, look_speed, nofly, look_v
 
 		}
 		this.moveShouldStop = true;
-	}
+	};
 
 	this.rotateAroundPoint = function (angDist, axis) {
 		// -pi < angDist < pi;
@@ -420,7 +420,7 @@ CameraControlWASD = function ( camera, movement_speed, look_speed, nofly, look_v
 		}
 //		console.log(axis+":"+ cTarget.x+rx +", "+cTarget.y+ry +", "+cTarget.z+rz );
 		return new THREE.Vector3( cTarget.x+rx, cTarget.y+ry, cTarget.z+rz );
-	}
+	};
 
 	this.move = function(type,length,message) {
 		star_viewer.div_info.innerHTML= (message) ? message : "";
@@ -434,27 +434,28 @@ CameraControlWASD = function ( camera, movement_speed, look_speed, nofly, look_v
 		case 'move_right':	this.camera.position.x-=length;break;  //TODO: Move perpendicular
 		case 'move_left':	this.camera.position.x+=length;break;
 		case 'move_forward':
-			var distTo = this.camera.position.distanceTo(this.camera.target.position)
-			if(distTo > (2*length)) {
-				this.camera.position.addSelf(this.camera.target.position.clone().subSelf(this.camera.position).setLength(length));
-			} else { //Very close
-				if (distTo > 5+(this.camera.target.scale.x ? this.camera.target.scale.x : 1)) {
-					this.camera.position.addSelf(this.camera.target.position.clone().subSelf(this.camera.position).setLength(length/10));
-				} else {
+			var distTo = this.camera.position.distanceTo(this.camera.target.position);
+            var close_boundary = star_viewer.close_by_boundary + (2*(this.camera.target.scale.x || 1));
 
-//					location.href= "http://wecreategames.com/apps/celestial/";
+			if(distTo > (4*close_boundary)) {
+				this.camera.position.addSelf(this.camera.target.position.clone().subSelf(this.camera.position).setLength(length/star_viewer.zoom_throttle));
+			} else { //Very close
+				if (distTo > close_boundary) {
+					this.camera.position.addSelf(this.camera.target.position.clone().subSelf(this.camera.position).setLength(length/star_viewer.zoom_close_throttle));
+				} else {
+                    star_viewer.function_run_when_close();
 				}
 			}
 			break;
 		case 'move_back':
-			if(this.camera.position.distanceTo(this.camera.target.position) < 200) {
-				this.camera.position.subSelf(this.camera.target.position.clone().subSelf(this.camera.position).setLength(length));
+			if(this.camera.position.distanceTo(this.camera.target.position) < star_viewer.zoom_out_max) {
+				this.camera.position.subSelf(this.camera.target.position.clone().subSelf(this.camera.position).setLength(length/star_viewer.zoom_out_throttle));
 			}
 			break;
 		case 'move_up':		this.camera.position.y-=length;break;
 		case 'move_down':	this.camera.position.y+=length;break;
 		}
-	}
+	};
 
 	this.swipeRight = function(length) {
 		this.move('rot_right', Math.sqrt(length-30), 'SWIPE RIGHT '+Math.round(length));

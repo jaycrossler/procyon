@@ -105,10 +105,17 @@ class StarModel(models.Model):
             star_list = json.loads(self.json_of_closest_stars)
 
         else:
-
             origin = self.location
             distance = 5
-            close_by_stars = StarModel.objects.filter(location__distance_lte=(origin, D(m=distance))).distance(origin)
+
+            #NOTE: This is not accurately returning the closest stars
+            #TODO: Check that origin is correct, maybe by creating a GEOS point from the XYZ values
+            #TODO: Look at the sql log files to see exactly what SQL is being generated, verify it there
+
+            close_by_stars = StarModel.objects.filter(location__distance_lte=(origin, D(m=distance)))
+#            num_close = len(close_by_stars)
+#            sorted_stars = close_by_stars.distance(origin).order_by('distance')
+
             for s in close_by_stars:
                 star_handle = dict()
                 if s == self:

@@ -7,9 +7,22 @@ star_viewer.lastColor = null;
 star_viewer.highlightLine = null;
 star_viewer.show_sun = false;
 star_viewer.stars_to_show = 4;
-star_viewer.star_scale_default = .04;
+star_viewer.star_scale_default = .005;
 star_viewer.central_sun = null;
-
+star_viewer.bounds = 60;
+star_viewer.close_by_boundary = 0.5;
+star_viewer.initial_stars_shown = 50;
+star_viewer.zoom_throttle = 5;
+star_viewer.zoom_close_throttle = 15;
+star_viewer.zoom_out_throttle = 5;
+star_viewer.zoom_out_max = 120;
+star_viewer.star_canvas_size = 96;
+star_viewer.mass_rescale = 20;
+star_viewer.camera_movement_speed = 1;
+star_viewer.camera_look_speed = 0.005;
+star_viewer.function_run_when_close = function(){
+    console.log("Close");
+};
 star_viewer.PI2 = Math.PI * 2;
 
 var program = function ( context, color ) {
@@ -29,7 +42,6 @@ star_viewer.init=function() {
     star_viewer.container = document.getElementById( 'container'  );
     star_viewer.div_details =document.getElementById( 'details' );
     star_viewer.div_info= document.getElementById( 'info' );
-    star_viewer.bounds = 100;
     star_viewer.scene = new THREE.Scene();
     star_viewer.init_central_sun();
     star_viewer.init_camera();
@@ -50,8 +62,8 @@ star_viewer.init_central_sun=function(){
 
 };
 //=======================================
-star_viewer.generateSunTexture=function(color, size, showShell) {
-    var size = (size) ? parseInt(size*24) : 24;
+star_viewer.generateSunTexture=function(color, size, showShell, altColor) {
+    var size = (size) ? parseInt(size*star_viewer.star_canvas_size) : star_viewer.star_canvas_size;
     var showShell = (showShell) ? showShell : false;
     var canvas = document.createElement( 'canvas' );
     canvas.width = size;
@@ -62,19 +74,20 @@ star_viewer.generateSunTexture=function(color, size, showShell) {
     var gradient = context.createRadialGradient( canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2 );
     gradient.addColorStop( 0, col.rgbaString);
     gradient.addColorStop( 0.1, col.rgbaString);
-    gradient.addColorStop( 0.6, 'rgba(125, 20, 0, 0.2)' );
+    gradient.addColorStop( 0.7, altColor || col.rgbaPrefixString + '0.2)');//'rgba(125, 20, 0, 0.2)' );
+    gradient.addColorStop( 0.8, 'rgba(125, 20, 0, 0.3)' );
     if (showShell) {
-        gradient.addColorStop( 0.7, 'rgba(0, 20, 0, 1)' );
-        gradient.addColorStop( 0.85, 'rgba(255, 255, 255, 0.2)' );
+        gradient.addColorStop( 0.85, 'rgba(0, 20, 0, 1)' );
+        gradient.addColorStop( 0.9, 'rgba(255, 255, 255, 0.2)' );
     }
-    gradient.addColorStop( .92, 'rgba(0,0,0,0)' );
+    gradient.addColorStop( .98, 'rgba(0,0,0,0)' );
     context.fillStyle = gradient;
     context.fillRect( 0, 0, canvas.width, canvas.height );
     return canvas;
 };
 star_viewer.init_object_points=function(show_amount, isRedder, isHideDwarfs) {
 
-    if (!show_amount) show_amount = stars.length;
+    show_amount = show_amount || star_viewer.initial_stars_shown || stars.length;
     var color_offset = (isRedder) ? 0x006050 : 0x000000;
 
     //currently, the star_viewer.particles are rendered differently
@@ -157,7 +170,7 @@ star_viewer.init_object_points=function(show_amount, isRedder, isHideDwarfs) {
                 map: new THREE.Texture( star_viewer.generateSunTexture(color,1) ), blending: THREE.AdditiveBlending
             } );
 
-            var scale = obj.mass ? obj.mass/5 : star_viewer.star_scale_default;
+            scale = star_viewer.size_based_on_star_mass(obj.mass);
 
             var location = {x:obj.x, y:obj.y, z:obj.z};
             if (star_viewer.central_sun && star_viewer.central_sun.x) {
@@ -180,6 +193,16 @@ star_viewer.init_object_points=function(show_amount, isRedder, isHideDwarfs) {
     }
     star_viewer.is_rendered = true;
 };
+star_viewer.size_based_on_star_mass=function(mass){
+    var scale = star_viewer.star_scale_default;
+    if (mass){
+        scale = star_viewer.star_scale_default + ((mass-1)/star_viewer.mass_rescale);
+        if (scale > (2*star_viewer.star_scale_default)) scale = star_viewer.star_scale_default*2;
+        if (scale < (.5*star_viewer.star_scale_default)) scale = star_viewer.star_scale_default*.5;
+    }
+    return scale;
+};
+
 function objectWasClicked(intersectClicked) {
     var starscopy = [];
     var objectClicked = intersectClicked.object;
@@ -208,7 +231,7 @@ function objectWasClicked(intersectClicked) {
         star_viewer.lastClicked = objectClicked;
         star_viewer.lastColor = objectClicked.materials[0].color.hex;
         objectClicked.materials[0] = new THREE.ParticleBasicMaterial( {
-            map: new THREE.Texture( star_viewer.generateSunTexture(0xff0000,1,true) ), blending: THREE.AdditiveBlending
+            map: new THREE.Texture( star_viewer.generateSunTexture(star_viewer.lastColor,1,true,'rgba(125, 20, 0, 0.2)' ) ), blending: THREE.AdditiveBlending
         } );
 //					objectClicked.scale.x = objectClicked.scale.y = .3;
 
@@ -249,7 +272,7 @@ function objectWasClicked(intersectClicked) {
 
         doctab.innerHTML = "<nobr>"+i+": "+star.name+"</nobr><br/>"
         doctab.innerHTML+= "ID: "+star.id+ " "+
-            parseInt(closest[0].position.distanceTo(closest[i].position))+" LY away";
+            parseInt(closest[0].position.distanceTo(closest[i].position))+" Parsec away";
 //					doctab.appendChild(star_viewer.generateSunTexture(star.color,.8));
 
     }
@@ -293,7 +316,7 @@ star_viewer.init_camera=function() {
     window.addEventListener( 'resize', onWindowResize, false );
 
     star_viewer.projector = new THREE.Projector();
-    star_viewer.cameraControl = new CameraControlWASD( star_viewer.camera, 10, 0.005, true, false, false, false );
+    star_viewer.cameraControl = new CameraControlWASD( star_viewer.camera, star_viewer.camera_movement_speed, star_viewer.camera_look_speed, true, false, false, false );
 };
 star_viewer.init_stats=function() {
     star_viewer.stats = new Stats();
