@@ -7,7 +7,7 @@ star_viewer.lastColor = null;
 star_viewer.highlightLine = null;
 star_viewer.show_sun = false;
 star_viewer.stars_to_show = 4;
-star_viewer.star_scale_default = .2;
+star_viewer.star_scale_default = .04;
 star_viewer.central_sun = null;
 
 star_viewer.PI2 = Math.PI * 2;
@@ -29,7 +29,7 @@ star_viewer.init=function() {
     star_viewer.container = document.getElementById( 'container'  );
     star_viewer.div_details =document.getElementById( 'details' );
     star_viewer.div_info= document.getElementById( 'info' );
-
+    star_viewer.bounds = 100;
     star_viewer.scene = new THREE.Scene();
     star_viewer.init_central_sun();
     star_viewer.init_camera();
@@ -37,12 +37,13 @@ star_viewer.init=function() {
     star_viewer.init_renderer();
     star_viewer.init_stats();
 
-    star_viewer.init_object_points(100,false,true);
+    star_viewer.init_object_points(false,false,true);
 };
 star_viewer.init_central_sun=function(){
     for ( var i = 0; i <= stars.length; i ++ ) {
-        if (stars[i].centered){
-            star_viewer.central_sun = stars[i];
+        var star = stars[i];
+        if (star && star.centered) {
+            star_viewer.central_sun = star;
             break;
         }
     }
@@ -63,8 +64,8 @@ star_viewer.generateSunTexture=function(color, size, showShell) {
     gradient.addColorStop( 0.1, col.rgbaString);
     gradient.addColorStop( 0.6, 'rgba(125, 20, 0, 0.2)' );
     if (showShell) {
-        gradient.addColorStop( 0.88, 'rgba(0, 20, 0, 1)' );
-        gradient.addColorStop( 0.9, 'rgba(255, 255, 255, 0.2)' );
+        gradient.addColorStop( 0.7, 'rgba(0, 20, 0, 1)' );
+        gradient.addColorStop( 0.85, 'rgba(255, 255, 255, 0.2)' );
     }
     gradient.addColorStop( .92, 'rgba(0,0,0,0)' );
     context.fillStyle = gradient;
@@ -84,7 +85,7 @@ star_viewer.init_object_points=function(show_amount, isRedder, isHideDwarfs) {
             star_viewer.is_rendered = false;
         }
 
-        //Staring sun // TODO, Add a seperate sphere?
+        //Staring sun
         var geometry = new THREE.Geometry();
 // 					var vector = new THREE.Vertex( new THREE.Vector3( 0,0,0 ));
 // 					vector.name = "Sol: The Sun";
@@ -262,8 +263,8 @@ function objectWasClicked(intersectClicked) {
 star_viewer.init_grid=function() {
     // Grid
     var geometry = new THREE.Geometry();
-    geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( -1 * 200, 0, 0 ) ) );
-    geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 200, 0, 0 ) ) );
+    geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( -1 * star_viewer.bounds, 0, 0 ) ) );
+    geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( star_viewer.bounds, 0, 0 ) ) );
 
     var material = new THREE.LineBasicMaterial( { color: 0x888888, opacity: 0.8 } );
     var lineSteps = 10;
@@ -287,8 +288,8 @@ star_viewer.init_grid=function() {
 star_viewer.init_camera=function() {
     star_viewer.camera = new THREE.Camera( 60, window.innerWidth / window.innerHeight, 1, 10000 );
 
-    star_viewer.camera.position.y = 30;
-    star_viewer.camera.position.z = 30;
+    star_viewer.camera.position.y = star_viewer.bounds/7;
+    star_viewer.camera.position.z = star_viewer.bounds/7;
     window.addEventListener( 'resize', onWindowResize, false );
 
     star_viewer.projector = new THREE.Projector();
@@ -369,4 +370,17 @@ star_viewer.animate=function() {
 star_viewer.render=function() {
     //Render the updated canvas
     star_viewer.renderer.render( star_viewer.scene, star_viewer.camera );
+};
+star_viewer.info=function(){
+    var loc = star_viewer.central_sun;
+    for (var i=0; i < stars.length; i++){
+        var star = stars[i];
+        var xd = star.x - loc.x;
+        var yd = star.y - loc.y;
+        var zd = star.z - loc.z;
+
+        var dist = Math.sqrt(xd*xd + yd*yd + zd*zd);
+
+        console.log(star.x+' '+star.y+' '+star.z+' : '+dist);
+    }
 };

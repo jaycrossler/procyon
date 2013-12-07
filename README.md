@@ -53,6 +53,7 @@ Startup steps: (about 1 hour total)
     brew install postgis
     brew install gdal (probably already installed)
     brew install libgeoip
+    brew install gfortran
 
     pip install Paver
 

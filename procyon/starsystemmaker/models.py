@@ -1,6 +1,7 @@
 from django.contrib.gis.geos import *
 from django.contrib.gis.measure import D
 from procyon.starsystemmaker.space_helpers import *
+
 from django.contrib.gis.db import models
 from procyon.starcatalog.models import Star, StarType
 import json
@@ -104,11 +105,11 @@ class StarModel(models.Model):
             star_list = json.loads(self.json_of_closest_stars)
 
         else:
-            origin = self.location
 
-            distance = 10000
-            close_by_stars = StarModel.objects.filter(location__distance_lte=(origin, D(m=distance))).distance(origin).order_by('distance')
-            for s in close_by_stars[:num_results]:
+            origin = self.location
+            distance = 5
+            close_by_stars = StarModel.objects.filter(location__distance_lte=(origin, D(m=distance))).distance(origin)
+            for s in close_by_stars:
                 star_handle = dict()
                 if s == self:
                     star_handle['centered'] = True
@@ -131,7 +132,7 @@ class StarModel(models.Model):
         return self.json_of_closest_stars
 
     def nearby_stars_json_force_recalc(self):
-        self.nearby_stars(force_regenerate=True, num_results=40)
+        self.nearby_stars(force_regenerate=True)
         return self.json_of_closest_stars
 
 
