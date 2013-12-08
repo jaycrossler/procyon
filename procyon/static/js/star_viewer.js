@@ -151,7 +151,7 @@ star_viewer.init_object_points=function(show_amount, isRedder, isHideDwarfs) {
             particle.position.x = 0;
             particle.position.y = 0;
             particle.position.z = 0;
-            particle.scale.x = particle.scale.y = .3;
+            particle.scale.x = particle.scale.y = particle.scale.z = .3;
             particle.isClickable = false;
             particle.name = "Sol";
             particle.starid = 0;
@@ -181,7 +181,7 @@ star_viewer.init_object_points=function(show_amount, isRedder, isHideDwarfs) {
 
             particle = new THREE.Particle( material );
             particle.position = new THREE.Vector3( location.x, location.y, location.z );
-            particle.scale.x = particle.scale.y = scale;
+            particle.scale.x = particle.scale.y = particle.scale.z = scale;
             particle.isClickable = true;
             particle.color = (color);
             particle.starid = i;

@@ -52,7 +52,6 @@ def install_dev_fixtures():
     sh('psql -d {db} -c "insert into starsystemmaker_starmodel (star_id, location) select id, ST_SetSRID(ST_MakePoint("X", "Y", "Z"),900913) from starcatalog_star;"')
 
 
-
 @task
 def sync():
     """ Runs the syncdb process with migrations """
