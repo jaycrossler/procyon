@@ -49,7 +49,7 @@ def install_dev_fixtures():
     num_lines = sum(1 for line in open(fixture(filename)))
     sh('psql -d {db} -c "COPY starcatalog_star FROM \'{file}\' DELIMITER \',\' CSV header;"'.format(db=db, file=fixture(filename)))
     sh('psql -d {db} -c "alter sequence starcatalog_star_id_seq restart with {linecount};"'.format(db=db, linecount=num_lines+1))
-    sh('psql -d {db} -c "insert into starsystemmaker_starmodel (star_id, location) select id, ST_SetSRID(ST_MakePoint("X", "Y", "Z"),900913) from starcatalog_star;"')
+    sh('psql -d {db} -c "insert into starsystemmaker_starmodel (star_id, location) select id, ST_SetSRID(ST_MakePoint(\\"X\\", \\"Y\\", \\"Z\\"),900913) from starcatalog_star;"'.format(db=db))
 
 
 @task
