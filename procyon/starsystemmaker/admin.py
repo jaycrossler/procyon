@@ -22,6 +22,12 @@ def make_randomized(modeladmin, request, queryset):
 make_randomized.short_description = "Randomize variables of selected stars based on random seed"
 
 
+def blank_all_starmodels(modeladmin, request, queryset):
+    StarModel.objects.all().update(json_of_closest_stars='', guessed_age=0, guessed_luminosity=0,
+                                   guessed_temp=0, guessed_mass=0, guessed_radius=0, rand_seed=0)
+blank_all_starmodels.short_description = "(select one, but) Delete ALL simulated data from ALL star models"
+
+
 def view_star_as_json(modeladmin, request, queryset):
     star = queryset[0].star
     if star and star.id:
@@ -37,7 +43,7 @@ class StarModelAdmin(admin.ModelAdmin):
     exclude = ['star', ]
     search_fields = ['id', ]
     list_filter = ['star_type', ]
-    actions = [make_initialized, make_randomized, view_star_as_json]
+    actions = [make_initialized, make_randomized, view_star_as_json, blank_all_starmodels]
 
     def star_type_name(self, obj):
         star_type = obj.star_type

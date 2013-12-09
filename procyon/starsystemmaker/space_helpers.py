@@ -88,6 +88,8 @@ def closest_stars(item, star_model, distance=10, goal_count=140):
         star_handle['y'] = s.location.y
         star_handle['z'] = s.location.z
         star_handle['mass'] = s.guessed_mass or 0
+        star_handle['mag'] = s.star.mag or 0
+        star_handle['abs_mag'] = s.star.abs_mag or 0
         star_handle['dist'] = dist
         star_list.append(star_handle)
 

@@ -35,8 +35,17 @@
 		</div>
 
 		<div id="details">
-			Show: <span onclick="star_viewer.init_object_points(50,false,false);">50</span>
-			<span onclick="star_viewer.init_object_points(5000,false,false);">ALL</span>
+			Show: <span onclick="star_viewer.init_object_points(50);">50</span>
+			<span onclick="star_viewer.init_object_points(5000);">ALL</span><br/>
+			Scale by: <span onclick="star_viewer.refresh_stars({scale:'mass'});">Mass</span>
+			<span onclick="star_viewer.refresh_stars({scale:'mag'});">Mag</span>
+			<span onclick="star_viewer.refresh_stars({scale:'abs_mag'});">Abs</span><br/>
+			Grid: <span onclick="star_viewer.remove_grid_lines();">None</span>
+			<span onclick="star_viewer.init_grid();">W</span>
+			<span onclick="star_viewer.init_grid({lightColor:0xff0000,darkColor:0x886666,rot:2});">R</span>
+			<span onclick="star_viewer.init_grid({lightColor:0x4444ee,darkColor:0x222288,rot:4});">B</span><br/>
+
+
 		</div>
 
 <script type="text/javascript">
