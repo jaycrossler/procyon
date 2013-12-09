@@ -7,6 +7,7 @@ from django.views.generic import ListView, DetailView
 from django.shortcuts import get_object_or_404, render_to_response
 from django.core import exceptions
 import json
+from django.template import RequestContext
 
 
 def create_star_extended_data(request, pk):
@@ -46,14 +47,19 @@ def create_star_model(star_id, force=False):
     return status
 
 
-class StarViewer(DetailView):
-    template_name = 'star_viewer.html'
-    model = StarModel
-    context_object_name = 'item'
+def star_viewer(request, pk):
+    """
+    View used for visualizing star clusters.
+    """
+    star = get_object_or_404(Star, id=pk)
 
-    def get_context_data(self, **kwargs):
-        cv = super(StarViewer, self).get_context_data(**kwargs)
-        return cv
+    try:
+        star = get_object_or_404(Star, id=pk)
+        star_model = get_object_or_404(StarModel, star=star)
+    except:
+        star_model = {}
+
+    return render_to_response('star_viewer.html', {'item': star_model, 'star': star}, RequestContext(request))
 
 
 def lookup_star_info(request, pk):

@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html lang="en">
 	<head>
-		<title>Star Viewer: {{ item.star }}</title>
+		<title>Star Viewer: {{ star }}</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 		<meta name="apple-mobile-web-app-capable" content="yes" />
@@ -35,12 +35,12 @@
 		</div>
 
 		<div id="details">
-			<span onclick="star_viewer.init_object_points(50,false,false);">50*</span>
+			Show: <span onclick="star_viewer.init_object_points(50,false,false);">50</span>
 			<span onclick="star_viewer.init_object_points(5000,false,false);">ALL</span>
 		</div>
 
 <script type="text/javascript">
-    var stars = {{ item.nearby_stars_json_force_recalc|safe }};
+    var stars = {{ item.nearby_stars_json|safe }}; //_force_recalc
 
     star_viewer.preloader();
 </script>

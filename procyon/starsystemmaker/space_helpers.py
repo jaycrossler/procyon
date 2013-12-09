@@ -2,6 +2,7 @@ from procyon.starsystemmaker.models import *
 from procyon.starsystemmaker.math_helpers import *
 import csv
 import re
+import numpy
 
 #This loads a list of info into memory, maybe should be a DB table instead?
 with open('procyon/fixtures/star_spectrums.csv', mode='rU') as infile:
@@ -57,3 +58,44 @@ def color_of_star(star_a, star_b, star_c):
 def color_by_spectrum(stellar):
     star_a, star_b, star_c = get_star_type(stellar)
     return color_of_star(star_a, star_b, star_c)
+
+
+def closest_stars(item, star_model, distance=10, goal_count=140):
+    origin = item.location
+    origin_array = numpy.array((origin.x, origin.y, origin.z))
+
+    close_by_stars = star_model.objects.filter(location__distance_lte=(origin, D(m=distance))).distance(origin).order_by('distance')
+
+    star_list = []
+    for s in close_by_stars:
+        location_array = numpy.array((s.location.x, s.location.y, s.location.z))
+
+        #NOTE: Because Django doesn't support ST_DWithin, use this to method to pull more than we want (everything within
+        #      x and y bounds, but too many within z bounds. Then, ignore those not within bounds mathematically
+        #      Should use this, but not supported: http://postgis.net/docs/ST_3DDWithin.html
+
+        dist = numpy.linalg.norm(origin_array - location_array)
+        if dist > distance:
+            continue
+
+        star_handle = dict()
+        if s == item:
+            star_handle['centered'] = True
+        star_handle['name'] = s.star.__unicode__()
+        star_handle['id'] = s.star.id
+        star_handle['web_color'] = s.star.web_color()
+        star_handle['x'] = s.location.x
+        star_handle['y'] = s.location.y
+        star_handle['z'] = s.location.z
+        star_handle['mass'] = s.guessed_mass or 0
+        star_handle['dist'] = dist
+        star_list.append(star_handle)
+
+    #NOTE: If not enough were found, expand the search distance
+    len_star_list = len(star_list)
+    if len_star_list < goal_count and distance < 40:
+        star_list = closest_stars(item, star_model, distance*2, goal_count)
+
+    star_list = sorted(star_list, key=lambda k: k['dist'])
+
+    return star_list

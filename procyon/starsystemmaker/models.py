@@ -98,38 +98,11 @@ class StarModel(models.Model):
         verbose_name_plural = 'Stars (Simulated)'
         ordering = ['star']
 
-    def nearby_stars(self, force_regenerate=False, num_results=200):
-        star_list = []
-
+    def nearby_stars(self, force_regenerate=False):
         if self.json_of_closest_stars and not force_regenerate:
             star_list = json.loads(self.json_of_closest_stars)
-
         else:
-            origin = self.location
-            distance = 5
-
-            #NOTE: HOT: TODO: This is not accurately returning the closest stars... not sure why
-            # It's returning stars within a "tube"... Tried:
-            #  - using a SRID of -1, 0, 1
-            #  - having all vals be /100 (in case there was some projection mapping issue)
-            #  - verifying that the DB SQL statements are accurately generating with Z values
-
-            close_by_stars = StarModel.objects.filter(location__distance_lte=(origin, D(m=distance))).distance(origin).order_by('distance')
-            num_close = len(close_by_stars) #NOTE: For debugging
-
-            for s in close_by_stars:
-                star_handle = dict()
-                if s == self:
-                    star_handle['centered'] = True
-                star_handle['name'] = s.star.__unicode__()
-                star_handle['id'] = s.star.id
-                star_handle['web_color'] = s.star.web_color()
-                star_handle['x'] = s.location.x
-                star_handle['y'] = s.location.y
-                star_handle['z'] = s.location.z
-                star_handle['mass'] = s.guessed_mass or 0
-                star_list.append(star_handle)
-
+            star_list = closest_stars(self, StarModel)
             self.json_of_closest_stars = json.dumps(star_list)
             self.save()
 
@@ -142,7 +115,6 @@ class StarModel(models.Model):
     def nearby_stars_json_force_recalc(self):
         self.nearby_stars(force_regenerate=True)
         return self.json_of_closest_stars
-
 
     additional_methods = ['nearby_stars', ]
 

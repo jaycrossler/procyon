@@ -60,15 +60,21 @@ CameraControlWASD = function ( camera, movement_speed, look_speed, nofly, look_v
 		var intersects = ray.intersectScene( star_viewer.scene, true );
 
 		return (intersects[ 0 ]) ? intersects[ 0 ] : null;
-	}
+	};
+
 
 	this.onDocumentMouseDown = function ( event ) {
 		event.preventDefault();
 		
 		var intersectClicked = this.objectAtScreenXY(event.clientX,event.clientY);
 		
-		if (intersectClicked) { 
-			objectWasClicked(intersectClicked);
+		if (intersectClicked) {
+            if (star_viewer.object_clicked == intersectClicked.object){
+                star_viewer.objectDoubleClicked(intersectClicked);
+            } else {
+                star_viewer.object_clicked = intersectClicked.object;
+    			star_viewer.objectWasClicked(intersectClicked);
+            }
 		} else {
 			star_viewer.div_info.innerHTML='';
 			//Object not clicked, handle move instead
@@ -423,12 +429,12 @@ CameraControlWASD = function ( camera, movement_speed, look_speed, nofly, look_v
 	};
 
 	this.move = function(type,length,message) {
-		star_viewer.div_info.innerHTML= (message) ? message : "";
+//		star_viewer.div_info.innerHTML= (message) ? message : "";
  		switch(type) {
 		case 'rot_right':	this.camera.position=this.rotateAroundPoint(  length,'y');break;
 		case 'rot_left':	this.camera.position=this.rotateAroundPoint(- length,'y');break;
-		case 'rot_forward':	this.camera.position=this.rotateAroundPoint(  length,'x');break;
-		case 'rot_back':	this.camera.position=this.rotateAroundPoint(- length,'x');break;
+		case 'rot_forward':	this.camera.position=this.rotateAroundPoint(  length*3,'x');break;
+		case 'rot_back':	this.camera.position=this.rotateAroundPoint(- length*3,'x');break;
 		case 'rot_up':		this.camera.position=this.rotateAroundPoint(  length,'z');break;
 		case 'rot_down':	this.camera.position=this.rotateAroundPoint(- length,'z');break;
 		case 'move_right':	this.camera.position.x-=length;break;  //TODO: Move perpendicular
