@@ -21,7 +21,6 @@ class StarType(models.Model):
     base_color = models.CharField(max_length=8, help_text="Basic RBG Color", default="#ffddbe", blank=True, null=True)
     mass_range = models.CharField(max_length=30, help_text="Mass Range compared to Sol", blank=True, null=True)
     radius_range = models.CharField(max_length=30, help_text="Radius Range compared to Sol", blank=True, null=True)
-    luminosity_range = models.CharField(max_length=30, help_text="Luminosity Range compared to Sol", blank=True, null=True)
     age = models.CharField(max_length=30, help_text="Approx Age in Millions of Years of a Type V star", blank=True, null=True, default="5300")
 
     def __unicode__(self):
@@ -50,7 +49,7 @@ class StarType(models.Model):
         return json.dumps(self.get_params(), ensure_ascii=True)
 
     class Meta:
-        verbose_name_plural = 'Types of Stars'
+        verbose_name_plural = 'Types of Star Categories'
 
 
 class Star(models.Model):
@@ -151,7 +150,7 @@ class Star(models.Model):
         return result
 
     def web_color(self):
-        star_a, star_b, star_c = get_star_type(self.spectrum)
+        star_a, star_b, star_c, star_d = get_star_type(self.spectrum)
         return color_of_star(star_a, star_b, star_c)
 
     additional_methods = ['known_planet_count', 'possibly_habitable', 'web_color', '__unicode__', 'known_planets', ]
@@ -254,3 +253,17 @@ class Planet(models.Model):
         ordering = ['name']
 
 
+class StarLuminosityType(models.Model):
+    symbol = models.CharField(max_length=5, help_text="Luminosity Class", default="III")
+    short_name = models.CharField(max_length=30, help_text="Short Name of class", blank=True, null=True)
+    mass_range = models.CharField(max_length=30, help_text="Mass Range in Solars (eg 4-9)", blank=True, null=True)
+    temp_range = models.CharField(max_length=30, help_text="Temperature Range in 3500 - 40000", blank=True, null=True)
+    magnitude_range = models.CharField(max_length=30, help_text="Abs Magnitude Range (eg -5 to -12)", blank=True, null=True)
+    radius_range = models.CharField(max_length=30, help_text="Radius Range in Solars (eg 1 to 5)", blank=True, null=True)
+
+    def __unicode__(self):
+        return '{0}: {1}'.format(self.symbol, self.short_name)
+
+    class Meta:
+        verbose_name_plural = 'Types of Star Luminosities'
+        ordering = ['symbol']

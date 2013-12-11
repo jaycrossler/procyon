@@ -1,0 +1,98 @@
+[
+{
+  "pk": 1, 
+  "model": "starcatalog.starluminositytype", 
+  "fields": {
+    "short_name": "Hypergiant", 
+    "symbol": "0", 
+    "mass_range": "40 - 60", 
+    "magnitude_range": "-19 - -7", 
+    "radius_range": "1000 - 1500", 
+    "temp_range": "8000"
+  }
+},
+{
+  "pk": 2, 
+  "model": "starcatalog.starluminositytype", 
+  "fields": {
+    "short_name": "Supergiant", 
+    "symbol": "I", 
+    "mass_range": "8 - 12", 
+    "magnitude_range": "-5 - -12", 
+    "radius_range": "30 - 1000", 
+    "temp_range": "3500 - 20000"
+  }
+},
+{
+  "pk": 3, 
+  "model": "starcatalog.starluminositytype", 
+  "fields": {
+    "short_name": "Bright giant", 
+    "symbol": "II", 
+    "mass_range": "6 - 12", 
+    "magnitude_range": "-3 - -5", 
+    "radius_range": "50 - 700", 
+    "temp_range": ""
+  }
+},
+{
+  "pk": 4, 
+  "model": "starcatalog.starluminositytype", 
+  "fields": {
+    "short_name": "Giant", 
+    "symbol": "III", 
+    "mass_range": ".25 - 12", 
+    "magnitude_range": "1 - -3", 
+    "radius_range": "100 - 300", 
+    "temp_range": ""
+  }
+},
+{
+  "pk": 5, 
+  "model": "starcatalog.starluminositytype", 
+  "fields": {
+    "short_name": "Subgiant", 
+    "symbol": "IV", 
+    "mass_range": "", 
+    "magnitude_range": "5 - 0", 
+    "radius_range": "", 
+    "temp_range": ""
+  }
+},
+{
+  "pk": 6, 
+  "model": "starcatalog.starluminositytype", 
+  "fields": {
+    "short_name": "Main Sequence Star", 
+    "symbol": "V", 
+    "mass_range": "", 
+    "magnitude_range": "", 
+    "radius_range": "", 
+    "temp_range": ""
+  }
+},
+{
+  "pk": 7, 
+  "model": "starcatalog.starluminositytype", 
+  "fields": {
+    "short_name": "Subdwarf", 
+    "symbol": "VI", 
+    "mass_range": "", 
+    "magnitude_range": "5-10", 
+    "radius_range": "", 
+    "temp_range": ""
+  }
+},
+{
+  "pk": 8, 
+  "model": "starcatalog.starluminositytype", 
+  "fields": {
+    "short_name": "White Dwarf", 
+    "symbol": "VII", 
+    "mass_range": ".17 - 1.33", 
+    "magnitude_range": "", 
+    "radius_range": "0.008 - 0.02", 
+    "temp_range": "8000 - 40000"
+  }
+}
+]

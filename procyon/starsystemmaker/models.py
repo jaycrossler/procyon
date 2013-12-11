@@ -3,7 +3,7 @@ from django.contrib.gis.measure import D
 from procyon.starsystemmaker.space_helpers import *
 
 from django.contrib.gis.db import models
-from procyon.starcatalog.models import Star, StarType
+from procyon.starcatalog.models import Star, StarType, StarLuminosityType
 import json
 
 class StarModel(models.Model):
@@ -11,20 +11,24 @@ class StarModel(models.Model):
     Additional data and simulated info about stars.
     Data needs to be generated using 'build_model' before being accessed
     """
+
     star = models.OneToOneField(Star, db_index=True, help_text="The star with real data", default=1)
     star_type = models.ForeignKey(StarType, help_text="Stellar Classification", blank=True, null=True)
+    luminosity_class = models.ForeignKey(StarLuminosityType, help_text="Luminosity Class (0-VII)", blank=True, null=True)
+    luminosity_mod = models.CharField(max_length=5, help_text="Luminosity sub class (a, ab, b, a-0", blank=True, null=True)
     base_color = models.CharField(max_length=8, help_text="Basic RBG Color", default="#ffddbe", blank=True, null=True)
 
     rand_seed = models.FloatField(help_text="Random Seed from 0-1 used to build notional system", blank=True, null=True, default=0)
     guessed_temp = models.FloatField(help_text="Guessed at Temperature", blank=True, null=True, default=0)
     guessed_mass = models.FloatField(help_text="Guessed at Mass", blank=True, null=True, default=0)
     guessed_radius = models.FloatField(help_text="Guessed at Radius", blank=True, null=True, default=0)
-    guessed_luminosity = models.FloatField(help_text="Guessed at Luminosity", blank=True, null=True, default=0)
     guessed_age = models.FloatField(help_text="Guessed at Age", blank=True, null=True, default=0)
 
     json_of_closest_stars = models.TextField(help_text="List of Stars, will be filled in automatically on first calculation", blank=True, null=True)
 
-    location = models.PointField(dim=3, blank=True, null=True, srid=900913)
+    ids_of_companion_stars = models.CharField(max_length=30, help_text="Comma-separated IDs of any stars within .3 LY", blank=True, null=True)
+
+    location = models.PointField(db_index=True, dim=3, blank=True, null=True, srid=900913)
     objects = models.GeoManager()
 
     def build_model(self, star_id=None, star_prime=None, forced=False):
@@ -40,9 +44,11 @@ class StarModel(models.Model):
         else:
             self.star = Star.objects.get(id=star_id)
         if self.star:
-            star_a, star_b, star_c = get_star_type(self.star.spectrum)
+            star_a, star_b, star_c, star_d = get_star_type(self.star.spectrum)
             self.add_type(star_a)
             self.add_color(star_a, star_b, star_c)
+            self.add_luminosity(star_c)
+            self.luminosity_mod = star_d
 
         self.add_rand_variables(forced)
 
@@ -62,14 +68,58 @@ class StarModel(models.Model):
             add_it = False
         if add_it:
             star_type = self.star_type
+
+            temp = 0
+            mass = 0
+            radius = 0
+            age = 0
+
+            np.random.seed(int(self.rand_seed*100000000))
             if star_type:
-                np.random.seed(int(self.rand_seed*100000000))
-                self.guessed_temp = rand_range_from_text(star_type.surface_temp_range)
-                self.guessed_mass = rand_range_from_text(star_type.mass_range)
-                self.guessed_radius = rand_range_from_text(star_type.radius_range)
-                self.guessed_luminosity = rand_range_from_text(star_type.luminosity_range)
-                self.guessed_age = rand_range_from_text(star_type.age)
-                self.save()
+                if star_type.surface_temp_range:
+                    temp = rand_range_from_text(star_type.surface_temp_range)
+                if star_type.mass_range:
+                    mass = rand_range_from_text(star_type.mass_range)
+                if star_type.radius_range:
+                    radius = rand_range_from_text(star_type.radius_range)
+                if star_type.age:
+                    age = rand_range_from_text(star_type.age)
+
+            star_l_type = self.luminosity_class
+            if star_l_type:
+                if star_l_type.temp_range:
+                    temp = rand_range_from_text(star_l_type.temp_range)
+                if star_l_type.mass_range:
+                    mass = (mass or 1) * rand_range_from_text(star_l_type.mass_range)
+                if star_l_type.radius_range:
+                    radius = rand_range_from_text(star_l_type.radius_range)
+
+            star_l_mod = self.luminosity_mod
+            if star_l_mod and mass:
+                if star_l_mod == 'a-0':
+                    mass *= 15
+                if star_l_mod == 'a':
+                    mass *= 5
+                if star_l_mod == 'ab':
+                    mass *= 3
+                if star_l_mod == 'b':
+                    mass *= 1
+
+            self.guessed_temp = temp
+            self.guessed_mass = mass
+            self.guessed_radius = radius
+            self.guessed_age = age
+            self.save()
+            #TODO: Change to take in lambda and return lamda of variables so can be used in web form
+
+    def add_luminosity(self, star_c):
+        result = "ok"
+        try:
+            star_type = StarLuminosityType.objects.get(symbol=star_c)
+            self.luminosity_class = star_type
+        except StarLuminosityType.DoesNotExist:
+            result = "unknown"
+        return result
 
     def add_type(self, star_a):
         result = "ok"

@@ -9,8 +9,8 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 setup(
     name="procyon",
     packages=['procyon'],
-    version='0.0.0.2',
-    url="",
+    version='0.0.0.3',
+    url="http://thestarsbetween.com/",
     author="Jay Crossler",
     author_email="jay.crossler@gmail.com"
 )
@@ -35,6 +35,7 @@ def install_dev_fixtures():
         'procyon/fixtures/star_type.json',
         'procyon/fixtures/starcatalog.planet.json',
         'procyon/fixtures/starcatalog.starpossiblyhabitable.json',
+        'procyon/fixtures/starcatalog.starluminositytype.json',
     ]
 
     for fixture in fixtures:

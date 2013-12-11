@@ -20,6 +20,12 @@ class StarTypeAdmin(admin.ModelAdmin):
     list_display = ['symbol', 'name', 'base_color', 'mass_range', ]
 
 
+class StarLuminosityTypeAdmin(admin.ModelAdmin):
+    model = StarLuminosityType
+    list_display = ['symbol', 'short_name', ]
+
+
 admin.site.register(Star, StarAdmin)
-admin.site.register(StarType, StarTypeAdmin)
 admin.site.register(Planet, PlanetAdmin)
+admin.site.register(StarType, StarTypeAdmin)
+admin.site.register(StarLuminosityType, StarLuminosityTypeAdmin)

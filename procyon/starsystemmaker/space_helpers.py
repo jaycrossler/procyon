@@ -11,21 +11,22 @@ with open('procyon/fixtures/star_spectrums.csv', mode='rU') as infile:
 
 
 def get_star_type(stellar):
-    star_a, star_b, star_c = "", "", ""
+    star_a, star_b, star_c, star_d = "", "", "", ""
     if not stellar or len(stellar) < 1:
-        return star_a, star_b, star_c
+        return star_a, star_b, star_c, star_d
 
     stellar = stellar.lstrip('esd')
 
-    parts = re.findall(r'(\w)([-+]?[0-9]*\.?[0-9]*)[ ]*([IV]*)', stellar)
+    parts = re.findall(r'(\w)([-+]?[0-9]*\.?[0-9]*)[ ]*([IV]*)([a]?[b]?(\-0)?)', stellar)
     if parts and len(parts) > 0 and len(parts[0]) > 0:
         star_a = parts[0][0] or ""
         star_a = star_a.upper()
         star_b = parts[0][1] or 4
         star_b = parse_num(star_b, True)
         star_c = parts[0][2] or ""
+        star_d = parts[0][3] or ""
 
-    return star_a, star_b, star_c
+    return star_a, star_b, star_c, star_d
 
 
 def color_of_star(star_a, star_b, star_c):

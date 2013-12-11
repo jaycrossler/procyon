@@ -23,8 +23,8 @@ make_randomized.short_description = "Randomize variables of selected stars based
 
 
 def blank_all_starmodels(modeladmin, request, queryset):
-    StarModel.objects.all().update(json_of_closest_stars='', guessed_age=0, guessed_luminosity=0,
-                                   guessed_temp=0, guessed_mass=0, guessed_radius=0, rand_seed=0)
+    StarModel.objects.all().update(json_of_closest_stars='', guessed_age=0, guessed_temp=0, guessed_mass=0,
+                                   guessed_radius=0, rand_seed=0)
 blank_all_starmodels.short_description = "(select one, but) Delete ALL simulated data from ALL star models"
 
 
@@ -39,11 +39,19 @@ view_star_as_json.short_description = "View star JSON info"
 class StarModelAdmin(admin.ModelAdmin):
     #TODO: Editing doesn't work when saving from admin menu
     model = StarModel
-    list_display = ['id', 'real_star_id', 'star', 'star_type', 'base_color', 'star_type_name', 'mass_in_sol', 'radius_in_sol', 'age_in_my']
-    exclude = ['star', ]
+    list_display = ['id', 'real_star_id', 'star', 'star_schema', 'star_type', 'luminosity_class', 'base_color', 'mass_in_sol', 'radius_in_sol', 'age_in_my']
+    exclude = ['star', 'location']
     search_fields = ['id', ]
-    list_filter = ['star_type', ]
+    list_filter = ['star_type', 'luminosity_class']
     actions = [make_initialized, make_randomized, view_star_as_json, blank_all_starmodels]
+
+    def star_schema(self, obj):
+        spectrum = obj.star
+        if spectrum and spectrum.spectrum:
+            output = spectrum.spectrum
+        else:
+            output = "Unknown"
+        return output
 
     def star_type_name(self, obj):
         star_type = obj.star_type
