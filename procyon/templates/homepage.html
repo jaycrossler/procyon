@@ -17,22 +17,26 @@
     <h1>{% trans "Welcome to " %}Procyon</h1>
     <p>
         {% blocktrans %}
-        <b>Procyon</b> is a tool for listing known stars and planets and making the data more discoverable.
+        <b>Procyon</b> is a tool for listing known stars and planets and making the data more discoverable. Data can either be browsed here, or consumed as JSON to be used in other applications (like video games).<p/>
+
+        All the source code for <b>Procyon</b> is open source under the <a href="http://opensource.org/licenses/MIT" target="_blank">MIT license</a>, and is available for <a href="https://github.com/jaycrossler/procyon" target="_blank">browsing/download on Github</a>. <p>
+
+        If you have improvements, please contribute!  You can also use <a href="https://github.com/jaycrossler/procyon-chef-repo" target="_blank">vagrant and chef to completely build and host</a> your own Procyon server.
         {% endblocktrans %}
     </p>
     
-    <h2>Options</h2>
+    <h2>Things you can do</h2>
     <p>
         <ul>
             <li><a href="{% url 'star-list' %}">{% trans "Search Known Stars"%}</a></li>
-            <li><a href="admin/starcatalog/planet">{% trans "Search Known Planets" %}</a></li>
-
+            <li><a href="{% url 'maker-star-system-builder' %}">{% trans "Star System Builder"%}</a></li>
+            <li><a href="{% url 'maker-star-info' 27919 %}">{% trans "JSON of a star (with simulated details and nearest locs)"%}</a></li>
+            <li><a href="{% url 'maker-star-viewer' 27919 %}">{% trans "HTML5 Nearby star viewer"%}</a></li>
         </ul>
     </p>
     
     {% if user.is_authenticated %}
-        {% url "what_next" as what_next_url %}
-        <p class="what_next">{% blocktrans %}Wondering <a href="{{ what_next_url }}" class="btn primary large">What Next</a>?{% endblocktrans %}</p>
+            Authenticated users can also <a href="admin/starcatalog/planet">{% trans "Search Known Planets" %}</a></li>
     {% else %}
         {% url "account_login" as login_url %}
         {% url "account_signup" as signup_url %}

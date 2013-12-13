@@ -208,9 +208,9 @@ star_viewer.init_object_points=function(show_amount, isRedder) {
             if (star_viewer.star_scale_mode == 'mag') scale = star_viewer.size_based_on_mag(obj.mag);
             if (star_viewer.star_scale_mode == 'abs_mag') scale = star_viewer.size_based_on_mag(obj.abs_mag, true);
 
-            if (i<5){
-                console.log (obj.name +": scale: "+scale + " mag:"+obj.mag + " abs_mag:"+obj.abs_mag);
-            }
+//            if (i<5){
+//                console.log (obj.name +": scale: "+scale + " mag:"+obj.mag + " abs_mag:"+obj.abs_mag);
+//            }
 
             var location = {x:obj.x, y:obj.y, z:obj.z};
             if (star_viewer.central_sun && star_viewer.central_sun.x) {
@@ -252,7 +252,7 @@ star_viewer.size_based_on_mag=function(mag, use_abs){
         var max = use_abs ? -5 : 0;
         var min_scale = star_viewer.star_scale_default /star_viewer.star_scale_multiplier_max;
         var max_scale = star_viewer.star_scale_default * star_viewer.star_scale_multiplier_max;
-        scale = star_viewer.mlerp(min,max,mag,min_scale,max_scale);
+        scale = helpers.mlerp(min,max,mag,min_scale,max_scale);
     }
     return scale;
 };
@@ -333,7 +333,7 @@ star_viewer.objectWasClicked=function(intersectClicked) {
         var colorstar = new THREE.Color( color );
         doctab.style.backgroundColor = colorstar.rgbaString;
 
-        var dist = star_viewer.round(closest[i].dist * 3.26163344,1);
+        var dist = helpers.round(closest[i].dist * 3.26163344,1);
 
         doctab.innerHTML = "<nobr>"+i+": "+star.name+"</nobr><br/>"
         doctab.innerHTML+= "ID: "+star.id+ ", "+ dist +" LYs away";
@@ -402,22 +402,9 @@ star_viewer.init_stats=function() {
     star_viewer.stats.domElement.style.top = '0px';
     star_viewer.container.appendChild( star_viewer.stats.domElement );
 };
-
-star_viewer.queryString=function(q) {
-    hu = window.location.search.substring(1);
-    gy = hu.split("&");
-    var result = null;
-    for (i=0;i<gy.length;i++) {
-        ft = gy[i].split("=");
-        if (ft[0] == q) {
-            result = ft[1]; break;
-        }
-    }
-    return result;
-};
 star_viewer.init_renderer=function() {
     star_viewer.renderer_created = false;
-    var requested_renderer = star_viewer.queryString("renderer");
+    var requested_renderer = helpers.queryString("renderer");
     if (!requested_renderer) requested_renderer="canvas";
     try {
         switch(requested_renderer) {
@@ -484,37 +471,4 @@ star_viewer.info=function(){
 
         console.log(star.x+' '+star.y+' '+star.z+' : '+dist);
     }
-};
-
-star_viewer.lerp = function(in_min, in_max, in_percent) {
-    return in_min + in_percent * (in_max - in_min);
-};
-star_viewer.mlerp = function(in_min, in_max, in_amount, out_min, out_max) {
-    var reverse = (in_min > in_max);
-    if (reverse) {
-        var in_temp = in_min;
-        in_min = in_max;
-        in_max = in_temp;
-    }
-    in_amount = star_viewer.clamp(in_amount,in_min,in_max);
-
-    var in_percent = (in_amount - in_min) / (in_max - in_min);
-    if (reverse) in_percent = 1-in_percent;
-
-
-    return star_viewer.lerp(out_min, out_max, in_percent);
-};
-star_viewer.clamp = function(value, min, max) {
-  return Math.min(Math.max(value, min), max);
-};
-star_viewer.round=function(num,digits){
-    var pow = Math.pow(10,digits || 2);
-    num = parseInt(num * pow) / pow;
-    if (num && num > 1000) {
-        num = star_viewer.numberWithCommas(parseInt(num))
-    }
-    return num;
-};
-star_viewer.numberWithCommas=function(x) {
-  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };

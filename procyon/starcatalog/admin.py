@@ -5,7 +5,7 @@ from procyon.starcatalog.models import *
 
 class StarAdmin(admin.ModelAdmin):
     model = Star
-    list_display = ['id', 'proper_name', 'gliese', 'HIP', 'HD', 'distance_ly', 'known_planet_count', 'possibly_habitable', 'spectrum', 'web_color', ]
+    list_display = ['id', 'proper_name', 'gliese', 'HIP', 'HD', 'distance_ly', 'known_planet_count', 'possibly_habitable', 'spectrum', ]
     search_fields = ['gliese', 'HIP', 'HD', 'proper_name', ]
 
 

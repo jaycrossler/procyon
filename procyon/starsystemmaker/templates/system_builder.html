@@ -1,0 +1,88 @@
+{% extends "banner_base.html" %}
+
+{% load i18n bootstrap_pagination %}
+{% load url from future %}
+
+{% block head_title_base %}Procyon - System Builder{% endblock %}
+
+{% block head_title %}{% trans "System Builder" %}{% endblock %}
+
+{% block body_class %}home{% endblock %}
+
+{% block extra_style %}
+<link rel="stylesheet" href="{{STATIC_URL}}css/front_page.css">
+<link rel="stylesheet" href="{{STATIC_URL}}css/star_list.css">
+<style>
+    label {
+        width:120px
+    }
+    input, textarea, .uneditable-input {
+        width: 150px;
+    }
+    .span6 {
+        background-color: #eeeeee;
+        padding: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block extra_script %}
+<script type="text/javascript" src="{{STATIC_URL}}js/underscore-min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/underscore.string.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/system_builder.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/helpers.js"></script>
+<script language="JavaScript">
+    $().ready(function(){
+        var settings = {{ settings|safe }};
+        system_builder.init(settings);
+
+    });
+</script>
+
+{% endblock %}
+
+
+{% block banner %}
+
+    <h2>Star System Builder</h2>
+    <div class="row">
+        <div class="span5">
+            <form class="form-inline">
+                <label>Random Seed</label><input type="text" id="rand" name="rand"><br/>
+                <label>Stellar Class</label><input type="text" id="stellar" name="stellar"><br/>
+                <label>Temperature</label><input type="text" id="temp" name="temp"><br/>
+                <label>Masses (Solars)</label><input type="text" id="mass" name="mass"><br/>
+                <label>Radius (Solars)</label><input type="text" id="radius" name="radius"><br/>
+                <label>Millions of Years</label><input type="text" id="age" name="age"><br/>
+                <label>Star Color</label><input type="text" id="color" name="color" disabled="true"><br/>
+                <hr/>
+                <label># of Planets</label><input type="text" id="planets" name="planets"><br/>
+
+
+                <input class="btn" type="submit" value="Build">
+                <input class="btn" value="Randomize" id="randomize">
+            </form>
+        </div>
+
+
+        <div class="span5">
+            <span id="data_display">
+                <table id="data_holder"></table>
+            </span>
+            <span id="data_details"></span>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+
+{% block column-1 %}
+{% endblock %}
+
+{% block column-2 %}
+{% endblock %}
+
+{% block column-3 %}
+{% endblock %}
+

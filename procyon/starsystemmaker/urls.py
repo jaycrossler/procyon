@@ -12,6 +12,7 @@ urlpatterns = patterns('',
     url(r'^rerandomize/(?P<pk>\d+)$', create_star_extended_data_rerandomize, name='maker-star-build-reset-rand' ),
     url(r'^initialize/(?P<pk>\d+)$', create_star_extended_data, name='maker-star-build' ),
     url(r'^star/(?P<pk>\d+)$', lookup_star_info_prime, name='maker-star-info' ),
-    url(r'^star/created/(?P<pk>\d+)$', lookup_star_info, name='maker-star-info-createdid' ),
+    url(r'^star/created/(?P<pk>\d+)$', lookup_star_info, name='maker-star-info-created' ),
     url(r'^viewer/(?P<pk>\d+)$', star_viewer, name='maker-star-viewer' ),
+    url(r'^builder$', system_builder, name='maker-star-system-builder' ),
     )

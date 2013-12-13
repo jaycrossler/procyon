@@ -19,7 +19,7 @@ star_list.buildTable=function(items){
         }},
         {sTitle: 'Spectrum', mData:'spectrum', sDefaultContent:""},
         {sTitle: 'LY', mData:function(data){
-            return star_list.parsecs_to_ly(data.distance_parsecs);
+            return helpers.parsecs_to_ly(data.distance_parsecs);
         }, sDefaultContent:""}
         ,{sTitle: 'Planets', mData:'known_planet_count', sDefaultContent:""}
     ];
@@ -61,9 +61,9 @@ star_list.showDetails=function(item){
     var text = "";
     $.ajax('/maker/star/'+item.id)
         .success(function(data){
-            text=""
-            if (data.guessed_age && data.guessed_age!="None") text+="<b>Age</b>: "+star_list.round(data.guessed_age)+" Million years old</br>";
-            if (data.guessed_mass && data.guessed_mass!="None") text+="<b>Solar Masses</b>: "+star_list.round(data.guessed_mass)+"</br>";
+            text="";
+            if (data.guessed_age && data.guessed_age!="None") text+="<b>Age</b>: "+helpers.round(data.guessed_age)+" Million years old</br>";
+            if (data.guessed_mass && data.guessed_mass!="None") text+="<b>Solar Masses</b>: "+helpers.round(data.guessed_mass)+"</br>";
             if (text){
                 $('<p>')
                     .html("<b><i>Simulated Data</i></b><br/>"+text)
@@ -118,7 +118,7 @@ star_list.showDetails=function(item){
     }
 
     if (item.distance_parsecs){
-        text = star_list.distance_from_parsecs_to_text(item.distance_parsecs,3);
+        text = helpers.distance_from_parsecs_to_text(item.distance_parsecs,3);
         $('<p>')
             .html("<b><i>Distance</i></b>:<br>"+text)
             .addClass('small')
@@ -138,8 +138,8 @@ star_list.showDetails=function(item){
         _.each(item.known_planets,function(planet){
             text+="<b>"+planet.name+"</b>: ";
 //            if (planet.other_name) text+="("+planet.other_name+") ";
-            if (planet.radius && planet.radius!="None") text+="Radius: "+star_list.round(planet.radius,1);
-            if (planet.mass && planet.mass!="None") text+="Mass: "+star_list.round(planet.mass,2);
+            if (planet.radius && planet.radius!="None") text+="Radius: "+helpers.round(planet.radius,1);
+            if (planet.mass && planet.mass!="None") text+="Mass: "+helpers.round(planet.mass,2);
             text+="<br/>";
         });
         $('<p>')
@@ -149,62 +149,3 @@ star_list.showDetails=function(item){
     }
 
 };
-star_list.round=function(num,digits){
-    var pow = Math.pow(10,digits || 2);
-    var num = parseInt(num * pow) / pow;
-    if (num && num > 1000) {
-        num = star_list.numberWithCommas(parseInt(num))
-    }
-    return num;
-};
-star_list.parsecs_to_ly=function(parsecs){
-    return star_list.round(parsecs * 3.26163344,2);
-};
-star_list.distance_from_parsecs_to_text=function(parsecs,numItems){
-    var speeds = [];
-    numItems = numItems || 3;
-    var distances = 'parsecs ly atlas horizons pioneer serenity falcon galactica warp2 warp5 warp99'.split(" ");
-    $.each(distances,function(i,distance_name){
-        speeds[i] = star_list.parsecs_to(parsecs,distance_name);
-    });
-
-    var speedlist = _.sample(speeds, numItems);
-    return speedlist.join("<br/>\n");
-
-};
-star_list.parsecs_to=function(parsecs, distance_name, hideTitle){
-    //parsec = 3.08567758 × 10^13 km / year
-    // 36000 km/h = 315567360 km/yr
-    // 3.08567758 x 10^13 / (36000 * 24 * 365.24)
-    // 1 AU = 149,597,870.7 km
-    // 1 LY = 9.4605284 × 10^12 km
-    // 16 d / 1 AU =  9349866.91875 km / day
-
-    var distance_db = [
-        {name:'parsecs',title:"Parsecs", mult:1, suffix:""},
-        {name:'ly',title:"Light Speed", mult:3.26163344, suffix:"years"},
-        {name:'atlas',title:"Atlas V Rocket", mult:97781.899, suffix:"years"}, //3.08567758 x 10^13 / (36000 * 24 * 365.24)
-        {name:'horizons',title:"New Horizons", mult:61113.687, suffix:"years"},
-        {name:'pioneer',title:"Pioneer 10", mult:63540.584, suffix:"years"},
-        {name:'serenity',title:"Serenity", mult:9035.8, suffix:"years"}, // 16 d / 1 AU =  9349866.91875 km / day
-        {name:'falcon',title:"Millenium Falcon", mult:0.5436, suffix:"hours"}, //(3.08567758 × 10^13) / ((4.2 * 9.4605284 X 10^12) / (42/60) * 365.24)
-        {name:'galactica',title:"Battlestar Gallactica", mult:0.2042066, suffix:"jumps", roundUp:true}, //3.08567758 × 10^13 / (4600 * (9.4605284 × 10^12) * 365.24) * 365.24 * 24 * 12
-        {name:'warp2',title:"Enterprise Warp 2", mult:119.127899803, suffix:"days"},
-        {name:'warp5',title:"Enterprise Warp 5", mult:5.56672428986, suffix:"days"}, // (3.08567758 × 10^13) / (214 * 9.4605284 × 10^12) * 365.24
-        {name:'warp99',title:"Enterprise Warp 9.9", mult:0.39019947528, suffix:"days"} // (3.08567758 × 10^13) / (3053 * 9.4605284 × 10^12) * 365.24
-    ];
-    var result = _.find(distance_db,function(item){return item.name==distance_name});
-    var output = "";
-    if (result){
-        var title = hideTitle?"":("<b>"+result.title+"</b>: ");
-        var suffix = result.suffix?(" "+result.suffix):"";
-        var val = result.roundUp? parseInt(parsecs*result.mult) : star_list.round(parsecs * result.mult,1);
-        if (val==1 && suffix) suffix=suffix.replace(/s$/,"");
-
-        output = title + val + suffix;
-    }
-    return output;
-};
-star_list.numberWithCommas=function(x) {
-  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}

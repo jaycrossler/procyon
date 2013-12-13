@@ -1,5 +1,6 @@
 from procyon.starsystemmaker.models import *
 from procyon.starsystemmaker.math_helpers import *
+from procyon.starcatalog.models import StarType, StarLuminosityType
 import csv
 import re
 import numpy
@@ -57,7 +58,7 @@ def color_of_star(star_a, star_b, star_c):
 
 
 def color_by_spectrum(stellar):
-    star_a, star_b, star_c = get_star_type(stellar)
+    star_a, star_b, star_c, star_d = get_star_type(stellar)
     return color_of_star(star_a, star_b, star_c)
 
 
@@ -65,14 +66,15 @@ def closest_stars(item, star_model, distance=10, goal_count=140):
     origin = item.location
     origin_array = numpy.array((origin.x, origin.y, origin.z))
 
-    close_by_stars = star_model.objects.filter(location__distance_lte=(origin, D(m=distance))).distance(origin).order_by('distance')
+    close_by_stars = star_model.objects.filter(location__distance_lte=(origin, D(m=distance))).distance(origin)
+    close_by_stars = close_by_stars.order_by('distance')
 
     star_list = []
     for s in close_by_stars:
         location_array = numpy.array((s.location.x, s.location.y, s.location.z))
 
-        #NOTE: Because Django doesn't support ST_DWithin, use this to method to pull more than we want (everything within
-        #      x and y bounds, but too many within z bounds. Then, ignore those not within bounds mathematically
+        #NOTE: Because Django doesn't support ST_DWithin, use this to method to pull more than we want (everything
+        #      within x and y bounds, but too many within z bounds. Then, ignore those not within bounds mathematically
         #      Should use this, but not supported: http://postgis.net/docs/ST_3DDWithin.html
 
         dist = numpy.linalg.norm(origin_array - location_array)
@@ -84,7 +86,8 @@ def closest_stars(item, star_model, distance=10, goal_count=140):
             star_handle['centered'] = True
         star_handle['name'] = s.star.__unicode__()
         star_handle['id'] = s.star.id
-        star_handle['web_color'] = s.star.web_color()
+        star_handle['spectrum'] = s.star.spectrum
+        star_handle['web_color'] = color_by_spectrum(s.star.spectrum)
         star_handle['x'] = s.location.x
         star_handle['y'] = s.location.y
         star_handle['z'] = s.location.z
@@ -102,3 +105,103 @@ def closest_stars(item, star_model, distance=10, goal_count=140):
     star_list = sorted(star_list, key=lambda k: k['dist'])
 
     return star_list
+
+
+def star_variables(options={}):
+
+    rand_seed = options.get('rand_seed', numpy.random.random())
+    try:
+        rand_seed = float(rand_seed)
+    except Exception as e:
+        rand_seed = numpy.random.random()
+    rand_seed_num = rand_seed
+    if rand_seed < 1:
+        rand_seed_num = rand_seed * 100000000
+    rand_seed_num = int(rand_seed_num)
+    np.random.seed(rand_seed_num)
+
+    try:
+        forced_temp = float(options.get('temp'))
+    except Exception:
+        forced_temp = 0
+    try:
+        forced_mass = float(options.get('mass'))
+    except Exception:
+        forced_mass = 0
+    try:
+        forced_radius = float(options.get('radius'))
+    except Exception:
+        forced_radius = 0
+    try:
+        forced_age = float(options.get('age'))
+    except Exception:
+        forced_age = 0
+
+    temp = 0
+    mass = 0
+    radius = 0
+    age = 0
+    stellar = str(options.get('stellar', 'M3V'))
+
+    star_type = options.get('star_type', None)
+    star_l_type = options.get('luminosity_class', None)
+    star_l_mod = options.get('luminosity_mod', None)
+    star_color = ''
+
+    if stellar and not star_type and not star_l_type and not star_l_mod:
+        star_a, star_b, star_c, star_d = get_star_type(stellar)
+        try:
+            star_type = StarType.objects.get(symbol=star_a)
+        except Exception:
+            star_type = StarType.objects.get(symbol='M')
+        star_color = color_of_star(star_a, star_b, star_c)
+        try:
+            star_l_type = StarLuminosityType.objects.get(symbol=star_c)
+        except Exception:
+            star_l_type = None
+        star_l_mod = star_d
+
+    star_type_name = ''
+    if star_type:
+        if star_type.surface_temp_range:
+            temp = rand_range_from_text(star_type.surface_temp_range)
+        if star_type.mass_range:
+            mass = rand_range_from_text(star_type.mass_range)
+        if star_type.radius_range:
+            radius = rand_range_from_text(star_type.radius_range)
+        if star_type.age:
+            age = rand_range_from_text(star_type.age)
+        star_type_name = str(star_type.name)
+
+    star_l_type_name = ''
+    if star_l_type:
+        if star_l_type.temp_range:
+            temp = rand_range_from_text(star_l_type.temp_range)
+        if star_l_type.mass_range:
+            mass = (mass or 1) * rand_range_from_text(star_l_type.mass_range)
+        if star_l_type.radius_range:
+            radius = rand_range_from_text(star_l_type.radius_range)
+        star_l_type_name = str(star_l_type.short_name)
+
+    if star_l_mod and mass:
+        if star_l_mod == 'a-0':
+            mass *= 15
+        if star_l_mod == 'a':
+            mass *= 5
+        if star_l_mod == 'ab':
+            mass *= 3
+        if star_l_mod == 'b':
+            mass *= 1
+
+    if forced_mass:
+        mass = forced_mass
+    if forced_temp:
+        temp = forced_temp
+    if forced_radius:
+        radius = forced_radius
+    if forced_age:
+        age = forced_age
+
+    return {'temp': temp, 'mass': mass, 'radius': radius, 'age': age, 'color': star_color,
+            'rand': rand_seed_num, 'stellar': stellar, 'star_type_name': star_type_name,
+            'luminosity_class': star_l_type_name, 'luminosity_mod': star_l_mod}

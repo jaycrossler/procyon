@@ -67,50 +67,17 @@ class StarModel(models.Model):
         if not forced and self.guessed_temp:
             add_it = False
         if add_it:
-            star_type = self.star_type
+            options = {'rand_seed': self.rand_seed, 'star_type': self.star_type,
+                       'temp': 0, 'mass': 0, 'age': 0, 'radius': 0,
+                       'luminosity_class': self.luminosity_class, 'luminosity_mod': self.luminosity_mod}
 
-            temp = 0
-            mass = 0
-            radius = 0
-            age = 0
+            settings = star_variables(options)
 
-            np.random.seed(int(self.rand_seed*100000000))
-            if star_type:
-                if star_type.surface_temp_range:
-                    temp = rand_range_from_text(star_type.surface_temp_range)
-                if star_type.mass_range:
-                    mass = rand_range_from_text(star_type.mass_range)
-                if star_type.radius_range:
-                    radius = rand_range_from_text(star_type.radius_range)
-                if star_type.age:
-                    age = rand_range_from_text(star_type.age)
-
-            star_l_type = self.luminosity_class
-            if star_l_type:
-                if star_l_type.temp_range:
-                    temp = rand_range_from_text(star_l_type.temp_range)
-                if star_l_type.mass_range:
-                    mass = (mass or 1) * rand_range_from_text(star_l_type.mass_range)
-                if star_l_type.radius_range:
-                    radius = rand_range_from_text(star_l_type.radius_range)
-
-            star_l_mod = self.luminosity_mod
-            if star_l_mod and mass:
-                if star_l_mod == 'a-0':
-                    mass *= 15
-                if star_l_mod == 'a':
-                    mass *= 5
-                if star_l_mod == 'ab':
-                    mass *= 3
-                if star_l_mod == 'b':
-                    mass *= 1
-
-            self.guessed_temp = temp
-            self.guessed_mass = mass
-            self.guessed_radius = radius
-            self.guessed_age = age
+            self.guessed_temp = settings.get('temp', 0)
+            self.guessed_mass = settings.get('mass', 0)
+            self.guessed_radius = settings.get('radius', 0)
+            self.guessed_age = settings.get('age', 0)
             self.save()
-            #TODO: Change to take in lambda and return lamda of variables so can be used in web form
 
     def add_luminosity(self, star_c):
         result = "ok"

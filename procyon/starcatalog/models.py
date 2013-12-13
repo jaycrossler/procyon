@@ -149,11 +149,7 @@ class Star(models.Model):
             result = StarPossiblyHabitable.objects.filter(HIP=self.HIP).exists()
         return result
 
-    def web_color(self):
-        star_a, star_b, star_c, star_d = get_star_type(self.spectrum)
-        return color_of_star(star_a, star_b, star_c)
-
-    additional_methods = ['known_planet_count', 'possibly_habitable', 'web_color', '__unicode__', 'known_planets', ]
+    additional_methods = ['known_planet_count', 'possibly_habitable', '__unicode__', 'known_planets', ]
 
     def get_params(self, requested_methods=None, only_variables=None):
         """

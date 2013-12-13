@@ -115,3 +115,24 @@ def lookup_star_info_prime(request, pk):
         output = '{0}({1});'.format(callback, output)
 
     return HttpResponse(output, content_type="application/json")
+
+
+def system_builder(request):
+    """
+    View used for designing a star system.
+    """
+    rand = request.GET.get('rand')
+    stellar = request.GET.get('stellar')
+    temp = request.GET.get('temp')
+    mass = request.GET.get('mass')
+    radius = request.GET.get('radius')
+    age = request.GET.get('age')
+    planets = request.GET.get('planets')
+
+    options = {'rand_seed': rand, 'stellar': stellar, 'temp': temp, 'mass': mass, 'radius': radius, 'age': age, 'planets': planets}
+    settings = star_variables(options)
+    settings = json.dumps(settings, ensure_ascii=True)
+
+    return render_to_response('system_builder.html', {'settings': settings}, RequestContext(request))
+
+
