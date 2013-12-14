@@ -54,6 +54,8 @@ def color_of_star(star_a, star_b, star_c):
             if key.startswith(cleaned):
                 color = STAR_DICT.get(key)
                 break
+    if color == "":
+        color = "#ffc676"
     return color
 
 
@@ -109,33 +111,13 @@ def closest_stars(item, star_model, distance=10, goal_count=140):
 
 def star_variables(options={}):
 
-    rand_seed = options.get('rand_seed', numpy.random.random())
-    try:
-        rand_seed = float(rand_seed)
-    except Exception as e:
-        rand_seed = numpy.random.random()
-    rand_seed_num = rand_seed
-    if rand_seed < 1:
-        rand_seed_num = rand_seed * 100000000
-    rand_seed_num = int(rand_seed_num)
-    np.random.seed(rand_seed_num)
+    rand_seed = get_float_from_hash(options, 'rand_seed', numpy.random.random())
+    rand_seed_num = set_rand_seed(rand_seed)
 
-    try:
-        forced_temp = float(options.get('temp'))
-    except Exception:
-        forced_temp = 0
-    try:
-        forced_mass = float(options.get('mass'))
-    except Exception:
-        forced_mass = 0
-    try:
-        forced_radius = float(options.get('radius'))
-    except Exception:
-        forced_radius = 0
-    try:
-        forced_age = float(options.get('age'))
-    except Exception:
-        forced_age = 0
+    forced_temp = get_float_from_hash(options, 'temp', 0)
+    forced_mass = get_float_from_hash(options, 'mass', 0)
+    forced_radius = get_float_from_hash(options, 'radius', 0)
+    forced_age = get_float_from_hash(options, 'age', 0)
 
     temp = 0
     mass = 0
@@ -176,11 +158,11 @@ def star_variables(options={}):
     star_l_type_name = ''
     if star_l_type:
         if star_l_type.temp_range:
-            temp = rand_range_from_text(star_l_type.temp_range)
+            temp = average_numbers_clamped(temp, rand_range_from_text(star_l_type.temp_range))
         if star_l_type.mass_range:
             mass = (mass or 1) * rand_range_from_text(star_l_type.mass_range)
         if star_l_type.radius_range:
-            radius = rand_range_from_text(star_l_type.radius_range)
+            radius = average_numbers_clamped(radius, rand_range_from_text(star_l_type.radius_range))
         star_l_type_name = str(star_l_type.short_name)
 
     if star_l_mod and mass:
@@ -192,6 +174,8 @@ def star_variables(options={}):
             mass *= 3
         if star_l_mod == 'b':
             mass *= 1
+
+    age = bigger_makes_smaller(mass=mass, mass_min=0, mass_max=10, age=age, age_min=1, age_max=11000, tries_to_adjust=2)
 
     if forced_mass:
         mass = forced_mass
@@ -205,3 +189,4 @@ def star_variables(options={}):
     return {'temp': temp, 'mass': mass, 'radius': radius, 'age': age, 'color': star_color,
             'rand': rand_seed_num, 'stellar': stellar, 'star_type_name': star_type_name,
             'luminosity_class': star_l_type_name, 'luminosity_mod': star_l_mod}
+

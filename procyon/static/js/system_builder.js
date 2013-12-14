@@ -12,16 +12,17 @@ system_builder.init= function(settings){
 
 };
 system_builder.randomStellarClass=function(){
-    var spectrum = _.sample('DYTLSCMKGFABMKMKMKGFAB'.split('')) + _.sample('1234567234563455'.split(''));
+    var spectrum = _.sample('DYTLSCMKGOFABMKMKMMKGFAB'.split('')) + _.sample('123456789234563455              '.split(''));
     if (Math.random()<0.4){
         spectrum += helpers.romanize(_.random(1,6)) + _.sample('ab     '.split(''));
     }
+    spectrum = spectrum.replace(" ","");
     return spectrum;
 };
 system_builder.setupStartingVars=function(settings){
     var userVars = 'rand, stellar, temp, mass, radius, age, planets, color';
     var types = 'temp:thousands, mass:3, radius:2, age:thousands';
-    var dataVars = 'Type of Star:star_type_name, Luminosity:luminosity_class, Brightness Class:luminosity_mod';
+    var dataVars = 'Type:star_type_name, Luminosity:luminosity_class, Brightness Class:luminosity_mod';
 
     var qs = {};
     //Set up form variables

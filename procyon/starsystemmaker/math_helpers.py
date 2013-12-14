@@ -5,8 +5,8 @@ import re
 #--- Mathy functions for planetary things ----------------
 
 
-def rand_range(low=0, high=1, weight=1):
-    rand = rand_weighted(0.5, weight)
+def rand_range(low=0, high=1, weight=1, avg=0.5):
+    rand = rand_weighted(avg, weight)
     if low == 0 and high == 1:
         return rand
 
@@ -90,3 +90,58 @@ def parse_num(s, force_int=False):
             return float(s)
         except Exception:
             return 0
+
+
+def average_numbers_clamped(num_1=0, num_2=0):
+    if num_1 and not num_2:
+        return num_1
+    if num_2 and not num_1:
+        return num_2
+    return float((num_1+num_2) / 2)
+
+
+def clamp(value, v_min=0, v_max=1):
+    if value < v_min:
+        return v_min
+    if value > v_max:
+        return v_max
+    return value
+
+
+def bigger_makes_smaller(mass=5, mass_min=0, mass_max=8, age=5000, age_min=1, age_max=12000, tries_to_adjust=2):
+    # Used to inversely correlate two variables within a range
+    # For example, the bigger stars are usually younger (as they'd burn out quicker)
+    #   so if mass is higher than average and age is higher than average, make age lower
+
+    mass_pct = clamp(mass / (mass_max-mass_min))
+    age_pct = clamp(age / (age_max-age_min))
+
+    age_pct_guessed = rand_range(low=0, high=1, weight=tries_to_adjust, avg=(1-mass_pct))
+    age_pct = average_numbers_clamped(age_pct, age_pct_guessed)
+
+    new_age = age_pct * (age_max-age_min)
+    return new_age
+
+
+def get_float_from_hash(options={}, var_name='', backup_val=0):
+
+    try:
+        val = float(options.get(var_name))
+    except Exception:
+        val = backup_val
+
+    return val
+
+
+def set_rand_seed(rand_seed=4815162342):
+    try:
+        rand_seed = float(rand_seed)
+    except Exception as e:
+        rand_seed = np.random.random()
+    rand_seed_num = rand_seed
+    if rand_seed < 1:
+        rand_seed_num = rand_seed * 100000000
+    rand_seed_num = int(rand_seed_num)
+    np.random.seed(rand_seed_num)
+
+    return rand_seed_num
