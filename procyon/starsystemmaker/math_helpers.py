@@ -6,11 +6,16 @@ import re
 
 
 def rand_range(low=0, high=1, weight=1, avg=0.5):
-    rand = rand_weighted(avg, weight)
-    if low == 0 and high == 1:
-        return rand
 
+    if low == 0 and high == 1:
+        return rand_weighted(avg, weight)
+
+    #convert numbers to 0 - 1
     num_range = high-low
+    new_avg = (avg-low) / num_range
+
+    rand = rand_weighted(new_avg, weight)
+
     rand = low + (num_range*rand)
     return rand
 
@@ -113,8 +118,8 @@ def bigger_makes_smaller(mass=5, mass_min=0, mass_max=8, age=5000, age_min=1, ag
     # For example, the bigger stars are usually younger (as they'd burn out quicker)
     #   so if mass is higher than average and age is higher than average, make age lower
 
-    mass_pct = clamp(mass / (mass_max-mass_min))
-    age_pct = clamp(age / (age_max-age_min))
+    mass_pct = clamp((mass -mass_min) / (mass_max-mass_min))
+    age_pct = clamp((age-age_min) / (age_max-age_min))
 
     age_pct_guessed = rand_range(low=0, high=1, weight=tries_to_adjust, avg=(1-mass_pct))
     age_pct = average_numbers_clamped(age_pct, age_pct_guessed)

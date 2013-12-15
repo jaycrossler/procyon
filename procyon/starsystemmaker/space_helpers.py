@@ -190,3 +190,16 @@ def star_variables(options={}):
             'rand': rand_seed_num, 'stellar': stellar, 'star_type_name': star_type_name,
             'luminosity_class': star_l_type_name, 'luminosity_mod': star_l_mod}
 
+
+def planet_from_variables(settings={}):
+    rand_seed = get_float_from_hash(settings, 'rand')
+    set_rand_seed(rand_seed)
+
+    planet_count = int(rand_range(low=0, high=20, weight=4, avg=4))
+    planets = []
+    for i in range(planet_count):
+        planets.append({'name': 'test', 'position': i})
+    settings['planets'] = planet_count
+    settings['planet_data'] = planets
+
+    return settings

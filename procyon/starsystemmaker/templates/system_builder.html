@@ -31,9 +31,11 @@
 <script type="text/javascript" src="{{STATIC_URL}}js/underscore.string.min.js"></script>
 <script type="text/javascript" src="{{STATIC_URL}}js/system_builder.js"></script>
 <script type="text/javascript" src="{{STATIC_URL}}js/helpers.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/namethatcolor.js"></script>
 <script language="JavaScript">
+    var settings;
     $().ready(function(){
-        var settings = {{ settings|safe }};
+        settings = {{ settings|safe }};
         system_builder.init(settings);
 
     });

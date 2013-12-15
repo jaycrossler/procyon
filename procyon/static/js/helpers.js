@@ -107,3 +107,26 @@ helpers.romanize=function(num){
         roman = (key[+digits.pop() + (i * 10)] || "") + roman;
     return Array(+digits.join("") + 1).join("M") + roman;
 };
+helpers.typedValues=function(val,varname,types){
+    //Use by passing in an array of types, like:
+    //var types = 'temp:thousands, mass:3, radius:2, age:thousands';
+
+
+    _.each(types.split(','),function(t){
+        t = t.split(":");
+        var type_name = _.str.trim(t[0]);
+        var type_type = t[1];
+        if (varname == type_name){
+            if (helpers.isNumber(type_type)){
+                var type_decimals = parseInt(type_type);
+                val = helpers.round(val,type_decimals);
+                return false;
+            } else {
+                if (type_type=='thousands'){
+                    val = helpers.numberWithCommas(parseInt(val));
+                }
+            }
+        }
+    });
+    return val;
+};

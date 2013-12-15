@@ -131,6 +131,9 @@ def system_builder(request):
 
     options = {'rand_seed': rand, 'stellar': stellar, 'temp': temp, 'mass': mass, 'radius': radius, 'age': age, 'planets': planets}
     settings = star_variables(options)
+
+    settings = planet_from_variables(settings)
+
     settings = json.dumps(settings, ensure_ascii=True)
 
     return render_to_response('system_builder.html', {'settings': settings}, RequestContext(request))
