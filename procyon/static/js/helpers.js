@@ -117,7 +117,9 @@ helpers.typedValues=function(val,varname,types){
         var type_name = _.str.trim(t[0]);
         var type_type = t[1];
         if (varname == type_name){
-            if (helpers.isNumber(type_type)){
+            if (type_type == "0"){
+                val = parseInt(val);
+            } else if (helpers.isNumber(type_type)){
                 var type_decimals = parseInt(type_type);
                 val = helpers.round(val,type_decimals);
                 return false;

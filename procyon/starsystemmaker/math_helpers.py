@@ -128,13 +128,22 @@ def bigger_makes_smaller(mass=5, mass_min=0, mass_max=8, age=5000, age_min=1, ag
     return new_age
 
 
-def get_float_from_hash(options={}, var_name='', backup_val=0):
+def bigger_makes_bigger(start=5, start_min=0, start_max=10, end=5, end_min=0, end_max=10, tries_to_adjust=2):
+    start_pct = clamp((start-start_min) / (start_max-start_min))
+    end_pct = clamp((end-end_min) / (end_max-end_min))
 
+    end_pct_guessed = rand_range(low=0, high=1, weight=tries_to_adjust, avg=start_pct)
+    end_pct = average_numbers_clamped(end_pct, end_pct_guessed)
+
+    new_end = end_pct * (end_max-end_min)
+    return new_end
+
+
+def get_float_from_hash(options={}, var_name='', backup_val=0):
     try:
         val = float(options.get(var_name))
     except Exception:
         val = backup_val
-
     return val
 
 

@@ -4,6 +4,12 @@ from procyon.starsystemmaker.models import *
 import locale
 from django.http import HttpResponseRedirect
 
+
+class PlanetFeatureAdmin(admin.ModelAdmin):
+    model = PlanetFeature
+    list_display = ['short_name']
+
+
 class PlanetModelAdmin(admin.ModelAdmin):
     model = PlanetModel
     exclude = ['parent_star', ]
@@ -100,3 +106,4 @@ class PlanetTypeAdmin(admin.ModelAdmin):
 admin.site.register(StarModel, StarModelAdmin)
 admin.site.register(PlanetModel, PlanetModelAdmin)
 admin.site.register(PlanetType, PlanetTypeAdmin)
+admin.site.register(PlanetFeature, PlanetFeatureAdmin)

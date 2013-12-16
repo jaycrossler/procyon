@@ -56,6 +56,8 @@ def install_dev_fixtures():
 @task
 def sync():
     """ Runs the syncdb process with migrations """
+    sh("python manage.py migrate starcatalog")
+    sh("python manage.py migrate starsystemmaker")
     sh("python manage.py syncdb --noinput")
     sh("python manage.py migrate --all")
 

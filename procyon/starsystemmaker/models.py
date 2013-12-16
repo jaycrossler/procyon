@@ -197,12 +197,15 @@ class PlanetType(models.Model):
         verbose_name_plural = 'Types of Planets'
 
 
-class PlanetFeatures(models.Model):
+class PlanetFeature(models.Model):
     """
     Major features of a planetary body
     """
     short_name = models.CharField(db_index=True, max_length=60, help_text="Short Description of Planetary Feature", blank=True, null=True)
-    details = models.CharField(db_index=True, max_length=60, help_text="Detailed Description of Planetary Feature", blank=True, null=True)
+    details = models.TextField(help_text="Detailed Description of Planetary Feature", blank=True, null=True)
+    rules_required = models.TextField(help_text="What attributes of the planet must be true to have this feature?", blank=True, null=True)
+    rules_more_likely = models.TextField(help_text="What attributes of the planet double the chances to have this feature?", blank=True, null=True)
+    likelihood = models.FloatField(help_text="How likely is a planet to have this feature (0 to 1) given that the above are met?", blank=True, null=True, default="0.1")
 
 
 class PlanetModel(models.Model):
@@ -212,35 +215,35 @@ class PlanetModel(models.Model):
     name = models.CharField(db_index=True, max_length=60, help_text="Planet Common Name", blank=True, null=True)
     planet_type = models.ForeignKey(PlanetType, help_text="Type of planet", default=1, blank=True, null=True)
 
-    mass = models.FloatField(db_index=True, help_text="Estimated Mass compared to Jupiter", blank=True, null=True)
-    radius = models.FloatField(help_text="Radius in Jupiters", blank=True, null=True)
-    density = models.FloatField(help_text="Density in g/cm^3", blank=True, null=True)
-    gravity = models.FloatField(help_text="Surface Gravity", blank=True, null=True)
+    mass = models.FloatField(db_index=True, help_text="Estimated Mass (Earth=1, Mercury=.05, Mars=.1, Jupiter=317)", blank=True, null=True)
+    radius = models.FloatField(help_text="Estimated Radius (Earth=1, Mercury=.382, Jupiter=10.97, Saturn=9.14) ", blank=True, null=True)
+    density = models.FloatField(help_text="Density in g/cm^3 (Earth=5.51, Jupiter=1.33, Saturn=0.68, Pluto=1.75)", blank=True, null=True)
+    gravity = models.FloatField(help_text="Surface Gravity (g=m/r^2, Earth=1, Mercury=0.38, Jupiter=2.53, Pluto=0.067)", blank=True, null=True)
 
-    inclination = models.FloatField(help_text="Inclination", blank=True, null=True)
-    oblateness = models.FloatField(help_text="How squished it is", blank=True, null=True)
-    tilt = models.FloatField(help_text="Tilt", blank=True, null=True)
-    albedo = models.FloatField(help_text="How bright it is (0 to 1)", blank=True, null=True)
+    oblateness = models.FloatField(help_text="How squished it is (Earth=.0034, Venus=0, Saturn=.0979)", blank=True, null=True)
+    tilt = models.FloatField(help_text="Axial Tilt (Earth=23.4, Uranus=97, Venus=177)", blank=True, null=True)
+    albedo = models.FloatField(help_text="How much light does the surface reflect (0 to 1)", blank=True, null=True)
 
-    length_days = models.FloatField(help_text="How squished it is", blank=True, null=True)
+    length_days = models.FloatField(help_text="How many hours are the days (Earth=24)", blank=True, null=True)
     surface_temperature_range = models.CharField(max_length=30, help_text="Range in C", blank=True, null=True, default=0)
     magnetic_field = models.FloatField(help_text="How strong a magnetic field (Earth=1, Jupiter=19519)", blank=True, null=True)
-    craterization = models.FloatField(help_text="How many craters? (Earth=1)", blank=True, null=True)
+    craterization = models.FloatField(help_text="How many craters? (Earth=1, Moon=2, Mars=3, Jupiter=0)", blank=True, null=True)
 
     mineral_surface_early = models.FloatField(help_text="% Amount of H, He, C (0 to 1)", blank=True, null=True)
-    mineral_surface_mid = models.FloatField(help_text="% Amount of N, O (0 to 1)", blank=True, null=True)
+    mineral_surface_mid = models.FloatField(help_text="% Amount of N, O, Fe (0 to 1)", blank=True, null=True)
     mineral_surface_heavy = models.FloatField(help_text="% Amount of Heavier Metals (0 to 1)", blank=True, null=True)
     mineral_surface_late = models.FloatField(help_text="% Amount of Exotic Metals (0 to 1)", blank=True, null=True)
     minerals_specific = models.CharField(max_length=100, help_text="Comma-separated list of specific notable minerals", blank=True, null=True, default="")
 
-    solid_core_size = models.FloatField(help_text="Percentage size of planet that is core (0 to 1)", blank=True, null=True)
+    solid_core_size = models.FloatField(help_text="Percentage size of planet that is core (0 to 1, Earth=.31)", blank=True, null=True)
     solid_core_type = models.CharField(max_length=30, help_text="Type of Core", blank=True, null=True, default="Iron")
     plate_tectonics_amount = models.FloatField(help_text="Amount of tectonics and plate movement (Earth=1, Io=20)", blank=True, null=True)
 
-    surface_ocean_amount = models.FloatField(help_text="% surface is covered with water (0 to 1)", blank=True, null=True)
+    surface_solidity = models.FloatField(help_text="How solid is surface (Inner=1, Gas Giants=0)", blank=True, null=True)
+    surface_ocean_amount = models.FloatField(help_text="% surface is covered with liquid (0 to 1, Earth=.71)", blank=True, null=True)
     surface_ocean_chemicals = models.CharField(max_length=100, help_text="Main composition of surface oceans (Earth=Salt Water, Titan=Ethane and Methane", blank=True, null=True, default="")
-    subsurface_ocean_amount = models.FloatField(help_text="% of subsurface that is water (0 to 1)", blank=True, null=True)
-    ice_amount = models.FloatField(help_text="% surface is covered with ice (0 to 1)", blank=True, null=True)
+    subsurface_ocean_amount = models.FloatField(help_text="% of subsurface that is liquid (0 to 1, Europa=1.0)", blank=True, null=True)
+    ice_amount = models.FloatField(help_text="% surface is covered with ice (0 to 1, Earth=.02, Europa=1.0)", blank=True, null=True)
 
     semi_major_axis = models.FloatField(help_text="Semi-major Axis in au", blank=True, null=True)
     revolution = models.FloatField(help_text="Revolutions per earth day", blank=True, null=True)
@@ -253,7 +256,7 @@ class PlanetModel(models.Model):
     ring_size = models.FloatField(help_text="Size of rings (as percentage of radius)", blank=True, null=True)
     ring_numbers = models.IntegerField(help_text="Number of ring groups", blank=True, null=True)
 
-    atmosphere_millibars = models.FloatField(help_text="Pressure of atmosphere (Mars=7, Earth=1000)", blank=True, null=True)
+    atmosphere_millibars = models.FloatField(help_text="Pressure of atmosphere in Millibars (Mars=7, Earth=1013.25)", blank=True, null=True)
     atmosphere_main_gas = models.CharField(max_length=30, help_text="Major gas (70%), if any", blank=True, null=True)
     atmosphere_secondary_gas = models.CharField(max_length=30, help_text="Second gas (20%), if any", blank=True, null=True)
     atmosphere_tertiary_gas = models.CharField(max_length=30, help_text="Tertiary gas (9%), if any", blank=True, null=True)
@@ -266,7 +269,7 @@ class PlanetModel(models.Model):
     parent_star = models.ForeignKey(Star, db_index=True, help_text="The star that it orbits", blank=True, null=True)
     parent_planet = models.ForeignKey('self', db_index=True, help_text="A planet that it orbits",  blank=True, null=True)
 
-    major_features = models.ManyToManyField(PlanetFeatures, help_text="What features are significant on this planet", blank=True, null=True)
+    major_features = models.ManyToManyField(PlanetFeature, help_text="What features are significant on this planet", blank=True, null=True)
 
     def __unicode__(self):
         name = self.name

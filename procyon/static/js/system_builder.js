@@ -68,7 +68,7 @@ system_builder.setupStartingVars=function(settings){
     data_holder += "<b>Color</b>: "+ _.str.capitalize(colorName)+"<br/><hr/>";
 
 
-    data_holder += system_builder.buildPlanetDescriptions(settings);
+    data_holder += system_builder.buildPlanetDescriptions(settings) || "<b>No planets</b>";
     $('#data_details').html(data_holder);
 
 
@@ -157,8 +157,29 @@ system_builder.buildStarDescription=function(settings){
 };
 system_builder.buildPlanetDescriptions=function(settings){
     var output='';
+    var types = 'mass:2, radius:1, gravity:1, craterization:1, ring_numbers:0, tilt:0, atmosphere_millibars:thousands, magnetic_field:thousands';
+    var dataVars = 'Mass:mass, Radius:radius, Gravity:gravity, Rings:ring_numbers, Tilt:tilt, Millibars:atmosphere_millibars, Craters:craterization, Mag Field:magnetic_field';
+
     _.each(settings.planet_data,function(planet){
-        output += '<b>Planet: '+planet.name+'</b><br/>';
+        output += '<b>Planet: '+planet.name+'</b><br/><span style="font-size:12px">';
+        var output_list = []
+
+        _.each(dataVars.split(','),function(v){
+            v = _.str.trim(v);
+            v = v.split(":");
+            var title = v[0];
+            var field = v[1];
+
+            if (planet[field] !== undefined){
+                var val = planet[field];
+                val = helpers.typedValues(val,field,types);
+                if (val !== undefined) {
+                    output_list.push("<span style='style:block'><b>"+title+"</b>: "+ _.str.capitalize(val)+"</span>");
+                }
+            }
+        });
+        output+=output_list.join(" :: ") + "</span><br/>";
+
     });
     return output;
 };

@@ -1,5 +1,6 @@
 from procyon.starsystemmaker.models import *
 from procyon.starsystemmaker.math_helpers import *
+from procyon.starsystemmaker.name_library import *
 from procyon.starcatalog.models import StarType, StarLuminosityType
 import csv
 import re
@@ -197,9 +198,73 @@ def planet_from_variables(settings={}):
 
     planet_count = int(rand_range(low=0, high=20, weight=4, avg=4))
     planets = []
+
+    planet_name_list = list_of_names()
+
     for i in range(planet_count):
-        planets.append({'name': 'test', 'position': i})
+        planet_data = create_random_planet(settings, i, planet_name_list)
+        planets.append(planet_data)
     settings['planets'] = planet_count
     settings['planet_data'] = planets
 
     return settings
+
+
+def create_random_planet(settings={}, planet_num=1, planet_name_list=None):
+    if not planet_name_list:
+        planet_name_list = list_of_names()
+    name = planet_name_list[planet_num] or "Planet"
+
+    star_age = get_float_from_hash(settings, 'age', 5000)
+
+    mass_max = 2 + (planet_num * 2)
+    mass_max *= (mass_max/2)
+    mass = bigger_makes_bigger(start=star_age, start_min=0, start_max=2000,
+                               end=1, end_min=0.01, end_max=mass_max, tries_to_adjust=7)
+    radius = bigger_makes_bigger(start=mass, start_min=0.01, start_max=2000,
+                                 end=2, end_min=0.002, end_max=8, tries_to_adjust=4)
+    density = bigger_makes_bigger(start=mass, start_min=0.01, start_max=2000,
+                                  end=5, end_min=0.6, end_max=10, tries_to_adjust=3)
+    gravity = mass/(radius*radius)
+    oblateness = rand_range(0, 0.1, 1, 0.04)
+    tilt = rand_range(0, 180, 1, 20)
+    albedo = rand_range(0, 1, 2, 0.2)
+    #length_days
+    #surface_temperature_range
+    magnetic_field = bigger_makes_bigger(start=mass, start_min=0.01, start_max=2000,
+                                         end=1, end_min=0.1, end_max=20000, tries_to_adjust=2)
+    craterization = 0
+    surface_solidity = 1
+    surface_ocean_amount = 0
+    ice_amount = 0
+    if mass < 2.2:
+        craterization = rand_range(0, 5, 1, 1)
+        surface_solidity = 0
+        surface_ocean_amount = rand_range(0, 1, 2, 0.9)
+        ice_amount = rand_range(0, 1, 1, 0.5)
+    ring_size = 0
+    ring_numbers = 0
+    if mass > 10:
+        ring_size = rand_range(0, 10, 2, 2)
+        ring_numbers = bigger_makes_bigger(start=ring_size, start_min=0, start_max=10,
+                                           end=4, end_min=1, end_max=12, tries_to_adjust=2)
+        ring_numbers = int(ring_numbers)
+
+    atmosphere_millibars = bigger_makes_bigger(start=gravity, start_min=0.01, start_max=5,
+                                               end=1, end_min=0.1, end_max=20000, tries_to_adjust=1)
+    solid_core_size = rand_range(0, 1, 2, .3)
+    solid_core_type = 'Iron'
+    plate_tectonics_amount = rand_range(0, 30, 2, 1)
+    surface_ocean_chemicals = 'Salt Water'
+
+    planet_data = {'name': name, 'position': planet_num, 'mass': mass, 'radius': radius,
+                   'density': density, 'gravity': gravity, 'oblateness': oblateness,
+                   'tilt': tilt, 'albedo': albedo, 'magnetic_field': magnetic_field,
+                   'craterization': craterization, 'surface_solidity': surface_solidity,
+                   'surface_ocean_amount': surface_ocean_amount, 'ice_amount': ice_amount,
+                   'atmosphere_millibars': atmosphere_millibars, 'solid_core_size': solid_core_size,
+                   'solid_core_type': solid_core_type, 'plate_tectonics_amount': plate_tectonics_amount,
+                   'surface_ocean_chemicals': surface_ocean_chemicals, 'ring_size': ring_size,
+                   'ring_numbers': ring_numbers, }
+
+    return planet_data
