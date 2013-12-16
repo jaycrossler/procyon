@@ -12,6 +12,8 @@ def rand_range(low=0, high=1, weight=1, avg=0.5):
 
     #convert numbers to 0 - 1
     num_range = high-low
+    if num_range <= 0:
+        num_range = 1
     new_avg = (avg-low) / num_range
 
     rand = rand_weighted(new_avg, weight)
@@ -113,19 +115,19 @@ def clamp(value, v_min=0, v_max=1):
     return value
 
 
-def bigger_makes_smaller(mass=5, mass_min=0, mass_max=8, age=5000, age_min=1, age_max=12000, tries_to_adjust=2):
+def bigger_makes_smaller(start=5, start_min=0, start_max=8, end=5000, end_min=1, end_max=12000, tries_to_adjust=2):
     # Used to inversely correlate two variables within a range
     # For example, the bigger stars are usually younger (as they'd burn out quicker)
-    #   so if mass is higher than average and age is higher than average, make age lower
+    #   so if start is higher than average and end is higher than average, make end lower
 
-    mass_pct = clamp((mass -mass_min) / (mass_max-mass_min))
-    age_pct = clamp((age-age_min) / (age_max-age_min))
+    start_pct = clamp((start-start_min) / (start_max-start_min))
+    end_pct = clamp((end-end_min) / (end_max-end_min))
 
-    age_pct_guessed = rand_range(low=0, high=1, weight=tries_to_adjust, avg=(1-mass_pct))
-    age_pct = average_numbers_clamped(age_pct, age_pct_guessed)
+    end_pct_guessed = rand_range(low=0, high=1, weight=tries_to_adjust, avg=(1-start_pct))
+    end_pct = average_numbers_clamped(end_pct, end_pct_guessed)
 
-    new_age = age_pct * (age_max-age_min)
-    return new_age
+    new_end = end_pct * (end_max-end_min)
+    return new_end
 
 
 def bigger_makes_bigger(start=5, start_min=0, start_max=10, end=5, end_min=0, end_max=10, tries_to_adjust=2):

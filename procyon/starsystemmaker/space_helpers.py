@@ -176,7 +176,7 @@ def star_variables(options={}):
         if star_l_mod == 'b':
             mass *= 1
 
-    age = bigger_makes_smaller(mass=mass, mass_min=0, mass_max=10, age=age, age_min=1, age_max=11000, tries_to_adjust=2)
+    age = bigger_makes_smaller(start=mass, start_min=0, start_max=10, end=age, end_min=1, end_max=11000, tries_to_adjust=2)
 
     if forced_mass:
         mass = forced_mass
@@ -201,19 +201,25 @@ def planet_from_variables(settings={}):
 
     planet_name_list = list_of_names()
 
-    for i in range(planet_count):
-        planet_data = create_random_planet(settings, i, planet_name_list)
-        planets.append(planet_data)
+    settings['name'] = planet_name_list[0]
     settings['planets'] = planet_count
+    for i in range(planet_count):
+        planet_data = create_random_planet(settings, i+1, planet_name_list)
+        planets.append(planet_data)
     settings['planet_data'] = planets
 
     return settings
 
 
 def create_random_planet(settings={}, planet_num=1, planet_name_list=None):
+    num_planets = settings['planets']
     if not planet_name_list:
         planet_name_list = list_of_names()
-    name = planet_name_list[planet_num] or "Planet"
+
+    if len(planet_name_list) > planet_num:
+        name = planet_name_list[planet_num]
+    else:
+        name = "Planet {0}".format(planet_num)
 
     star_age = get_float_from_hash(settings, 'age', 5000)
 
@@ -221,18 +227,16 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None):
     mass_max *= (mass_max/2)
     mass = bigger_makes_bigger(start=star_age, start_min=0, start_max=2000,
                                end=1, end_min=0.01, end_max=mass_max, tries_to_adjust=7)
-    radius = bigger_makes_bigger(start=mass, start_min=0.01, start_max=2000,
+    radius = bigger_makes_bigger(start=mass, start_min=0.01, start_max=mass_max,
                                  end=2, end_min=0.002, end_max=8, tries_to_adjust=4)
-    density = bigger_makes_bigger(start=mass, start_min=0.01, start_max=2000,
+    density = bigger_makes_bigger(start=mass, start_min=0.01, start_max=mass_max,
                                   end=5, end_min=0.6, end_max=10, tries_to_adjust=3)
     gravity = mass/(radius*radius)
     oblateness = rand_range(0, 0.1, 1, 0.04)
     tilt = rand_range(0, 180, 1, 20)
     albedo = rand_range(0, 1, 2, 0.2)
-    #length_days
-    #surface_temperature_range
-    magnetic_field = bigger_makes_bigger(start=mass, start_min=0.01, start_max=2000,
-                                         end=1, end_min=0.1, end_max=20000, tries_to_adjust=2)
+    length_days = rand_range(0, 80, 2, 24)
+
     craterization = 0
     surface_solidity = 1
     surface_ocean_amount = 0
@@ -242,20 +246,57 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None):
         surface_solidity = 0
         surface_ocean_amount = rand_range(0, 1, 2, 0.9)
         ice_amount = rand_range(0, 1, 1, 0.5)
-    ring_size = 0
-    ring_numbers = 0
-    if mass > 10:
+    if (radius * mass) > 20:
+        #Gas Giant
         ring_size = rand_range(0, 10, 2, 2)
         ring_numbers = bigger_makes_bigger(start=ring_size, start_min=0, start_max=10,
                                            end=4, end_min=1, end_max=12, tries_to_adjust=2)
         ring_numbers = int(ring_numbers)
+        atmosphere_millibars = bigger_makes_bigger(start=gravity, start_min=0.01, start_max=5,
+                                                   end=1, end_min=0.1, end_max=20000, tries_to_adjust=2)
+        surface_temp_low = rand_range(-240, 200, 2, -100)
+        surface_temp_low = bigger_makes_smaller(start=planet_num, start_min=0, start_max=num_planets,
+                                                end=surface_temp_low, end_min=-220, end_max=200, tries_to_adjust=2)
 
-    atmosphere_millibars = bigger_makes_bigger(start=gravity, start_min=0.01, start_max=5,
-                                               end=1, end_min=0.1, end_max=20000, tries_to_adjust=1)
+        surface_temp_high = rand_range(surface_temp_low, 200, 2, surface_temp_low+20)
+        surface_temperature_range = "{0} - {1}".format(surface_temp_low, surface_temp_high)
+
+        magnetic_field = bigger_makes_bigger(start=mass, start_min=0.01, start_max=mass_max,
+                                             end=1, end_min=0.1, end_max=20000, tries_to_adjust=2)
+
+    else:
+        ring_size = 0
+        ring_numbers = 0
+        atmosphere_millibars = bigger_makes_bigger(start=gravity, start_min=0.01, start_max=5,
+                                                   end=1, end_min=0.1, end_max=50, tries_to_adjust=2)
+        surface_temp_low = rand_range(-240, 200, 2, 0)
+        surface_temp_low = bigger_makes_smaller(start=planet_num, start_min=0, start_max=num_planets,
+                                                end=surface_temp_low, end_min=-220, end_max=200, tries_to_adjust=2)
+        surface_temp_high = rand_range(surface_temp_low, 200, 2, surface_temp_low+30)
+        surface_temperature_range = "{0} - {1}".format(surface_temp_low, surface_temp_high)
+
+        magnetic_field = bigger_makes_bigger(start=mass, start_min=0.01, start_max=mass_max,
+                                             end=1, end_min=0.1, end_max=100, tries_to_adjust=2)
+
+    mineral_surface_early = rand_range(0, 0.95, 3, 0.9)
+    space_left = 1 - mineral_surface_early
+    mineral_surface_mid = rand_range(0, space_left, 1, space_left)
+    space_left = 1 - mineral_surface_early + mineral_surface_mid
+    mineral_surface_heavy = rand_range(0, space_left, 1, space_left)
+    space_left = 1 - mineral_surface_early + mineral_surface_mid + mineral_surface_heavy
+    mineral_surface_late = space_left
+    minerals_specific = 'Hydrogen, Helium, Iron'
+
     solid_core_size = rand_range(0, 1, 2, .3)
     solid_core_type = 'Iron'
     plate_tectonics_amount = rand_range(0, 30, 2, 1)
     surface_ocean_chemicals = 'Salt Water'
+
+    num_moons_max = 1 + (planet_num * 5)
+    num_moons = rand_range(0, num_moons_max, 7, 0)
+    num_moons = bigger_makes_bigger(start=gravity, start_min=0.1, start_max=5,
+                                    end=num_moons, end_min=0, end_max=num_moons_max, tries_to_adjust=1)
+    num_moons = int(num_moons)
 
     planet_data = {'name': name, 'position': planet_num, 'mass': mass, 'radius': radius,
                    'density': density, 'gravity': gravity, 'oblateness': oblateness,
@@ -265,6 +306,30 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None):
                    'atmosphere_millibars': atmosphere_millibars, 'solid_core_size': solid_core_size,
                    'solid_core_type': solid_core_type, 'plate_tectonics_amount': plate_tectonics_amount,
                    'surface_ocean_chemicals': surface_ocean_chemicals, 'ring_size': ring_size,
-                   'ring_numbers': ring_numbers, }
+                   'ring_numbers': ring_numbers, 'length_days': length_days,
+                   'surface_temperature_range': surface_temperature_range,
+                   'mineral_surface_early': mineral_surface_early,
+                   'mineral_surface_mid': mineral_surface_mid,
+                   'mineral_surface_heavy': mineral_surface_heavy,
+                   'mineral_surface_late': mineral_surface_late,
+                   'minerals_specific': minerals_specific,
+                   'num_moons': num_moons
+                   }
+
+    moon_name_list = list_of_names()
+    moons = []
+    for i in range(num_moons):
+        moon_data = create_random_moon(planet_data, i, moon_name_list)
+        moons.append(moon_data)
+    planet_data['moons'] = moons
 
     return planet_data
+
+
+def create_random_moon(planet_data, moon_num, moon_name_list):
+    if len(moon_name_list) > moon_num:
+        name = moon_name_list[moon_num]
+    else:
+        name = "Moon {0}".format(moon_num)
+
+    return {'name': name, 'moon_num': moon_num}

@@ -6,7 +6,7 @@
 {% block head_title_base %}Procyon - System Builder{% endblock %}
 
 {% block head_title %}{% trans "System Builder" %}{% endblock %}
-
+{% block site_brand %}<a class="brand" href="{% url "home" %}">{% trans "The Stars Between : Star System Builder" %}</a>{% endblock %}
 {% block body_class %}home{% endblock %}
 
 {% block extra_style %}
@@ -23,6 +23,26 @@
         background-color: #eeeeee;
         padding: 10px;
     }
+    .planet-info {
+        display: inline-block;
+        border: solid gold 4px;
+        background-color: goldenrod;
+        padding: 10px;
+        width: 222px;
+        font-size:12px;
+        line-height:1.1em;
+        height: 120px;
+        overflow-y: scroll;
+        margin: 4px;
+    }
+    .planet-info h4 {
+        margin: 3px 0px;
+    }
+    .planet-info span {
+        white-space: nowrap;
+    }
+
+
 </style>
 {% endblock %}
 
@@ -46,7 +66,6 @@
 
 {% block banner %}
 
-    <h2>Star System Builder</h2>
     <div class="row">
         <div class="span5">
             <form class="form-inline">
@@ -56,10 +75,6 @@
                 <label>Masses (Solars)</label><input type="text" id="mass" name="mass"><br/>
                 <label>Radius (Solars)</label><input type="text" id="radius" name="radius"><br/>
                 <label>Millions of Years</label><input type="text" id="age" name="age"><br/>
-                <label>Star Color</label><input type="text" id="color" name="color" disabled="true"><br/>
-                <hr/>
-                <label># of Planets</label><input type="text" id="planets" name="planets"><br/>
-
 
                 <input class="btn" type="submit" value="Build">
                 <input class="btn" value="Randomize" id="randomize">
@@ -68,11 +83,10 @@
 
 
         <div class="span5">
-            <span id="data_display">
-                <table id="data_holder"></table>
-            </span>
             <span id="data_details"></span>
         </div>
+
+        <div class="span10" id="planet_data"></div>
     </div>
 
 {% endblock %}

@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 setup(
     name="procyon",
     packages=['procyon'],
-    version='0.0.0.3',
+    version='0.0.0.4',
     url="http://thestarsbetween.com/",
     author="Jay Crossler",
     author_email="jay.crossler@gmail.com"

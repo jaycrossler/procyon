@@ -20,7 +20,7 @@ system_builder.randomStellarClass=function(){
     return spectrum;
 };
 system_builder.setupStartingVars=function(settings){
-    var userVars = 'rand, stellar, temp, mass, radius, age, planets, color';
+    var userVars = 'rand, stellar, temp, mass, radius, age';
     var types = 'temp:thousands, mass:3, radius:2, age:thousands';
 //    var dataVars = 'Type:star_type_name, Luminosity:luminosity_class, Brightness Class:luminosity_mod';
     var dataVars = 'Brightness Class:luminosity_mod';
@@ -41,12 +41,11 @@ system_builder.setupStartingVars=function(settings){
         $('#'+v).val(val);
     });
 
-
     //Set up additional data
     var description = system_builder.buildStarDescription(settings);
-    document.title=description;
+    document.title="Builder: "+description;
 
-    var data_holder = '<b>'+description+'</b><p>';
+    var data_holder = '<h2>'+settings.name+'</h2><b>'+description+'</b><p>';
     _.each(dataVars.split(','),function(v){
         v = _.str.trim(v);
         v = v.split(":");
@@ -67,12 +66,14 @@ system_builder.setupStartingVars=function(settings){
     var colorName = n_match[1];
     data_holder += "<b>Color</b>: "+ _.str.capitalize(colorName)+"<br/><hr/>";
 
+    $('#data_details')
+        .html(data_holder)
+        .css({backgroundColor:settings['color']});
 
-    data_holder += system_builder.buildPlanetDescriptions(settings) || "<b>No planets</b>";
-    $('#data_details').html(data_holder);
+    var planet_data = system_builder.buildPlanetDescriptions(settings) || "<b>No planets</b>";
 
-
-    $('#color').css({backgroundColor:settings['color']});
+    $('#planet_data')
+        .html(planet_data);
 
 };
 system_builder.buildStarDescription=function(settings){
@@ -157,11 +158,11 @@ system_builder.buildStarDescription=function(settings){
 };
 system_builder.buildPlanetDescriptions=function(settings){
     var output='';
-    var types = 'mass:2, radius:1, gravity:1, craterization:1, ring_numbers:0, tilt:0, atmosphere_millibars:thousands, magnetic_field:thousands';
+    var types = 'mass:2, radius:1, gravity:1, craterization:1, ring_numbers:0, tilt:0, atmosphere_millibars:thousands, magnetic_field:thousands, num_moons:0';
     var dataVars = 'Mass:mass, Radius:radius, Gravity:gravity, Rings:ring_numbers, Tilt:tilt, Millibars:atmosphere_millibars, Craters:craterization, Mag Field:magnetic_field';
 
     _.each(settings.planet_data,function(planet){
-        output += '<b>Planet: '+planet.name+'</b><br/><span style="font-size:12px">';
+        output += '<span class="planet-info"><h4>Planet: '+planet.name+'</h4>';
         var output_list = []
 
         _.each(dataVars.split(','),function(v){
@@ -174,11 +175,21 @@ system_builder.buildPlanetDescriptions=function(settings){
                 var val = planet[field];
                 val = helpers.typedValues(val,field,types);
                 if (val !== undefined) {
-                    output_list.push("<span style='style:block'><b>"+title+"</b>: "+ _.str.capitalize(val)+"</span>");
+                    output_list.push("<span><b>"+title+"</b>: "+ _.str.capitalize(val)+"</span>");
                 }
             }
         });
-        output+=output_list.join(" :: ") + "</span><br/>";
+        output+=output_list.join(" :: ") + "<br/>";
+
+        if (planet.moons && planet.moons.length){
+            output+="<br/>Moons ("+planet.num_moons+"): ";
+            _.each(planet.moons,function(moon){
+                output+="[<b>"+moon.name+"</b>] ";
+            });
+
+        }
+
+        output+="</span>";
 
     });
     return output;
