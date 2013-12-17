@@ -64,7 +64,7 @@ system_builder.setupStartingVars=function(settings){
 
     var n_match  = ntc.name(settings.color);
     var colorName = n_match[1];
-    data_holder += "<b>Color</b>: "+ _.str.capitalize(colorName)+"<br/><hr/>";
+    data_holder += "<b>Color</b>: "+ _.str.capitalize(colorName);
 
     $('#data_details')
         .html(data_holder)
@@ -99,7 +99,7 @@ system_builder.buildPlanetCanvas=function(settings){
             var circle = new createjs.Shape();
             var size = 1+parseInt(Math.random()*2);
 
-            var color = createjs.Graphics.getRGB(Math.random()*255|0, Math.random()*255|0, Math.random()*255|0)
+            var color = moon.color || createjs.Graphics.getRGB(Math.random()*255|0, Math.random()*255|0, Math.random()*255|0)
 
             circle.graphics.beginFill(color).drawCircle(0, 0, size);
             circle.x = parseInt(Math.random()*circle_max*2);
@@ -260,9 +260,9 @@ system_builder.buildPlanetDescriptions=function(settings){
         if (planet.moons && planet.moons.length){
             output+="<br/>Moons ("+planet.num_moons+"): ";
             _.each(planet.moons,function(moon){
-                output+="[<b>"+moon.name+"</b>] ";
+                var color = moon.color || 'black';
+                output+="[<b style='color:"+color+"'>"+moon.name+"</b>] ";
             });
-
         }
 
         output+="</span>";

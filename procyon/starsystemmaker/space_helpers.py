@@ -296,6 +296,9 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None):
     surface_ocean_chemicals = 'Salt Water'
 
     num_moons_max = 1 + (planet_num * 4)
+    if planet_num > 6:
+        num_moons_max = 1 + (planet_num * 2)
+
     num_moons = rand_range(0, num_moons_max, 7, 0)
     num_moons = bigger_makes_bigger(start=gravity, start_min=0.1, start_max=5,
                                     end=num_moons, end_min=0, end_max=num_moons_max, tries_to_adjust=1)
@@ -338,4 +341,7 @@ def create_random_moon(planet_data, moon_num, moon_name_list):
     else:
         name = "Moon {0}".format(moon_num)
 
-    return {'name': name, 'moon_num': moon_num}
+    r = lambda: random.randint(0,255)
+    color = '#%02X%02X%02X' % (r(), r(), r())
+
+    return {'name': name, 'moon_num': moon_num, 'color':color}
