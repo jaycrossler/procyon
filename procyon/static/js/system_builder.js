@@ -75,6 +75,35 @@ system_builder.setupStartingVars=function(settings){
     $('#planet_data')
         .html(planet_data);
 
+    _.each(settings.planet_data,function(planet,num){
+        var circle_max = 20;
+        var radius = parseInt(planet.radius/8*circle_max);
+
+        //Create a stage by getting a reference to the canvas
+        var stage = new createjs.Stage('planet_'+num);
+        //Create a Shape DisplayObject.
+        var circle = new createjs.Shape();
+        circle.graphics.beginFill("black").drawCircle(0, 0, radius);
+        //Set position of Shape instance.
+        circle.x = circle.y = circle_max-3;
+        //Add Shape instance to stage display list.
+        stage.addChild(circle);
+        //Update stage will render next frame
+
+        _.each(planet.moons,function(moon,moon_num){
+            var circle = new createjs.Shape();
+            var size = 1+parseInt(Math.random()*2);
+            circle.graphics.beginFill("brown").drawCircle(0, 0, size);
+            circle.x = parseInt(Math.random()*circle_max*2);
+            circle.y = parseInt(Math.random()*circle_max*2);
+            stage.addChild(circle);
+        });
+
+        stage.update();
+
+    });
+
+
 };
 system_builder.buildStarDescription=function(settings){
 
@@ -161,8 +190,8 @@ system_builder.buildPlanetDescriptions=function(settings){
     var types = 'mass:2, radius:1, gravity:1, craterization:1, ring_numbers:0, tilt:0, atmosphere_millibars:thousands, magnetic_field:thousands, num_moons:0';
     var dataVars = 'Mass:mass, Radius:radius, Gravity:gravity, Rings:ring_numbers, Tilt:tilt, Millibars:atmosphere_millibars, Craters:craterization, Mag Field:magnetic_field';
 
-    _.each(settings.planet_data,function(planet){
-        output += '<span class="planet-info"><h4>Planet: '+planet.name+'</h4>';
+    _.each(settings.planet_data,function(planet,num){
+        output += '<span class="planet-info"><h3><canvas id="planet_'+num+'" width="40" height="40"></canvas>'+planet.name+'</h3>';
         var output_list = []
 
         _.each(dataVars.split(','),function(v){
@@ -179,7 +208,7 @@ system_builder.buildPlanetDescriptions=function(settings){
                 }
             }
         });
-        output+=output_list.join(" :: ") + "<br/>";
+        output+=output_list.join(" : ") + "<br/>";
 
         if (planet.moons && planet.moons.length){
             output+="<br/>Moons ("+planet.num_moons+"): ";

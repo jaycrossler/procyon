@@ -3,7 +3,7 @@ import random
 import os
 
 
-def list_of_names(name_file='', num_requested=20, use_prefix=True, prefix='New'):
+def list_of_names(name_file='', num_requested=20, use_prefix=True, prefix='New', prefix2='Old'):
     name_file_dir = 'procyon/fixtures/names/'
     if not name_file:
         name_file = random.choice(os.listdir(name_file_dir))
@@ -18,7 +18,9 @@ def list_of_names(name_file='', num_requested=20, use_prefix=True, prefix='New')
     if use_prefix and prefix:
         for i in range(len(name_list)):
             if not name_list[i].startswith(prefix):
-                if random.random() < 0.2:
+                if random.random() < 0.1:
                     name_list[i] = prefix+" "+name_list[i]
+                elif random.random() < 0.1:
+                    name_list[i] = prefix2+" "+name_list[i]
 
     return name_list

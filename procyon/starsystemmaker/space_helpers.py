@@ -241,13 +241,10 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None):
     surface_solidity = 1
     surface_ocean_amount = 0
     ice_amount = 0
-    if mass < 2.2:
-        craterization = rand_range(0, 5, 1, 1)
-        surface_solidity = 0
-        surface_ocean_amount = rand_range(0, 1, 2, 0.9)
-        ice_amount = rand_range(0, 1, 1, 0.5)
+
     if (radius * mass) > 20:
         #Gas Giant
+        craterization = 0
         ring_size = rand_range(0, 10, 2, 2)
         ring_numbers = bigger_makes_bigger(start=ring_size, start_min=0, start_max=10,
                                            end=4, end_min=1, end_max=12, tries_to_adjust=2)
@@ -265,6 +262,12 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None):
                                              end=1, end_min=0.1, end_max=20000, tries_to_adjust=2)
 
     else:
+        if radius < 2.2:
+            craterization = rand_range(0, 5, 1, 1)
+            surface_solidity = 0
+            surface_ocean_amount = rand_range(0, 1, 2, 0.9)
+            ice_amount = rand_range(0, 1, 1, 0.5)
+
         ring_size = 0
         ring_numbers = 0
         atmosphere_millibars = bigger_makes_bigger(start=gravity, start_min=0.01, start_max=5,
