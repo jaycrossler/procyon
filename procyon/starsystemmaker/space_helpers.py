@@ -295,10 +295,13 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None):
     plate_tectonics_amount = rand_range(0, 30, 2, 1)
     surface_ocean_chemicals = 'Salt Water'
 
-    num_moons_max = 1 + (planet_num * 5)
+    num_moons_max = 1 + (planet_num * 4)
     num_moons = rand_range(0, num_moons_max, 7, 0)
     num_moons = bigger_makes_bigger(start=gravity, start_min=0.1, start_max=5,
                                     end=num_moons, end_min=0, end_max=num_moons_max, tries_to_adjust=1)
+    num_moons = bigger_makes_smaller(start=radius, start_min=0.1, start_max=8,
+                                     end=num_moons, end_min=0, end_max=num_moons_max, tries_to_adjust=1)
+
     num_moons = int(num_moons)
 
     planet_data = {'name': name, 'position': planet_num, 'mass': mass, 'radius': radius,

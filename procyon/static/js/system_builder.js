@@ -75,6 +75,11 @@ system_builder.setupStartingVars=function(settings){
     $('#planet_data')
         .html(planet_data);
 
+    system_builder.buildPlanetCanvas(settings);
+
+};
+system_builder.buildPlanetCanvas=function(settings){
+    var moon_objects = [];
     _.each(settings.planet_data,function(planet,num){
         var circle_max = 20;
         var radius = parseInt(planet.radius/8*circle_max);
@@ -93,15 +98,57 @@ system_builder.setupStartingVars=function(settings){
         _.each(planet.moons,function(moon,moon_num){
             var circle = new createjs.Shape();
             var size = 1+parseInt(Math.random()*2);
-            circle.graphics.beginFill("brown").drawCircle(0, 0, size);
+
+            var color = createjs.Graphics.getRGB(Math.random()*255|0, Math.random()*255|0, Math.random()*255|0)
+
+            circle.graphics.beginFill(color).drawCircle(0, 0, size);
             circle.x = parseInt(Math.random()*circle_max*2);
-            circle.y = parseInt(Math.random()*circle_max*2);
+            circle.y = parseInt(circle_max-6 + Math.random()*8);
+            circle.go_dir = Math.random()<=0.5?'right':'left';
+            circle.rot_speed = Math.random();
+
             stage.addChild(circle);
+
+            moon_objects.push({circle:circle, stage:stage, p_radius:radius});
         });
 
         stage.update();
 
     });
+
+    function moveMoons(event) {
+        //TODO: Add speed bounce
+
+        _.each(moon_objects,function(obj){
+            var circle = obj.circle;
+            var stage = obj.stage;
+            var planet_left = (stage.canvas.width/2)-obj.p_radius-2;
+            var planet_right = (stage.canvas.width/2)+obj.p_radius-2;
+
+            if (circle.go_dir == 'left') {
+                circle.x -= circle.rot_speed;
+                if (circle.x >= planet_left && circle.x <= planet_right && circle.y >planet_left && circle.y < planet_right-2){
+                    circle.alpha=0;
+                } else {
+                    circle.alpha=1;
+                }
+
+            } else {
+                circle.x += circle.rot_speed;
+            }
+
+            if (circle.x > stage.canvas.width-2) { circle.go_dir='left'; }
+            if (circle.x < 2) { circle.go_dir='right'; }
+
+            stage.update(event);
+        });
+
+    }
+
+
+
+    createjs.Ticker.on("tick", moveMoons);
+    createjs.Ticker.setFPS(30);
 
 
 };
