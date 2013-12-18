@@ -80,6 +80,7 @@ system_builder.setupStartingVars=function(settings){
 };
 system_builder.buildPlanetCanvas=function(settings){
     var moon_objects = [];
+    var stage_objects = [];
     _.each(settings.planet_data,function(planet,num){
         var circle_max = 20;
         var radius = parseInt(planet.radius/8*circle_max);
@@ -106,6 +107,7 @@ system_builder.buildPlanetCanvas=function(settings){
             circle.y = parseInt(circle_max-6 + Math.random()*8);
             circle.go_dir = Math.random()<=0.5?'right':'left';
             circle.rot_speed = Math.random();
+            circle.orbit_radius = Math.random()*6;
 
             stage.addChild(circle);
 
@@ -113,6 +115,7 @@ system_builder.buildPlanetCanvas=function(settings){
         });
 
         stage.update();
+        stage_objects.push(stage);
 
     });
 
@@ -137,18 +140,19 @@ system_builder.buildPlanetCanvas=function(settings){
                 circle.x += circle.rot_speed;
             }
 
-            if (circle.x > stage.canvas.width-2) { circle.go_dir='left'; }
-            if (circle.x < 2) { circle.go_dir='right'; }
+            if (circle.x > stage.canvas.width-obj.circle.orbit_radius-1) { circle.go_dir='left'; }
+            if (circle.x < circle.orbit_radius+1) { circle.go_dir='right'; }
+        });
 
-            stage.update(event);
+        _.each(stage_objects,function(obj){
+            obj.update(event);
         });
 
     }
 
 
-
     createjs.Ticker.on("tick", moveMoons);
-    createjs.Ticker.setFPS(30);
+    createjs.Ticker.setFPS(20);
 
 
 };
@@ -238,7 +242,7 @@ system_builder.buildPlanetDescriptions=function(settings){
     var dataVars = 'Mass:mass, Radius:radius, Gravity:gravity, Rings:ring_numbers, Tilt:tilt, Millibars:atmosphere_millibars, Craters:craterization, Mag Field:magnetic_field';
 
     _.each(settings.planet_data,function(planet,num){
-        output += '<span class="planet-info"><h3><canvas id="planet_'+num+'" width="40" height="40"></canvas>'+planet.name+'</h3>';
+        output += '<span class="planet-info"><h3><canvas id="planet_'+num+'" width="40" height="40"></canvas>'+planet.name+'</h3><br/>';
         var output_list = []
 
         _.each(dataVars.split(','),function(v){
