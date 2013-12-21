@@ -176,7 +176,8 @@ def star_variables(options={}):
         if star_l_mod == 'b':
             mass *= 1
 
-    age = bigger_makes_smaller(start=mass, start_min=0, start_max=10, end=age, end_min=1, end_max=11000, tries_to_adjust=2)
+    age = bigger_makes_smaller(start=mass, start_min=0, start_max=10, end=age, end_min=1, end_max=11000,
+                               tries_to_adjust=5)
 
     if forced_mass:
         mass = forced_mass
@@ -197,13 +198,14 @@ def planet_from_variables(settings={}):
     set_rand_seed(rand_seed)
 
     mass = get_float_from_hash(settings, 'mass')
-    planet_count_max = (2+mass)*(3+mass)
+    planet_count_max = (1.5+mass)*(1.5+mass)
+    planet_count_max = clamp(planet_count_max, 0, 20)
     planet_count = rand_range(low=0, high=planet_count_max, weight=3, avg=4)
     planet_count = int(planet_count)
 
     planets = []
 
-    planet_name_list = list_of_names(rand='{0}0'.format(rand_seed))
+    planet_name_list = list_of_names()
 
     settings['name'] = planet_name_list[0]
     settings['planets'] = planet_count
@@ -218,7 +220,7 @@ def planet_from_variables(settings={}):
 def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_seed=''):
     num_planets = settings['planets']
     if not planet_name_list:
-        planet_name_list = list_of_names(rand='{0}{1}'.format(rand_seed,planet_num))
+        planet_name_list = list_of_names()
 
     if len(planet_name_list) > planet_num:
         name = planet_name_list[planet_num]
@@ -228,8 +230,8 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
     star_age = get_float_from_hash(settings, 'age', 5000)
 
     mass_max = 2 + (planet_num * 2)
-    mass_max *= (mass_max/2)
-    mass = bigger_makes_bigger(start=star_age, start_min=0, start_max=2000,
+#    mass_max *= (mass_max/2)
+    mass = bigger_makes_bigger(start=star_age, start_min=0, start_max=12000,
                                end=1, end_min=0.01, end_max=mass_max, tries_to_adjust=7)
     radius = bigger_makes_bigger(start=mass, start_min=0.01, start_max=mass_max,
                                  end=2, end_min=0.002, end_max=8, tries_to_adjust=4)
@@ -326,8 +328,7 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
                    'num_moons': num_moons
                    }
 
-
-    moon_name_list = list_of_names(rand='{0}00{1}'.format(rand_seed,planet_num))
+    moon_name_list = list_of_names()
     moons = []
     for i in range(num_moons):
         moon_data = create_random_moon(planet_data, i, moon_name_list)

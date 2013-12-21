@@ -4,10 +4,7 @@ import os
 import numpy as np
 
 
-def list_of_names(name_file='', num_requested=20, use_prefix=True, prefix='New', prefix2='Old', rand=''):
-    # if rand:
-    #     set_rand_seed(rand)
-
+def list_of_names(name_file='', num_requested=20, use_prefix=True, prefix='New', prefix2='Old'):
     name_file_dir = 'procyon/fixtures/names/'
     if not name_file:
         name_file_list = os.listdir(name_file_dir)
