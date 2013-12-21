@@ -343,7 +343,7 @@ def create_random_moon(planet_data, moon_num, moon_name_list):
     else:
         name = "Moon {0}".format(moon_num)
 
-    r = lambda: random.randint(0, 255)
+    r = lambda: np.random.randint(0, 255)
     color = '#%02X%02X%02X' % (r(), r(), r())
 
     return {'name': name, 'moon_num': moon_num, 'color':color}
