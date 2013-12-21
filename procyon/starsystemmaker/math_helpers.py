@@ -153,11 +153,16 @@ def set_rand_seed(rand_seed=4815162342):
     try:
         rand_seed = float(rand_seed)
     except Exception as e:
-        rand_seed = np.random.random()
+        rand_seed = int(np.random.random() * 100000000)
     rand_seed_num = rand_seed
     if rand_seed < 1:
         rand_seed_num = rand_seed * 100000000
-    rand_seed_num = int(rand_seed_num)
-    np.random.seed(rand_seed_num)
+
+    try:
+        rand_seed_num = int(rand_seed_num)
+        np.random.seed(rand_seed_num)
+    except ValueError as e:
+        rand_seed_num = int(np.random.random() * 100000000)
+        np.random.seed(rand_seed_num)
 
     return rand_seed_num
