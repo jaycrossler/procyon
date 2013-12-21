@@ -203,22 +203,22 @@ def planet_from_variables(settings={}):
 
     planets = []
 
-    planet_name_list = list_of_names()
+    planet_name_list = list_of_names(rand='{0}0'.format(rand_seed))
 
     settings['name'] = planet_name_list[0]
     settings['planets'] = planet_count
     for i in range(planet_count):
-        planet_data = create_random_planet(settings, i+1, planet_name_list)
+        planet_data = create_random_planet(settings, i+1, planet_name_list, rand_seed=rand_seed)
         planets.append(planet_data)
     settings['planet_data'] = planets
 
     return settings
 
 
-def create_random_planet(settings={}, planet_num=1, planet_name_list=None):
+def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_seed=''):
     num_planets = settings['planets']
     if not planet_name_list:
-        planet_name_list = list_of_names()
+        planet_name_list = list_of_names(rand='{0}{1}'.format(rand_seed,planet_num))
 
     if len(planet_name_list) > planet_num:
         name = planet_name_list[planet_num]
@@ -326,7 +326,8 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None):
                    'num_moons': num_moons
                    }
 
-    moon_name_list = list_of_names()
+
+    moon_name_list = list_of_names(rand='{0}00{1}'.format(rand_seed,planet_num))
     moons = []
     for i in range(num_moons):
         moon_data = create_random_moon(planet_data, i, moon_name_list)
@@ -342,7 +343,7 @@ def create_random_moon(planet_data, moon_num, moon_name_list):
     else:
         name = "Moon {0}".format(moon_num)
 
-    r = lambda: random.randint(0,255)
+    r = lambda: random.randint(0, 255)
     color = '#%02X%02X%02X' % (r(), r(), r())
 
     return {'name': name, 'moon_num': moon_num, 'color':color}
