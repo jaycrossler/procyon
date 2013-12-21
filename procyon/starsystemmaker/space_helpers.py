@@ -294,7 +294,7 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
     mineral_surface_heavy = rand_range(0, space_left, 1, space_left)
     space_left = 1 - mineral_surface_early + mineral_surface_mid + mineral_surface_heavy
     mineral_surface_late = space_left
-    minerals_specific = 'Hydrogen, Helium, Iron'
+    minerals_specific = 'Hydrogen, Helium, Iron' #TODO: Randomize and make awesome
 
     solid_core_size = rand_range(0, 1, 2, .3)
     solid_core_type = 'Iron'
@@ -309,6 +309,8 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
     num_moons = bigger_makes_bigger(start=gravity, start_min=0.1, start_max=5,
                                     end=num_moons, end_min=0, end_max=num_moons_max, tries_to_adjust=1)
     num_moons = int(num_moons)
+
+    rand_seed_planet = "{0}00{1}".format(int(rand_seed), planet_num)
 
     planet_data = {'name': name, 'position': planet_num, 'mass': mass, 'radius': radius,
                    'density': density, 'gravity': gravity, 'oblateness': oblateness,
@@ -325,8 +327,9 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
                    'mineral_surface_heavy': mineral_surface_heavy,
                    'mineral_surface_late': mineral_surface_late,
                    'minerals_specific': minerals_specific,
-                   'num_moons': num_moons
+                   'num_moons': num_moons, 'rand_seed': rand_seed_planet,
                    }
+    #TODO: Loop through everything, and if a float, only return 4? decimal points of data
 
     moon_name_list = list_of_names()
     moons = []

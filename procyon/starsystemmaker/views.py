@@ -1,5 +1,6 @@
 from procyon.starsystemmaker.test_helpers import *
 from procyon.starsystemmaker.space_helpers import *
+from procyon.starsystemmaker.texture_generator import *
 from procyon.starsystemmaker.models import *
 from procyon.starcatalog.models import Star
 from django.http import HttpResponseRedirect, HttpResponse, Http404
@@ -139,3 +140,5 @@ def system_builder(request):
     return render_to_response('system_builder.html', {'settings': settings}, RequestContext(request))
 
 
+def create_planet_texture(request):
+    return generate_texture(request)

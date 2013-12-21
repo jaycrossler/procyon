@@ -71,9 +71,13 @@ system_builder.setupStartingVars=function(settings){
         .css({backgroundColor:settings['color']});
 
     var planet_data = system_builder.buildPlanetDescriptions(settings) || "<b>No planets</b>";
-
     $('#planet_data')
         .html(planet_data);
+
+    var $planets = $('span.planet-info');
+    if ($planets.length < 4) {
+        $planets.css({height:'350px'});
+    }
 
     system_builder.buildPlanetCanvas(settings);
 
@@ -243,7 +247,7 @@ system_builder.buildPlanetDescriptions=function(settings){
 
     _.each(settings.planet_data,function(planet,num){
         output += '<span class="planet-info"><h3><canvas id="planet_'+num+'" width="40" height="40"></canvas>'+planet.name+'</h3><br/>';
-        var output_list = []
+        var output_list = [];
 
         _.each(dataVars.split(','),function(v){
             v = _.str.trim(v);
@@ -268,6 +272,13 @@ system_builder.buildPlanetDescriptions=function(settings){
                 output+="[<b style='color:"+color+"'>"+moon.name+"</b>] ";
             });
         }
+
+        var planet_new = $.extend({},planet);
+        planet_new.size = 220;
+
+        var planetvars_as_get = $.param(planet_new);
+        var route = "/maker/planet.png?"+planetvars_as_get;
+        output+="<br/><img src='"+route+"' width=220 height=220/>";
 
         output+="</span>";
 

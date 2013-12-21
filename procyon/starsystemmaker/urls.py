@@ -15,4 +15,5 @@ urlpatterns = patterns('',
     url(r'^star/created/(?P<pk>\d+)$', lookup_star_info, name='maker-star-info-created' ),
     url(r'^viewer/(?P<pk>\d+)$', star_viewer, name='maker-star-viewer' ),
     url(r'^builder$', system_builder, name='maker-star-system-builder' ),
+    url(r'^planet.png$', create_planet_texture, name='create_planet_texture' ),
     )
