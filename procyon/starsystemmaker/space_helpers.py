@@ -244,9 +244,12 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
     length_days = rand_range(0, 80, 2, 24)
 
     craterization = 0
-    surface_solidity = 1
+    surface_solidity = 0
     surface_ocean_amount = 0
-    ice_amount = 0
+
+    ice_amount_total = rand_range(0, .1, 1, 0.05)
+    ice_amount_north_pole = rand_range(0, .1, 1, 0.01)
+    ice_amount_south_pole = rand_range(0, .1, 1, 0.01)
 
     if (radius * mass) > 20:
         #Gas Giant
@@ -270,10 +273,15 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
     else:
         if radius < 2.2:
             craterization = rand_range(0, 5, 1, 1)
-            surface_solidity = 0
             surface_ocean_amount = rand_range(0, 1, 2, 0.9)
-            ice_amount = rand_range(0, 1, 1, 0.5)
 
+            ice_amount_total = rand_range(0, 1, 1, 0.5)
+            ice_space_left = 1 - ice_amount_total
+            ice_amount_north_pole = rand_range(0, ice_space_left, 2, 0.01)
+            ice_space_left -= ice_amount_north_pole
+            ice_amount_south_pole = rand_range(0, ice_space_left, 2, 0.01)
+
+        surface_solidity = 1
         ring_size = 0
         ring_numbers = 0
         atmosphere_millibars = bigger_makes_bigger(start=gravity, start_min=0.01, start_max=5,
@@ -282,7 +290,6 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
         surface_temp_low = bigger_makes_smaller(start=planet_num, start_min=0, start_max=num_planets,
                                                 end=surface_temp_low, end_min=-220, end_max=200, tries_to_adjust=2)
         surface_temp_high = rand_range(surface_temp_low, 200, 2, surface_temp_low+30)
-        surface_temperature_range = "{0} - {1}".format(surface_temp_low, surface_temp_high)
 
         magnetic_field = bigger_makes_bigger(start=mass, start_min=0.01, start_max=mass_max,
                                              end=1, end_min=0.1, end_max=100, tries_to_adjust=2)
@@ -301,6 +308,10 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
     plate_tectonics_amount = rand_range(0, 30, 2, 1)
     surface_ocean_chemicals = 'Salt Water'
 
+    atmosphere_dust_amount = 0
+    if surface_solidity > .9:
+        atmosphere_dust_amount = rand_range(1, 1000, 2, 10)
+
     num_moons_max = 1 + (planet_num * 4)
     if planet_num > 6:
         num_moons_max = 1 + (planet_num * 2)
@@ -316,17 +327,26 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
                    'density': density, 'gravity': gravity, 'oblateness': oblateness,
                    'tilt': tilt, 'albedo': albedo, 'magnetic_field': magnetic_field,
                    'craterization': craterization, 'surface_solidity': surface_solidity,
-                   'surface_ocean_amount': surface_ocean_amount, 'ice_amount': ice_amount,
+                   'surface_ocean_amount': surface_ocean_amount,
+
+                   'ice_amount_total': ice_amount_total,
+                   'ice_amount_north_pole': ice_amount_north_pole,
+                   'ice_amount_south_pole': ice_amount_south_pole,
                    'atmosphere_millibars': atmosphere_millibars, 'solid_core_size': solid_core_size,
                    'solid_core_type': solid_core_type, 'plate_tectonics_amount': plate_tectonics_amount,
                    'surface_ocean_chemicals': surface_ocean_chemicals, 'ring_size': ring_size,
                    'ring_numbers': ring_numbers, 'length_days': length_days,
-                   'surface_temperature_range': surface_temperature_range,
+                   'surface_temp_low': surface_temp_low,
+                   'surface_temp_high': surface_temp_high,
+
+                   'atmosphere_dust_amount': atmosphere_dust_amount,
+
                    'mineral_surface_early': mineral_surface_early,
                    'mineral_surface_mid': mineral_surface_mid,
                    'mineral_surface_heavy': mineral_surface_heavy,
                    'mineral_surface_late': mineral_surface_late,
                    'minerals_specific': minerals_specific,
+
                    'num_moons': num_moons, 'rand_seed': rand_seed_planet,
                    }
     #TODO: Loop through everything, and if a float, only return 4? decimal points of data

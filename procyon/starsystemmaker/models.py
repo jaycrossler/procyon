@@ -225,10 +225,13 @@ class PlanetModel(models.Model):
     albedo = models.FloatField(help_text="How much light does the surface reflect (0 to 1)", blank=True, null=True)
 
     length_days = models.FloatField(help_text="How many hours are the days (Earth=24)", blank=True, null=True)
-    surface_temperature_range = models.CharField(max_length=30, help_text="Range in C", blank=True, null=True, default=0)
+    surface_temp_low = models.CharField(max_length=30, help_text="Low Temperature in C", blank=True, null=True, default=0)
+    surface_temp_high = models.CharField(max_length=30, help_text="Low Temperature in C", blank=True, null=True, default=0)
     magnetic_field = models.FloatField(help_text="How strong a magnetic field (Earth=1, Jupiter=19519)", blank=True, null=True)
     craterization = models.FloatField(help_text="How many craters? (Earth=1, Moon=2, Mars=3, Jupiter=0)", blank=True, null=True)
 
+    #TODO: Figure out how to have a list of minerals and amounts that makes sense for coloring, mining, changing
+    #TODO: Same for atmosphere gasses
     mineral_surface_early = models.FloatField(help_text="% Amount of H, He, C (0 to 1)", blank=True, null=True)
     mineral_surface_mid = models.FloatField(help_text="% Amount of N, O, Fe (0 to 1)", blank=True, null=True)
     mineral_surface_heavy = models.FloatField(help_text="% Amount of Heavier Metals (0 to 1)", blank=True, null=True)
@@ -243,7 +246,10 @@ class PlanetModel(models.Model):
     surface_ocean_amount = models.FloatField(help_text="% surface is covered with liquid (0 to 1, Earth=.71)", blank=True, null=True)
     surface_ocean_chemicals = models.CharField(max_length=100, help_text="Main composition of surface oceans (Earth=Salt Water, Titan=Ethane and Methane", blank=True, null=True, default="")
     subsurface_ocean_amount = models.FloatField(help_text="% of subsurface that is liquid (0 to 1, Europa=1.0)", blank=True, null=True)
-    ice_amount = models.FloatField(help_text="% surface is covered with ice (0 to 1, Earth=.02, Europa=1.0)", blank=True, null=True)
+
+    ice_amount_north_pole = models.FloatField(help_text="% North Pole is covered with ice (0 to 1, Earth=.01)", blank=True, null=True)
+    ice_amount_south_pole = models.FloatField(help_text="% South Pole is covered with ice (0 to 1, Earth=.01)", blank=True, null=True)
+    ice_amount_total = models.FloatField(help_text="% overall surface is covered with ice, not counting poles (0 to 1, Europa=1.0)", blank=True, null=True)
 
     semi_major_axis = models.FloatField(help_text="Semi-major Axis in au", blank=True, null=True)
     revolution = models.FloatField(help_text="Revolutions per earth day", blank=True, null=True)
