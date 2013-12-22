@@ -15,7 +15,7 @@ except ImportError:
         raise ImportError("The Python Imaging Library was not found.")
 
 
-def generate_texture(request):
+def generate_texture(request, image_format="PNG"):
 
     width = height = int(request.GET.get('size', 256))
     color_range = int(request.GET.get('color_range', 5))
@@ -52,8 +52,11 @@ def generate_texture(request):
         #TODO: Build into a data array, separate out into functions
         draw.line((0, row, width, row), fill=draw_color)
 
-    response = HttpResponse(mimetype="image/png")
-    im.save(response, 'PNG')
+    mime = "image/png"
+    if image_format == "JPEG":
+        mime = "image/jpeg"
+    response = HttpResponse(mimetype=mime)
+    im.save(response, image_format)
 
     return response
 

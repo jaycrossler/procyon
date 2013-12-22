@@ -140,5 +140,9 @@ def system_builder(request):
     return render_to_response('system_builder.html', {'settings': settings}, RequestContext(request))
 
 
-def create_planet_texture(request):
-    return generate_texture(request)
+def create_planet_texture_png(request):
+    return generate_texture(request, 'PNG')
+
+
+def create_planet_texture_jpeg(request):
+    return generate_texture(request, 'JPEG')
