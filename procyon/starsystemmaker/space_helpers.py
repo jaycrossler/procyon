@@ -329,9 +329,9 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
                    'craterization': craterization, 'surface_solidity': surface_solidity,
                    'surface_ocean_amount': surface_ocean_amount,
 
-                   'ice_amount_total': ice_amount_total,
-                   'ice_amount_north_pole': ice_amount_north_pole,
-                   'ice_amount_south_pole': ice_amount_south_pole,
+                   'ice_total': ice_amount_total,
+                   'ice_north_pole': ice_amount_north_pole,
+                   'ice_south_pole': ice_amount_south_pole,
                    'atmosphere_millibars': atmosphere_millibars, 'solid_core_size': solid_core_size,
                    'solid_core_type': solid_core_type, 'plate_tectonics_amount': plate_tectonics_amount,
                    'surface_ocean_chemicals': surface_ocean_chemicals, 'ring_size': ring_size,

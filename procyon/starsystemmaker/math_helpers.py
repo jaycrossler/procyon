@@ -166,3 +166,7 @@ def set_rand_seed(rand_seed=4815162342):
         np.random.seed(rand_seed_num)
 
     return rand_seed_num
+
+
+def randint(low, high):
+    return np.random.randint(low, high)
