@@ -310,7 +310,7 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
 
     atmosphere_dust_amount = 0
     if surface_solidity > .9:
-        atmosphere_dust_amount = rand_range(1, 1000, 2, 10)
+        atmosphere_dust_amount = int(rand_range(1, 1000, 2, 10))
 
     num_moons_max = 1 + (planet_num * 4)
     if planet_num > 6:
