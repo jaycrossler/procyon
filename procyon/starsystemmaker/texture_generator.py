@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 import numpy as np
 from procyon.starsystemmaker.math_helpers import *
+import struct
 
 try:
     import Image
@@ -25,6 +26,8 @@ def generate_texture(request, image_format="PNG"):
     ice_n = float(request.GET.get('ice_north_pole', .03))
     ice_s = float(request.GET.get('ice_south_pole', .03))
     ice_total = float(request.GET.get('ice_total', .02))
+    base_color = str(request.GET.get('base_color', ''))
+    surface_solidity = float(request.GET.get('surface_solidity', 0))
 
     atmosphere_dust_amount = int(float(request.GET.get('atmosphere_dust_amount', 3)))
 
@@ -36,15 +39,22 @@ def generate_texture(request, image_format="PNG"):
 
     #TODO: Try to get/save file from file cache
 
-    image_data = []
+    #TODO: Determine color based on minerals and atmosphere
+    if base_color:
+        rgb_str = base_color.replace("#", "")
+        color = struct.unpack('BBB', rgb_str.decode('hex'))
+        color = (color[0], color[1], color[2], 255)
+    else:
+        color = (randint(0, 255), randint(0, 255), randint(0, 255), 255)
 
-    #TODO: Determine based on minerals and atmosphere
-    color = (randint(0, 255), randint(0, 255), randint(0, 255), 255)
-    for row in xrange(0, height):
-        rand = (randint(-color_range, color_range), randint(-color_range, color_range), randint(-color_range, color_range), 0)
-        draw_color = color = tuple(map(sum, zip(color, rand)))
-        for i in range(0, width):
-            image_data.append(draw_color)
+    #Set base color
+    image_data = []
+    for i in range(0, width*height):
+        image_data.append(color)
+
+    #Add gas streaks
+    if surface_solidity < .9:
+        add_streaks(image_data, height=height, width=width, color_range=color_range, color=color)
 
     #Add Ice
     if use_icecaps:
@@ -126,6 +136,18 @@ def add_dust(image_data, dust_amount=10):
         x = randint(0, pixel_count)
         blur_amount = .3 + np.random.random()/3
         image_data[x] = color_blend(image_data[x], white, blur_amount)
+
+    return image_data
+
+
+def add_streaks(image_data, height=256, width=256, color_range=5, color=(255, 0, 0, 255)):
+
+    for row in xrange(0, height):
+        rand = (randint(-color_range, color_range), randint(-color_range, color_range), randint(-color_range, color_range), 0)
+        draw_color = color = tuple(map(sum, zip(color, rand)))
+        for i in range(0, width):
+            pixel = (row*width) + i
+            image_data[pixel] = draw_color
 
     return image_data
 

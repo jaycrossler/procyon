@@ -230,9 +230,9 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
     star_age = get_float_from_hash(settings, 'age', 5000)
 
     mass_max = 2 + (planet_num * 2)
-#    mass_max *= (mass_max/2)
+    mass_max *= (mass_max/2)
     mass = bigger_makes_bigger(start=star_age, start_min=0, start_max=12000,
-                               end=1, end_min=0.01, end_max=mass_max, tries_to_adjust=7)
+                               end=1, end_min=0.01, end_max=mass_max, tries_to_adjust=5)
     radius = bigger_makes_bigger(start=mass, start_min=0.01, start_max=mass_max,
                                  end=2, end_min=0.002, end_max=8, tries_to_adjust=4)
     density = bigger_makes_bigger(start=mass, start_min=0.01, start_max=mass_max,
@@ -244,15 +244,15 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
     length_days = rand_range(0, 80, 2, 24)
 
     craterization = 0
-    surface_solidity = 0
     surface_ocean_amount = 0
 
-    ice_amount_total = rand_range(0, .1, 1, 0.05)
-    ice_amount_north_pole = rand_range(0, .1, 1, 0.01)
-    ice_amount_south_pole = rand_range(0, .1, 1, 0.01)
+    ice_amount_total = rand_range(0, .1, 3, 0.02)
+    ice_amount_north_pole = rand_range(0, .1, 3, 0.001)
+    ice_amount_south_pole = rand_range(0, .1, 3, 0.001)
 
-    if (radius * mass) > 20:
+    if (radius * mass) > 8:
         #Gas Giant
+        surface_solidity = 0
         craterization = 0
         ring_size = rand_range(0, 10, 2, 2)
         ring_numbers = bigger_makes_bigger(start=ring_size, start_min=0, start_max=10,
@@ -272,7 +272,7 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
 
     else:
         if radius < 2.2:
-            craterization = rand_range(0, 5, 1, 1)
+            craterization = rand_range(0, 5, 2, 1)
             surface_ocean_amount = rand_range(0, 1, 2, 0.9)
 
             ice_amount_total = rand_range(0, 1, 1, 0.5)
