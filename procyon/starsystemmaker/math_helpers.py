@@ -120,13 +120,13 @@ def bigger_makes_smaller(start=5, start_min=0, start_max=8, end=5000, end_min=1,
     # For example, the bigger stars are usually younger (as they'd burn out quicker)
     #   so if start is higher than average and end is higher than average, make end lower
 
-    start_pct = clamp((start-start_min) / (start_max-start_min))
-    end_pct = clamp((end-end_min) / (end_max-end_min))
+    start_pct = clamp(float(start-start_min) / float(start_max-start_min), 0, 1)
+    end_pct = clamp(float(end-end_min) / float(end_max-end_min), 0, 1)
 
     end_pct_guessed = rand_range(low=0, high=1, weight=tries_to_adjust, avg=(1-start_pct))
     end_pct = average_numbers_clamped(end_pct, end_pct_guessed)
 
-    new_end = end_pct * (end_max-end_min)
+    new_end = (end_pct * (end_max-end_min)) + end_min
     return new_end
 
 
@@ -137,7 +137,7 @@ def bigger_makes_bigger(start=5, start_min=0, start_max=10, end=5, end_min=0, en
     end_pct_guessed = rand_range(low=0, high=1, weight=tries_to_adjust, avg=start_pct)
     end_pct = average_numbers_clamped(end_pct, end_pct_guessed)
 
-    new_end = end_pct * (end_max-end_min)
+    new_end = (end_pct * (end_max-end_min)) + end_min
     return new_end
 
 
@@ -169,4 +169,6 @@ def set_rand_seed(rand_seed=4815162342):
 
 
 def randint(low, high):
+    if low >= high:
+        return high
     return np.random.randint(low, high)

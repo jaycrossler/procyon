@@ -20,19 +20,24 @@ except ImportError:
 
 def generate_texture(request, image_format="PNG"):
 
-    width = height = int(request.GET.get('size', 256))
-    color_range = int(request.GET.get('color_range', 5))
-    use_icecaps = str(request.GET.get('use_icecaps', 'true')).lower() == 'true'
-    ice_n = float(request.GET.get('ice_north_pole', .03))
-    ice_s = float(request.GET.get('ice_south_pole', .03))
-    ice_total = float(request.GET.get('ice_total', .02))
-    base_color = str(request.GET.get('base_color', ''))
-    surface_solidity = float(request.GET.get('surface_solidity', 0))
+    width = height = int(float(request.GET.get('size', 256) or 256))
+    color_range = int(float(request.GET.get('color_range', 5) or 5))
+    ice_n = float(request.GET.get('ice_north_pole', .03) or .03)
+    ice_s = float(request.GET.get('ice_south_pole', .03) or .03)
+    ice_total = float(request.GET.get('ice_total', .02) or .02)
+    base_color = str(request.GET.get('base_color', '') or '')
+    surface_solidity = float(request.GET.get('surface_solidity', 0) or 0)
+    craterization = float(request.GET.get('craterization', .02) or .02)
 
     atmosphere_dust_amount = int(float(request.GET.get('atmosphere_dust_amount', 3)))
 
+    #TODO: Build multiple image and data layers for each planetoid, all related
+    #TODO: Allow user to request just one specific layer (ice, dust, atmosphere, surface, minerals, water), or (surface, air) or all combined as one
+    #TODO: Cache each of these images once drawn
+    #TODO: Allow passing in system # and planet # (and maybe moon #) to generate the images instead of with all vars
+
     #TODO: Use Blur?
-    blur_radius = 0
+    blur_radius = 1
 
     rand_seed = float(request.GET.get('rand_seed', np.random.random()))
     set_rand_seed(rand_seed)
@@ -56,21 +61,26 @@ def generate_texture(request, image_format="PNG"):
     if surface_solidity < .9:
         add_streaks(image_data, height=height, width=width, color_range=color_range, color=color)
 
+    #Add Ice Caps on north and south poles
+    if ice_n > 0 or ice_s > 0:
+        image_data = add_icecaps(image_data, ice_n=ice_n, ice_s=ice_s, height=height, width=width)
     #Add Ice
-    if use_icecaps:
-        image_data = add_icecaps(image_data, ice_n=ice_n, ice_s=ice_s, height=height, width=width)        
-    if ice_total:
-        image_data = add_ice(image_data, ice=ice_total)
-
+    # if ice_total:
+    #     image_data = add_ice(image_data, percent_ice=ice_total)
     # Add Dust
-    if atmosphere_dust_amount > 0:
-        image_data = add_dust(image_data, dust_amount=atmosphere_dust_amount)
-
+    # if atmosphere_dust_amount > 0:
+    #     image_data = add_dust(image_data, dust_amount=atmosphere_dust_amount)
+    #Blur
     if blur_radius > 0:
         image_data = blur_image(image_data, height=height, width=width, radius=blur_radius)
 
-    im = Image.new('RGB', (width, height))
+    im = Image.new('RGBA', (width, height))
     im.putdata(image_data)
+
+    #Add Craters
+    if craterization > 0:
+        im = add_craters(im, craterization=craterization, width=width, height=height)
+
 
     mime = "image/png"
     if image_format == "JPEG":
@@ -112,30 +122,79 @@ def add_icecaps(image_data, ice_n=0.01, ice_s=0.01, height=256, width=256):
     return image_data
 
 
-def add_ice(image_data, ice=0.01):
+def add_craters(image, craterization=1.0, width=256, height=256):
+    craterization = int(craterization*10)
+    CRATER_VARIANCE = 2
+    crater_size = int(float(width) / 10)
+
+    foreground = Image.new('RGBA', (width, height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(foreground)
+
+    for c in range(0, craterization):
+        x = randint(10, width-10)
+        y = randint(10, height-10)
+        radius = randint(int(crater_size/20), crater_size)
+        x_left = x-radius+randint(-CRATER_VARIANCE, CRATER_VARIANCE)
+        x_right = x+radius+randint(-CRATER_VARIANCE, CRATER_VARIANCE)
+        y_left = y-radius+randint(-CRATER_VARIANCE, CRATER_VARIANCE)
+        y_right = y+radius+randint(-CRATER_VARIANCE, CRATER_VARIANCE)
+
+        #TODO: Rotation?
+
+        crater_rim_width = randint(0, 2)
+        crater_rim_basewidth = randint(0, 3)
+
+        crater_rim_brightness = randint(128, 200)
+        bright = (crater_rim_brightness, crater_rim_brightness, crater_rim_brightness, crater_rim_brightness)
+        dark = (0, 0, 0, randint(0, 128))
+        mid = (0, 0, 0, randint(80, 160))
+
+        offset = crater_rim_basewidth
+        draw.ellipse((x_left-offset, y_left-offset, x_right+offset, y_right+offset), fill=dark)
+
+        offset = crater_rim_width
+        draw.ellipse((x_left-offset, y_left-offset, x_right+offset, y_right+offset), fill=bright)
+
+        draw.ellipse((x_left, y_left, x_right, y_right), fill=bright)
+
+        offset = -crater_rim_width
+        draw.ellipse((x_left-offset, y_left-offset, x_right+offset, y_right+offset), fill=mid)
+
+        offset = -crater_rim_width-1
+        draw.ellipse((x_left-offset, y_left-offset, x_right+offset, y_right+offset), fill=dark)
+
+    image_new = Image.composite(foreground, image, foreground)
+    return image_new
+
+
+def add_ice(image_data, percent_ice=0.01):
     #TODO: Make patchy?
     ice_color = (255, 255, 255, 255)
 
-    pixel_count = len(image_data)
-    num_ice_pixels = clamp(int(ice * pixel_count), 0, 10000)
-    for ice_pixel in xrange(0, num_ice_pixels):
-        x = randint(0, pixel_count)
+    num_pixels = len(image_data)
+    pixels_to_ice = range(0, num_pixels)
+    np.random.shuffle(pixels_to_ice)
+
+    num_to_ice = int(percent_ice * num_pixels)
+    for ice in pixels_to_ice[:num_to_ice]:
         blur_amount = .7 + np.random.random()/3
-        image_data[x] = color_blend(image_data[x], ice_color, blur_amount)
+        image_data[ice] = color_blend(image_data[ice], ice_color, blur_amount)
 
     return image_data
 
 
 def add_dust(image_data, dust_amount=10):
-    percent_dust = float(dust_amount) / 2000
-    pixel_count = len(image_data)
-    num_dust_pixels = clamp(int(percent_dust * pixel_count), 0, 10000)
+    dust_color = (128, 128, 128, 128)
+    percent_dust = clamp(float(dust_amount) / 2000)
 
-    white = (255, 255, 255, 255)
-    for dust in xrange(0, num_dust_pixels):
-        x = randint(0, pixel_count)
+    num_pixels = len(image_data)
+    pixels_to_dust = range(0, num_pixels)
+    np.random.shuffle(pixels_to_dust)
+
+    num_to_dust = int(percent_dust * num_pixels)
+    for dust in pixels_to_dust[:num_to_dust]:
         blur_amount = .3 + np.random.random()/3
-        image_data[x] = color_blend(image_data[x], white, blur_amount)
+        image_data[dust] = color_blend(image_data[dust], dust_color, blur_amount)
 
     return image_data
 

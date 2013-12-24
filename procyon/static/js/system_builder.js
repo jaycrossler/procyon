@@ -242,8 +242,8 @@ system_builder.buildStarDescription=function(settings){
 };
 system_builder.buildPlanetDescriptions=function(settings){
     var output='';
-    var types = 'mass:2, radius:1, gravity:1, craterization:1, ring_numbers:0, tilt:0, atmosphere_millibars:thousands, magnetic_field:thousands, num_moons:0';
-    var dataVars = 'Mass:mass, Radius:radius, Gravity:gravity, Rings:ring_numbers, Tilt:tilt, Millibars:atmosphere_millibars, Craters:craterization, Mag Field:magnetic_field';
+    var types = 'mass:2, radius:1, gravity:1, craterization:1, ring_numbers:0, tilt:0, atmosphere_millibars:thousands, magnetic_field:thousands, num_moons:0, surface_temp_low:1, surface_temp_high:1';
+    var dataVars = 'Mass:mass, Radius:radius, Gravity:gravity, Rings:ring_numbers, Tilt:tilt, Millibars:atmosphere_millibars, Craters:craterization, Mag Field:magnetic_field, T&lt;:surface_temp_low, T&gt;:surface_temp_high';
 
     _.each(settings.planet_data,function(planet,num){
         output += '<span class="planet-info"><h3><canvas id="planet_'+num+'" width="40" height="40"></canvas>'+planet.name+'</h3><br/>';
@@ -273,15 +273,21 @@ system_builder.buildPlanetDescriptions=function(settings){
             });
         }
 
-        var planet_new = $.extend({},planet);
-        planet_new.size = 220;
-
-        var planetvars_as_get = $.param(planet_new);
-        var route = "/maker/planet.png?"+planetvars_as_get;
-        output+="<br/><img src='"+route+"' width=220 height=220/>";
-
+        output+="<br/><img src='"+system_builder.buildUrlToPlanetTexture(planet)+"' width=220 height=220/>";
         output+="</span>";
 
     });
     return output;
+};
+system_builder.buildUrlToPlanetTexture=function(planet){
+    //Only send certain variables to the texture generator via an image querystring
+    var planet_new = {};
+    planet_new.size = 220;
+    var planet_vars = "rand_seed color_range ice_north_pole ice_south_pole ice_total base_color surface_solidity craterization atmosphere_dust_amount";
+    _.each(planet_vars.split(" "), function(v){
+        planet_new[v] = planet[v];
+    });
+    var planetvars_as_get = $.param(planet_new);
+
+    return "/maker/planet.png?"+planetvars_as_get;
 };

@@ -198,9 +198,9 @@ def planet_from_variables(settings={}):
     set_rand_seed(rand_seed)
 
     mass = get_float_from_hash(settings, 'mass')
-    planet_count_max = (1.5+mass)*(1.5+mass)
+    planet_count_max = (2+mass)*(2+mass)
     planet_count_max = clamp(planet_count_max, 0, 20)
-    planet_count = rand_range(low=0, high=planet_count_max, weight=3, avg=4)
+    planet_count = rand_range(low=0, high=planet_count_max, weight=2, avg=4)
     planet_count = int(planet_count)
 
     planets = []
@@ -229,15 +229,28 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
 
     star_age = get_float_from_hash(settings, 'age', 5000)
 
+    #Keep Mass and Radius related, so that gravity won't be too high
     mass_max = 2 + (planet_num * 2)
     mass_max *= (mass_max/2)
+
+    #Make farther out planets smaller
+    if planet_num > 7:
+        mass_max /= 2
+    if planet_num > 11:
+        mass_max /= 2
+
     mass = bigger_makes_bigger(start=star_age, start_min=0, start_max=12000,
                                end=1, end_min=0.01, end_max=mass_max, tries_to_adjust=5)
     radius = bigger_makes_bigger(start=mass, start_min=0.01, start_max=mass_max,
                                  end=2, end_min=0.002, end_max=8, tries_to_adjust=4)
+    mass = clamp(mass, 0.01, radius*4.5)
+
     density = bigger_makes_bigger(start=mass, start_min=0.01, start_max=mass_max,
                                   end=5, end_min=0.6, end_max=10, tries_to_adjust=3)
+    #TODO: Shouldn't density be based on mass/radius?
     gravity = mass/(radius*radius)
+    #TODO: Use heavier minerals when gravity is high
+
     oblateness = rand_range(0, 0.1, 1, 0.04)
     tilt = rand_range(0, 180, 1, 20)
     albedo = rand_range(0, 1, 2, 0.2)
@@ -246,9 +259,16 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
     craterization = 0
     surface_ocean_amount = 0
 
-    ice_amount_total = rand_range(0, .1, 3, 0.02)
-    ice_amount_north_pole = rand_range(0, .1, 3, 0.001)
-    ice_amount_south_pole = rand_range(0, .1, 3, 0.001)
+    ice_amount_total = 0
+    ice_amount_north_pole = 0
+    ice_amount_south_pole = 0
+
+    #TODO: Relate to dist, not just planet_num
+    surface_temp_low = rand_range(-240, 200, 3, -100)
+    surface_temp_low = bigger_makes_smaller(start=planet_num, start_min=0, start_max=num_planets,
+                                            end=surface_temp_low, end_min=-240, end_max=200, tries_to_adjust=2)
+    surface_temp_high = rand_range(surface_temp_low, 400, 3, surface_temp_low+40)
+    surface_temp_mid = (surface_temp_high+surface_temp_low) / 2
 
     if (radius * mass) > 8:
         #Gas Giant
@@ -260,37 +280,39 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
         ring_numbers = int(ring_numbers)
         atmosphere_millibars = bigger_makes_bigger(start=gravity, start_min=0.01, start_max=5,
                                                    end=1, end_min=0.1, end_max=20000, tries_to_adjust=2)
-        surface_temp_low = rand_range(-240, 200, 2, -100)
-        surface_temp_low = bigger_makes_smaller(start=planet_num, start_min=0, start_max=num_planets,
-                                                end=surface_temp_low, end_min=-220, end_max=200, tries_to_adjust=2)
-
-        surface_temp_high = rand_range(surface_temp_low, 200, 2, surface_temp_low+20)
-        surface_temperature_range = "{0} - {1}".format(surface_temp_low, surface_temp_high)
-
         magnetic_field = bigger_makes_bigger(start=mass, start_min=0.01, start_max=mass_max,
                                              end=1, end_min=0.1, end_max=20000, tries_to_adjust=2)
 
+        #TODO: Reduce craterization for inner planets
+        #TODO: Capture bombardment as separate variable, use to increase spin, add textures, add moons, or move minerals to other planets
+
     else:
+        #Terrestial planet
+        craterization = rand_range(0, 10, 3, 1)
+
         if radius < 2.2:
-            craterization = rand_range(0, 5, 2, 1)
             surface_ocean_amount = rand_range(0, 1, 2, 0.9)
 
-            ice_amount_total = rand_range(0, 1, 1, 0.5)
-            ice_space_left = 1 - ice_amount_total
-            ice_amount_north_pole = rand_range(0, ice_space_left, 2, 0.01)
-            ice_space_left -= ice_amount_north_pole
-            ice_amount_south_pole = rand_range(0, ice_space_left, 2, 0.01)
+            ice_amount_total = rand_range(0, 1, 4, 0.1)
+            if surface_temp_low > 0:
+                ice_amount_total = 0
+            else:
+                ice_amount_total = bigger_makes_smaller(start=ice_amount_total, start_min=-200, start_max=400,
+                                                        end_min=0, end_max=1, tries_to_adjust=2)
+                ice_amount_north_pole = rand_range(0, ice_amount_total, 2, 0.01)
+                ice_space_left = ice_amount_total - ice_amount_north_pole
+                ice_amount_south_pole = rand_range(0, ice_space_left, 2, 0.01)
+                ice_amount_total = ice_amount_total - ice_amount_south_pole
+
+            #TODO: If water on surface and high temp < 0, make all ice
+            #TODO: If less atmosphere and high water content, make ice
+            #TODO: Add functions to increase h20 on bombardment of comets
 
         surface_solidity = 1
         ring_size = 0
         ring_numbers = 0
         atmosphere_millibars = bigger_makes_bigger(start=gravity, start_min=0.01, start_max=5,
                                                    end=1, end_min=0.1, end_max=50, tries_to_adjust=2)
-        surface_temp_low = rand_range(-240, 200, 2, 0)
-        surface_temp_low = bigger_makes_smaller(start=planet_num, start_min=0, start_max=num_planets,
-                                                end=surface_temp_low, end_min=-220, end_max=200, tries_to_adjust=2)
-        surface_temp_high = rand_range(surface_temp_low, 200, 2, surface_temp_low+30)
-
         magnetic_field = bigger_makes_bigger(start=mass, start_min=0.01, start_max=mass_max,
                                              end=1, end_min=0.1, end_max=100, tries_to_adjust=2)
 
@@ -310,7 +332,7 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
 
     atmosphere_dust_amount = 0
     if surface_solidity > .9:
-        atmosphere_dust_amount = int(rand_range(1, 1000, 2, 10))
+        atmosphere_dust_amount = int(rand_range(1, 1000, 5, 10))
 
     num_moons_max = 1 + (planet_num * 4)
     if planet_num > 6:
