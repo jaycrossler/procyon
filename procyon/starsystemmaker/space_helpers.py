@@ -372,6 +372,9 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
                    'num_moons': num_moons, 'rand_seed': rand_seed_planet,
                    }
     #TODO: Loop through everything, and if a float, only return 4? decimal points of data
+    for v in planet_data:
+        if type(planet_data[v]) == float:
+            planet_data[v] = round(planet_data[v] * 1000) / 1000
 
     moon_name_list = list_of_names()
     moons = []
