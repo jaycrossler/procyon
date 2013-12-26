@@ -2,6 +2,7 @@ from django.http import HttpResponse
 import numpy as np
 from procyon.starsystemmaker.math_helpers import *
 import struct
+from noise import snoise2
 
 try:
     import Image
@@ -20,6 +21,7 @@ except ImportError:
 
 def generate_texture(request, image_format="PNG"):
 
+    rand_seed = float(request.GET.get('rand_seed', np.random.random()))
     width = height = int(float(request.GET.get('size', 256) or 256))
     color_range = int(float(request.GET.get('color_range', 5) or 5))
     ice_n = float(request.GET.get('ice_north_pole', .03) or .03)
@@ -28,8 +30,8 @@ def generate_texture(request, image_format="PNG"):
     base_color = str(request.GET.get('base_color', '') or '')
     surface_solidity = float(request.GET.get('surface_solidity', 0) or 0)
     craterization = float(request.GET.get('craterization', .02) or .02)
-
     atmosphere_dust_amount = int(float(request.GET.get('atmosphere_dust_amount', 3)))
+    minerals = str(request.GET.get('minerals_specific', '') or 'Carbon Iron Hydrogen Nitrogen Oxygen')
 
     #TODO: Build multiple image and data layers for each planetoid, all related
     #TODO: Allow user to request just one specific layer (ice, dust, atmosphere, surface, minerals, water), or (surface, air) or all combined as one
@@ -39,40 +41,41 @@ def generate_texture(request, image_format="PNG"):
     #TODO: Use Blur?
     blur_radius = 1
 
-    rand_seed = float(request.GET.get('rand_seed', np.random.random()))
     set_rand_seed(rand_seed)
 
-    #TODO: Try to get/save file from file cache
-
-    #TODO: Determine color based on minerals and atmosphere
-    if base_color:
-        rgb_str = base_color.replace("#", "")
-        color = struct.unpack('BBB', rgb_str.decode('hex'))
-        color = (color[0], color[1], color[2], 255)
-    else:
-        color = (randint(0, 255), randint(0, 255), randint(0, 255), 255)
+    surface_color = get_surface_color(base_color=base_color,  minerals=minerals)
 
     #Set base color
     image_data = []
     for i in range(0, width*height):
-        image_data.append(color)
+        image_data.append(surface_color)
 
     #Add gas streaks
     if surface_solidity < .9:
-        add_streaks(image_data, height=height, width=width, color_range=color_range, color=color)
+        add_streaks(image_data, height=height, width=width, color_range=color_range, color=surface_color)
 
     #Add Ice Caps on north and south poles
     if ice_n > 0 or ice_s > 0:
         image_data = add_icecaps(image_data, ice_n=ice_n, ice_s=ice_s, height=height, width=width)
     #Add Ice
-    # if ice_total:
-    #     image_data = add_ice(image_data, percent_ice=ice_total)
+    if ice_total:
+        image_data = add_ice(image_data, percent_ice=ice_total)
     # Add Dust
     # if atmosphere_dust_amount > 0:
     #     image_data = add_dust(image_data, dust_amount=atmosphere_dust_amount)
     #Blur
     if blur_radius > 0:
         image_data = blur_image(image_data, height=height, width=width, radius=blur_radius)
+
+
+    #Add Noise
+    noise_map = get_noise(width=width, height=height)
+    #TODO: Make this tileable perlin noise.
+    #TODO: Make a function to generate different types of noise, some for blending colors, others for contrast, etc.
+    for i in range(0, len(noise_map)):
+        col = image_data[i]
+        image_data[i] = ((col[0]+noise_map[i])/2, (col[1]+noise_map[i])/2, (col[2]+noise_map[i])/2, 255)
+
 
     im = Image.new('RGBA', (width, height))
     im.putdata(image_data)
@@ -123,9 +126,9 @@ def add_icecaps(image_data, ice_n=0.01, ice_s=0.01, height=256, width=256):
 
 
 def add_craters(image, craterization=1.0, width=256, height=256):
-    craterization = int(craterization*10)
+    craterization = int(craterization*20)
     CRATER_VARIANCE = 2
-    crater_size = int(float(width) / 10)
+    crater_size = int(float(width) / 20)
 
     foreground = Image.new('RGBA', (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(foreground)
@@ -133,7 +136,7 @@ def add_craters(image, craterization=1.0, width=256, height=256):
     for c in range(0, craterization):
         x = randint(10, width-10)
         y = randint(10, height-10)
-        radius = randint(int(crater_size/20), crater_size)
+        radius = randint(int(crater_size/10), crater_size)
         x_left = x-radius+randint(-CRATER_VARIANCE, CRATER_VARIANCE)
         x_right = x+radius+randint(-CRATER_VARIANCE, CRATER_VARIANCE)
         y_left = y-radius+randint(-CRATER_VARIANCE, CRATER_VARIANCE)
@@ -265,3 +268,43 @@ def blur_image(image_data, blur_horizontal=True, blur_vertical=True, height=256,
         image_data = out_image_data
 
     return image_data
+
+
+def get_noise(octaves=42, width=256, height=256):
+    freq = 16.0 * octaves
+    output = []
+
+    for y in range(height):
+        for x in range(width):
+            output.append(int(snoise2(x / freq, y / freq, octaves) * 127.0 + 128.0))
+    return output
+
+
+def get_surface_color(base_color='ff0000',  minerals='Carbon Iron'):
+
+    #TODO: Determine color based on minerals and atmosphere
+    if base_color:
+        color = color_array_from_hex(color=base_color)
+    else:
+        color = (randint(0, 255), randint(0, 255), randint(0, 255), 255)
+
+    return color
+
+
+def build_color_layer(color='ff0000', width=256, height=256, rand_seed=42):
+    image_data = []
+    for i in range(0, width*height):
+        image_data.append(color)
+#Add noise with rand_seed
+
+    return image_data
+
+
+def color_array_from_hex(color='ff0000'):
+    base_color = color.replace("%23", "")
+    rgb_str = base_color.replace("#", "")
+
+    color = struct.unpack('BBB', rgb_str.decode('hex'))
+    color = (color[0], color[1], color[2], 255)
+
+    return color
