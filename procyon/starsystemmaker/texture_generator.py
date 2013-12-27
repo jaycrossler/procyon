@@ -20,7 +20,7 @@ except ImportError:
         raise ImportError("The Python Imaging Library was not found.")
 
 
-LAYER_TYPES = "minerals surface craters icecaps ice noise atmosphere"
+LAYER_TYPES = "minerals surface craters icecaps ice atmosphere noise"
 
 
 def generate_texture(request, image_format="PNG"):
@@ -63,15 +63,15 @@ def generate_texture(request, image_format="PNG"):
     if ice_total:
         image_layers['ice'] = image_layer_ice(percent_ice=ice_total, height=height, width=width)
     # Add Dust
-    # if atmosphere_dust_amount > 0:
-    #     image_layers['dust'] = image_layer_dust(dust_amount=atmosphere_dust_amount, height=height, width=width)
+    if atmosphere_dust_amount > 0:
+        image_layers['dust'] = image_layer_dust(dust_amount=atmosphere_dust_amount, height=height, width=width)
 
     #Add Craters
     if craterization > 0:
         image_layers['craters'] = image_layer_craters(craterization=craterization, width=width, height=height)
 
     #NOTE: Good land with white_min=-.25, white_range=10
-    image_layers['noise'] = image_layer_noise(width=width, height=height, white_min=.25, white_range=2)
+    image_layers['noise'] = image_layer_noise(width=width, height=height, white_min=0, white_range=.2)
 
     return response_from_image_layers(width=width, height=height, image_layers=image_layers, image_format=image_format)
 
@@ -96,9 +96,9 @@ def image_layer_icecaps(ice_n=0.01, ice_s=0.01, height=256, width=256, octaves=6
                 noise1 = noise.snoise2(col / freq, row / freq, octaves)
                 noise2 = from_edge * 2
                 noisenum = clamp(noise1 * noise2 + noise2)
-
-                pixel = (row*width)+col
-                image_data[pixel] = (255, 255, 255, int(noisenum * 255.0))
+                if noisenum > .5:
+                    pixel = (row*width)+col
+                    image_data[pixel] = (255, 255, 255, int(noisenum * 255.0))
 
     return image_data
 
@@ -112,9 +112,9 @@ def image_layer_craters(craterization=1.0, width=256, height=256):
     draw = ImageDraw.Draw(foreground)
 
     for c in range(0, craterization):
-        x = randint(10, width-10)
-        y = randint(10, height-10)
         radius = randint(int(crater_size/10), crater_size)
+        x = randint(radius+1, width-radius-1)
+        y = randint(radius+1, height-radius-1)
         x_left = x-radius+randint(-CRATER_VARIANCE, CRATER_VARIANCE)
         x_right = x+radius+randint(-CRATER_VARIANCE, CRATER_VARIANCE)
         y_left = y-radius+randint(-CRATER_VARIANCE, CRATER_VARIANCE)
@@ -125,10 +125,10 @@ def image_layer_craters(craterization=1.0, width=256, height=256):
         crater_rim_width = randint(0, 2)
         crater_rim_basewidth = randint(0, 3)
 
-        crater_rim_brightness = randint(128, 200)
+        crater_rim_brightness = randint(128, 120)
         bright = (crater_rim_brightness, crater_rim_brightness, crater_rim_brightness, crater_rim_brightness)
-        dark = (0, 0, 0, randint(0, 128))
-        mid = (0, 0, 0, randint(80, 160))
+        dark = (0, 0, 0, randint(0, 80))
+        mid = (0, 0, 0, randint(80, 100))
 
         offset = crater_rim_basewidth
         draw.ellipse((x_left-offset, y_left-offset, x_right+offset, y_right+offset), fill=dark)
@@ -328,6 +328,18 @@ def color_array_from_hex(color='ff0000'):
     color = (color[0], color[1], color[2], 255)
 
     return color
+
+
+def image_with_random_color(image_format="PNG"):
+    im = Image.new('RGBA', (256, 256), (randint(0, 255), randint(0, 255), randint(0, 255), 255))
+
+    mime = "image/png"
+    if image_format == "JPEG":
+        mime = "image/jpeg"
+
+    response = HttpResponse(mimetype=mime)
+    im.save(response, image_format)
+    return response
 
 
 # ==== Not used ====

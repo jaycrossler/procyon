@@ -141,8 +141,14 @@ def system_builder(request):
 
 
 def create_planet_texture_png(request):
-    return generate_texture(request, 'PNG')
+    try:
+        return generate_texture(request, 'PNG')
+    except:
+        return image_with_random_color('PNG')
 
 
 def create_planet_texture_jpeg(request):
-    return generate_texture(request, 'JPEG')
+    try:
+        return generate_texture(request, 'JPEG')
+    except:
+        return image_with_random_color('JPEG')
