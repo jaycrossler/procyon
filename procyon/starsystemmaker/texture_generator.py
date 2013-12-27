@@ -2,7 +2,8 @@ from django.http import HttpResponse
 import numpy as np
 from procyon.starsystemmaker.math_helpers import *
 import struct
-from noise import snoise2
+import noise
+import math
 
 try:
     import Image
@@ -34,7 +35,6 @@ def generate_texture(request, image_format="PNG"):
     craterization = float(request.GET.get('craterization', .02) or .02)
     atmosphere_dust_amount = int(float(request.GET.get('atmosphere_dust_amount', 3)))
     minerals = str(request.GET.get('minerals_specific', '') or 'Carbon Iron Hydrogen Nitrogen Oxygen')
-    octaves = int(float(request.GET.get('octaves', 42) or 42))
 
     #TODO: Allow user to request just one specific layer (ice, dust, atmosphere, surface, minerals, water), or (surface, air) or all combined as one
     #TODO: Cache each of these images once drawn
@@ -71,7 +71,7 @@ def generate_texture(request, image_format="PNG"):
         image_layers['craters'] = image_layer_craters(craterization=craterization, width=width, height=height)
 
     #NOTE: Good land with white_min=-.25, white_range=10
-    image_layers['noise'] = image_layer_noise(width=width, height=height, octaves=octaves, white_min=.25, white_range=5)
+    image_layers['noise'] = image_layer_noise(width=width, height=height, white_min=.25, white_range=2)
 
     return response_from_image_layers(width=width, height=height, image_layers=image_layers, image_format=image_format)
 
@@ -93,12 +93,12 @@ def image_layer_icecaps(ice_n=0.01, ice_s=0.01, height=256, width=256, octaves=6
 
         if from_edge > 0:
             for col in range(0, width):
-                noise1 = snoise2(col / freq, row / freq, octaves)
+                noise1 = noise.snoise2(col / freq, row / freq, octaves)
                 noise2 = from_edge * 2
-                noise = clamp(noise1 * noise2 + noise2)
+                noisenum = clamp(noise1 * noise2 + noise2)
 
                 pixel = (row*width)+col
-                image_data[pixel] = (255, 255, 255, int(noise * 255.0))
+                image_data[pixel] = (255, 255, 255, int(noisenum * 255.0))
 
     return image_data
 
@@ -205,24 +205,45 @@ def image_layer_surface(color=(255, 0, 0, 255), width=256, height=256):
     return image_data
 
 
-def image_layer_noise(width=256, height=256, octaves=42, white_min=0.5, white_range=None):
-    #Add Noise
-    #TODO: Make this tileable perlin noise.
-    #TODO: Make a function to generate different types of noise, some for blending colors, others for contrast, etc.
+def image_layer_noise(width=256, height=256, white_min=0.5, white_range=None, octave=5):
+    #Derived from http://gamedev.stackexchange.com/questions/23625/how-do-you-generate-tileable-perlin-noise
 
-    freq = 16.0 * octaves
+    perm = range(width)
+    np.random.shuffle(perm)
+
+    perm += perm
+    dirs = [(math.cos(a * 2.0 * math.pi / width), math.sin(a * 2.0 * math.pi / height)) for a in range(width)]
+
+    def simplex_noise(x, y, per):
+        def surflet(grid_x, grid_y):
+            dist_x, dist_y = abs(x-grid_x), abs(y-grid_y)
+            poly_x = 1 - 6*dist_x**5 + 15*dist_x**4 - 10*dist_x**3
+            poly_y = 1 - 6*dist_y**5 + 15*dist_y**4 - 10*dist_y**3
+            hashed = perm[perm[int(grid_x) % per] + int(grid_y) % per]
+            grad = (x-grid_x)*dirs[hashed][0] + (y-grid_y)*dirs[hashed][1]
+            return poly_x * poly_y * grad
+        int_x, int_y = int(x), int(y)
+        return (surflet(int_x+0, int_y+0) + surflet(int_x+1, int_y+0) +
+                surflet(int_x+0, int_y+1) + surflet(int_x+1, int_y+1))
+
+    def fractal_brownian(x, y, per, octaves):
+        value = 0
+        for o in range(octaves):
+            value += 0.5**o * simplex_noise(x*2**o, y*2**o, per*2**o)
+        return value
+
+    size, freq, data = width, 1/32.0, []
     white_min *= 255.0
     if not white_range:
         white_range = 1-white_min
     white_range *= 255.0
 
-    image_data = []
-    for y in range(height):
-        for x in range(width):
-            noise = int(snoise2(x / freq, y / freq, octaves) * white_range + white_min)
-            image_data.append((255, 255, 255, noise))
+    for row in range(size):
+        for col in range(size):
+            val = fractal_brownian(col*freq, row*freq, int(size*freq), octave)
+            data.append((255, 255, 255, int(val*white_range + white_min)))
 
-    return image_data
+    return data
 
 
 #==== Supporting function ====
@@ -240,7 +261,7 @@ def get_noise(octaves=42, width=256, height=256):
 
     for y in range(height):
         for x in range(width):
-            output.append(int(snoise2(x / freq, y / freq, octaves) * 127.0 + 128.0))
+            output.append(int(noise.snoise2(x / freq, y / freq, octaves) * 127.0 + 128.0))
     return output
 
 
@@ -361,3 +382,33 @@ def blur_image(image_data, blur_horizontal=True, blur_vertical=True, height=256,
         image_data = out_image_data
 
     return image_data
+
+
+def image_layer_noise_old(width=256, height=256, white_min=0.5, white_range=None):
+    #Add Noise
+    #TODO: Make a function to generate different types of noise, some for blending colors, others for contrast, etc.
+
+    x_start = 0
+    y_start = 0
+
+    # freq = 32.0 * octaves
+    freq = width
+    white_min *= 255.0
+    if not white_range:
+        white_range = 1-white_min
+    white_range *= 255.0
+
+    octaves = 42
+    period = 128.0
+
+    image_data = []
+    for y in range(height):
+        for x in range(width):
+#            noisenum = noise.snoise2(x_start + (x / freq), y_start + (y / freq), octaves)
+            noisenum = noise.snoise2(x/period, y/period, octaves)
+
+            # noisenum = pnoise2(x * 16.0 / width, y * 16.0 / width, octaves=64, repeatx=64.0, repeaty=64.0)
+            image_data.append((255, 255, 255, int(noisenum * white_range + white_min)))
+
+    return image_data
+
