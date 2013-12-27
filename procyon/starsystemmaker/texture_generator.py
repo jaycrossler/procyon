@@ -19,7 +19,7 @@ except ImportError:
         raise ImportError("The Python Imaging Library was not found.")
 
 
-LAYER_TYPES = "minerals surface craters icecaps ice atmosphere"
+LAYER_TYPES = "minerals surface craters icecaps ice noise atmosphere"
 
 
 def generate_texture(request, image_format="PNG"):
@@ -34,6 +34,7 @@ def generate_texture(request, image_format="PNG"):
     craterization = float(request.GET.get('craterization', .02) or .02)
     atmosphere_dust_amount = int(float(request.GET.get('atmosphere_dust_amount', 3)))
     minerals = str(request.GET.get('minerals_specific', '') or 'Carbon Iron Hydrogen Nitrogen Oxygen')
+    octaves = int(float(request.GET.get('octaves', 42) or 42))
 
     #TODO: Allow user to request just one specific layer (ice, dust, atmosphere, surface, minerals, water), or (surface, air) or all combined as one
     #TODO: Cache each of these images once drawn
@@ -53,7 +54,7 @@ def generate_texture(request, image_format="PNG"):
     if surface_solidity < .9:
         image_layers['atmosphere'] = image_layer_streaks(height=height, width=width, color_range=color_range, color=surface_color)
     else:
-        image_layers['surface'] = image_layer_surface(color=surface_color, width=width, height=height, rand_seed=42) #TODO, Pull from seed
+        image_layers['surface'] = image_layer_surface(color=surface_color, width=width, height=height)
 
     #Add Ice Caps on north and south poles
     if ice_n > 0 or ice_s > 0:
@@ -62,34 +63,42 @@ def generate_texture(request, image_format="PNG"):
     if ice_total:
         image_layers['ice'] = image_layer_ice(percent_ice=ice_total, height=height, width=width)
     # Add Dust
-    if atmosphere_dust_amount > 0:
-        image_layers['dust'] = image_layer_dust(dust_amount=atmosphere_dust_amount, height=height, width=width)
+    # if atmosphere_dust_amount > 0:
+    #     image_layers['dust'] = image_layer_dust(dust_amount=atmosphere_dust_amount, height=height, width=width)
+
     #Add Craters
     if craterization > 0:
         image_layers['craters'] = image_layer_craters(craterization=craterization, width=width, height=height)
+
+    #NOTE: Good land with white_min=-.25, white_range=10
+    image_layers['noise'] = image_layer_noise(width=width, height=height, octaves=octaves, white_min=.25, white_range=5)
 
     return response_from_image_layers(width=width, height=height, image_layers=image_layers, image_format=image_format)
 
 
 # ==== Image Building Functions ====
-def image_layer_icecaps(ice_n=0.01, ice_s=0.01, height=256, width=256):
-    ice_buffer = 0
+def image_layer_icecaps(ice_n=0.01, ice_s=0.01, height=256, width=256, octaves=64):
     image_data = []
     for i in range(0, width*height):
         image_data.append((0, 0, 0, 0))
 
-    for row in range(0, height):
-        if row < (height*ice_n) or row > height-(height*ice_s):
-            if row < (height*ice_n):
-                from_edge = ((height*ice_n)-row) / (height*ice_n)
-            else:
-                from_edge = (row - (height-(height*ice_s))) / (height*ice_s)
+    freq = 2.0 * octaves
 
-            for i in range(0, width):
-                if np.random.random() < (from_edge+ice_buffer):
-                    blend_amount = int(clamp(np.random.random()+from_edge)*255)
-                    pixel = (row*width)+i
-                    image_data[pixel] = (255, 255, 255, blend_amount)
+    for row in range(0, height):
+        from_edge = 0
+        if row <= (height*ice_n):
+            from_edge = ((height*ice_n)-row) / (height*ice_n)
+        elif row >= height-(height*ice_s):
+            from_edge = (row - (height-(height*ice_s))) / (height*ice_s)
+
+        if from_edge > 0:
+            for col in range(0, width):
+                noise1 = snoise2(col / freq, row / freq, octaves)
+                noise2 = from_edge * 2
+                noise = clamp(noise1 * noise2 + noise2)
+
+                pixel = (row*width)+col
+                image_data[pixel] = (255, 255, 255, int(noise * 255.0))
 
     return image_data
 
@@ -189,18 +198,29 @@ def image_layer_streaks(height=256, width=256, color_range=5, color=(255, 0, 0, 
     return image_data
 
 
-def image_layer_surface(color=(255, 0, 0, 255), width=256, height=256, rand_seed=42):
+def image_layer_surface(color=(255, 0, 0, 255), width=256, height=256):
     image_data = []
     for i in range(0, width*height):
         image_data.append(color)
+    return image_data
 
+
+def image_layer_noise(width=256, height=256, octaves=42, white_min=0.5, white_range=None):
     #Add Noise
-    noise_map = get_noise(width=width, height=height)
     #TODO: Make this tileable perlin noise.
     #TODO: Make a function to generate different types of noise, some for blending colors, others for contrast, etc.
-    for i in range(0, len(noise_map)):
-        col = image_data[i]
-        image_data[i] = ((col[0]+noise_map[i])/2, (col[1]+noise_map[i])/2, (col[2]+noise_map[i])/2, 255)
+
+    freq = 16.0 * octaves
+    white_min *= 255.0
+    if not white_range:
+        white_range = 1-white_min
+    white_range *= 255.0
+
+    image_data = []
+    for y in range(height):
+        for x in range(width):
+            noise = int(snoise2(x / freq, y / freq, octaves) * white_range + white_min)
+            image_data.append((255, 255, 255, noise))
 
     return image_data
 
