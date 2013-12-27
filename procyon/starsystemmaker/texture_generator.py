@@ -44,7 +44,7 @@ def generate_texture(request, image_format="PNG"):
     set_rand_seed(rand_seed)
 
     #Parse out the colors of the planet
-    surface_color = colors_from_minerals(base_color=base_color,  minerals=minerals)
+    surface_colors = colors_from_minerals(base_color=base_color,  minerals=minerals)
     #TODO: Make an surface_color_array
 
     #Create the image_layers
@@ -52,9 +52,9 @@ def generate_texture(request, image_format="PNG"):
 
     #Add gas streaks
     if surface_solidity < .9:
-        image_layers['atmosphere'] = image_layer_streaks(height=height, width=width, color_range=color_range, color=surface_color)
+        image_layers['atmosphere'] = image_layer_streaks(height=height, width=width, color_range=color_range, colors=surface_colors)
     else:
-        image_layers['surface'] = image_layer_surface(color=surface_color, width=width, height=height)
+        image_layers['surface'] = image_layer_surface(colors=surface_colors, width=width, height=height)
 
     #Add Ice Caps on north and south poles
     if ice_n > 0 or ice_s > 0:
@@ -186,7 +186,12 @@ def image_layer_dust(dust_amount=10, height=256, width=256):
     return image_data
 
 
-def image_layer_streaks(height=256, width=256, color_range=5, color=(255, 0, 0, 255)):
+def image_layer_streaks(height=256, width=256, color_range=5, colors=list()):
+
+    if colors and len(colors) > 0:
+        color = colors[0]
+    else:
+        color = (255, 0, 0, 255)
 
     image_data = []
     for row in range(0, height):
@@ -198,7 +203,13 @@ def image_layer_streaks(height=256, width=256, color_range=5, color=(255, 0, 0, 
     return image_data
 
 
-def image_layer_surface(color=(255, 0, 0, 255), width=256, height=256):
+def image_layer_surface(width=256, height=256, colors=list()):
+
+    if colors and len(colors) > 0:
+        color = colors[0]
+    else:
+        color = (255, 0, 0, 255)
+
     image_data = []
     for i in range(0, width*height):
         image_data.append(color)
@@ -301,14 +312,68 @@ def merge_image_layers(im, image_layers):
 
 
 def colors_from_minerals(base_color='ff0000',  minerals='Carbon Iron'):
+    #Determine color based on minerals
 
-    #TODO: Determine color based on minerals and atmosphere
+    mineral_list = [
+        {'name': 'Iron', 'element': 'Fe', 'col': '8d6039'},
+        {'name': 'Carbon', 'element': 'C', 'col': '888888'},
+        {'name': 'Lithium', 'element': 'Li', 'col': 'ff0000'},
+        {'name': 'Strontium', 'element': 'Sr', 'col': 'ff0000'},
+        {'name': 'Calcium', 'element': 'Ca', 'col': 'ff6666'},
+        {'name': 'Sodium', 'element': 'Na', 'col': 'ffff00'},
+        {'name': 'Barium', 'element': 'Ba', 'col': '99ff33'},
+        {'name': 'Molybdenum', 'element': 'Mo', 'col': '99ff33'},
+        {'name': 'Boron', 'element': 'B', 'col': '66ff66'},
+        {'name': 'Thallium', 'element': 'Tl', 'col': '66ff66'},
+        {'name': 'Phosphorus', 'element': 'P', 'col': '66ffcc'},
+        {'name': 'Zinc', 'element': 'Zn', 'col': '66ffcc'},
+        {'name': 'Tellurium', 'element': 'Te', 'col': 'ccffcc'},
+        {'name': 'Antimony', 'element': 'Sb', 'col': 'ccffcc'},
+        {'name': 'Lead', 'element': 'Pb', 'col': 'ccffcc'},
+        {'name': 'Copper', 'element': 'Cu', 'col': '0066ff'},
+        {'name': 'Copper-ammonium', 'element': 'CuNH', 'col': '0000ff'},
+
+        {'name': 'Selenium', 'element': 'Se', 'col': '0066ff'},
+        {'name': 'Indium', 'element': 'In', 'col': '0066ff'},
+        {'name': 'Arsenic', 'element': 'As', 'col': '0066ff'},
+        {'name': 'Potassium', 'element': 'K', 'col': 'ffccff'},
+        {'name': 'Rubidium', 'element': 'Rb', 'col': 'ffccff'},
+        {'name': 'Cesium', 'element': 'Cs', 'col': 'ffccff'},
+
+
+    ]
     if base_color:
         color = color_array_from_hex(color=base_color)
     else:
         color = (randint(0, 255), randint(0, 255), randint(0, 255), 255)
 
-    return color
+    weighting = 1
+    color_list = []
+    for mineral_text in minerals.split():
+        t = mineral_text.split(":")
+        mineral = t[0] or "carbon"
+        weighting /= 2
+        mineral_weighting = weighting #TODO: Use this for random weighting?
+        if len(t) > 1:
+            mineral_weighting = t[1]
+
+        for min_option in mineral_list:
+            name = min_option.get('name')
+            symbol = min_option.get('symbol')
+            col = min_option.get('col')
+
+            if name and name.lower() == mineral.lower():
+                col = color_array_from_hex(col)
+                color_list.append(col)
+                break
+            elif symbol and symbol.lower() == mineral.lower():
+                col = color_array_from_hex(col)
+                color_list.append(col)
+                break
+
+    color_list.append(color)
+
+    return color_list
 
 
 def color_blend(base_color=(255, 255, 255, 255), new_color=(0, 0, 255, 255), amount=.2):
