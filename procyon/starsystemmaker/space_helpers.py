@@ -323,7 +323,7 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
     mineral_surface_heavy = rand_range(0, space_left, 1, space_left)
     space_left = 1 - mineral_surface_early + mineral_surface_mid + mineral_surface_heavy
     mineral_surface_late = space_left
-    minerals_specific = 'Hydrogen, Helium, Iron' #TODO: Randomize and make awesome
+    minerals_specific = pick_random_minerals()
 
     solid_core_size = rand_range(0, 1, 2, .3)
     solid_core_type = 'Iron'
@@ -396,3 +396,20 @@ def create_random_moon(planet_data, moon_num, moon_name_list):
     color = '#%02X%02X%02X' % (r(), r(), r())
 
     return {'name': name, 'moon_num': moon_num, 'color':color}
+
+
+def pick_random_minerals():
+    mineral_list = "Iron Carbon Lithium Strontium Calcium Hydrogen Sodium Barium Boron Helium Nitrogen Oxygen "
+    mineral_list += "Phosphorus Zinc Lead Copper Arsenic Cesium Indium Gold Silver"
+    mineral_list = mineral_list.split()
+
+    minerals = []
+    mineral_count = randint(4, 8)
+    for i in range(mineral_count):
+        min_num = randint(0, len(mineral_list))
+        mineral = mineral_list[min_num]
+        minerals.append(mineral)
+
+    minerals = " ".join(minerals)
+
+    return minerals

@@ -283,7 +283,7 @@ system_builder.buildUrlToPlanetTexture=function(planet){
     //Only send certain variables to the texture generator via an image querystring
     var planet_new = {};
     planet_new.size = 220;
-    var planet_vars = "rand_seed color_range ice_north_pole ice_south_pole ice_total base_color surface_solidity craterization atmosphere_dust_amount";
+    var planet_vars = "rand_seed color_range ice_north_pole ice_south_pole ice_total base_color surface_solidity craterization atmosphere_dust_amount minerals_specific";
     _.each(planet_vars.split(" "), function(v){
         planet_new[v] = planet[v];
     });

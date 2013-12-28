@@ -45,14 +45,13 @@ def generate_texture(request, image_format="PNG"):
 
     #Parse out the colors of the planet
     surface_colors = colors_from_minerals(base_color=base_color,  minerals=minerals)
-    #TODO: Make an surface_color_array
 
     #Create the image_layers
     image_layers = build_initial_image_layers()
 
     #Add gas streaks
     if surface_solidity < .9:
-        image_layers['atmosphere'] = image_layer_streaks(height=height, width=width, color_range=color_range, colors=surface_colors)
+        image_layers['atmosphere'] = image_layer_streaks(height=height, width=width, c_range=color_range, colors=surface_colors)
     else:
         image_layers['surface'] = image_layer_surface(colors=surface_colors, width=width, height=height)
 
@@ -186,16 +185,20 @@ def image_layer_dust(dust_amount=10, height=256, width=256):
     return image_data
 
 
-def image_layer_streaks(height=256, width=256, color_range=5, colors=list()):
+def image_layer_streaks(height=256, width=256, c_range=5, colors=list()):
 
-    if colors and len(colors) > 0:
+    len_colors = len(colors)
+    if colors and len_colors > 0:
         color = colors[0]
     else:
         color = (255, 0, 0, 255)
 
     image_data = []
     for row in range(0, height):
-        rand = (randint(-color_range, color_range), randint(-color_range, color_range), randint(-color_range, color_range), 0)
+        rand = (randint(-c_range, c_range), randint(-c_range, c_range), randint(-c_range, c_range), 0)
+        if np.random.random() < .2:
+            new_color = colors[randint(0, len_colors)]
+            color = color_blend(color, new_color, 0.2)
         draw_color = color = tuple(map(sum, zip(color, rand)))
         for i in range(0, width):
             image_data.append(draw_color)
@@ -205,6 +208,7 @@ def image_layer_streaks(height=256, width=256, color_range=5, colors=list()):
 
 def image_layer_surface(width=256, height=256, colors=list()):
 
+    len_colors = len(colors)
     if colors and len(colors) > 0:
         color = colors[0]
     else:
@@ -212,6 +216,10 @@ def image_layer_surface(width=256, height=256, colors=list()):
 
     image_data = []
     for i in range(0, width*height):
+        if np.random.random() < .01:
+            new_color = colors[randint(0, len_colors)]
+            color = color_blend(color, new_color, 0.05)
+
         image_data.append(color)
     return image_data
 
@@ -332,22 +340,19 @@ def colors_from_minerals(base_color='ff0000',  minerals='Carbon Iron'):
         {'name': 'Lead', 'element': 'Pb', 'col': 'ccffcc'},
         {'name': 'Copper', 'element': 'Cu', 'col': '0066ff'},
         {'name': 'Copper-ammonium', 'element': 'CuNH', 'col': '0000ff'},
-
         {'name': 'Selenium', 'element': 'Se', 'col': '0066ff'},
         {'name': 'Indium', 'element': 'In', 'col': '0066ff'},
         {'name': 'Arsenic', 'element': 'As', 'col': '0066ff'},
         {'name': 'Potassium', 'element': 'K', 'col': 'ffccff'},
         {'name': 'Rubidium', 'element': 'Rb', 'col': 'ffccff'},
         {'name': 'Cesium', 'element': 'Cs', 'col': 'ffccff'},
-
-
     ]
     if base_color:
         color = color_array_from_hex(color=base_color)
     else:
         color = (randint(0, 255), randint(0, 255), randint(0, 255), 255)
 
-    weighting = 1
+    weighting = 1.0
     color_list = []
     for mineral_text in minerals.split():
         t = mineral_text.split(":")
