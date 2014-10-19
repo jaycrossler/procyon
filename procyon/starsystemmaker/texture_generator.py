@@ -216,9 +216,9 @@ def image_layer_surface(width=256, height=256, colors=list()):
 
     image_data = []
     for i in range(0, width*height):
-        if np.random.random() < .01:
-            new_color = colors[randint(0, len_colors)]
-            color = color_blend(color, new_color, 0.05)
+        # if np.random.random() < .01:
+        #     new_color = colors[randint(0, len_colors)]
+        #     color = color_blend(color, new_color, 0.05)
 
         image_data.append(color)
     return image_data
@@ -226,6 +226,8 @@ def image_layer_surface(width=256, height=256, colors=list()):
 
 def image_layer_noise(width=256, height=256, white_min=0.5, white_range=None, octave=5):
     #Derived from http://gamedev.stackexchange.com/questions/23625/how-do-you-generate-tileable-perlin-noise
+
+    #TODO: This is taking too long to calculate for larger images. Pre-generate and prestore?
 
     perm = range(width)
     np.random.shuffle(perm)
