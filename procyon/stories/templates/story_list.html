@@ -1,0 +1,77 @@
+{% extends "banner_base.html" %}
+
+{% load i18n bootstrap_pagination %}
+{% load url from future %}
+
+{% block head_title_base %}Chronicler Stories{% endblock %}
+
+{% block head_title %}{% trans "Welcome" %}{% endblock %}
+
+{% block body_class %}home{% endblock %}
+
+{% block extra_style %}
+<link rel="stylesheet" href="{{STATIC_URL}}css/front_page.css">
+<style>
+    #stories {padding: 10px;}
+</style>
+
+{% endblock %}
+
+{% block extra_script %}
+<script type="text/javascript" src="{{STATIC_URL}}js/underscore-min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/underscore.string.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/helpers.js"></script>
+{% endblock %}
+
+{% block banner %}
+    <h2>Stories</h2>
+    <div>
+        <form action="." class="form-inline">
+            <input type="text" name="q" class="search-query" placeholder="Enter a search term.">  <input class="btn" type="submit" value="Search">
+        </form>
+    </div>
+
+{% if stories %}
+    <table id="stories">
+        {% for story in stories %}
+            <tr>
+                <td>#{{ story.id }}</td>
+                <td>{% if object.anthology %}[{{ object.anthology }}] {% endif %}</td>
+                <td><a href="{% url 'story-detail' story.id%}" class="see_detail">{{ story.name }}</a></td>
+                <td>(Years: {{ story.year_min }} - {{ story.year_max }})</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    {% if is_paginated %}
+        <div class="pagination">
+            <span class="page-links">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                {% endif %}
+                <span class="page-current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">next</a>
+                {% endif %}
+            </span>
+        </div>
+    {% endif %}
+{% else %}
+    <h3>Stories</h3>
+    <p>No stories found</p>
+{% endif %}
+
+
+{% endblock %}
+
+{% block column-1 %}
+{% endblock %}
+
+{% block column-2 %}
+{% endblock %}
+
+{% block column-3 %}
+{% endblock %}
+

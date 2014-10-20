@@ -157,6 +157,7 @@ INSTALLED_APPS = [
     "procyon",
     "procyon.starcatalog",
     "procyon.starsystemmaker",
+    "procyon.stories",
 
     "PIL",
 ]
