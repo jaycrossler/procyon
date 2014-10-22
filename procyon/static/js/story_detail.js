@@ -34,20 +34,23 @@ story_details.showOptions = function (data, $options) {
     data = data || [];
     _.each(data, function (option) {
         var title = "Option: " + option.title;
-        var chances = option.chances || [];
 
         //TODO: Make this a tree
         var $opt = $("<div>")
-            .html(title)
             .addClass('option')
             .appendTo($options);
+
+        $("<span>")
+            .addClass('option_title')
+            .html(title)
+            .appendTo($opt);
 
         $opt.append(story_details.buildRequirementsHolder(option.requirements));
         $opt.append(story_details.buildEffectsHolder(option.effects));
 
-        _.each(chances, function (chance) {
+        _.each(option.chances || [], function (chance) {
             var $sub_opt = $("<div>")
-                .html("- " + chance.title)
+                .html(" - " + chance.title)
                 .addClass("chance")
                 .appendTo($opt);
 
@@ -61,7 +64,7 @@ story_details.showVariables = function (data) {
     var $vars = $("#variables");
     data = data || [];
     _.each(data, function (variable) {
-        var header = "<b>Variable: [" + variable.nickname + "]</b>: " + variable.name + ", Type: " + variable.type;
+        var header = "<b>Variable: [" + variable.nickname + "]</b>: " + variable.name + ", Type: <b>" + variable.type+"</b>";
         if (variable.subtype) {
             header += " (" + variable.subtype + ")"
         }
@@ -101,20 +104,21 @@ story_details.buildRequirementsHolder = function (data) {
     var $holder = $("<span>");
     data = data || [];
     _.each(data, function (requirement) {
-        var text = "<b>" + requirement.concept + "." + requirement.name + "</b> ";
+        var text = "<b>" + requirement.concept + "." + requirement.name;
         if (requirement.has) {
-            text += " has a value in it of <b>" + requirement.has + "</b>";
+            text += " has a value in it of " + requirement.has;
         } else if (requirement.exceeds) {
-            text += " >= <b>" + requirement.exceeds + "</b>";
+            text += " >= " + requirement.exceeds;
         } else if (requirement.below) {
-            text += " <= <b>" + requirement.below + "</b>";
+            text += " <= " + requirement.below;
         } else if (requirement.is) {
-            text += " = <b>" + requirement.is + "</b>";
+            text += " = " + requirement.is;
         } else if (requirement.isnt) {
-            text += " is not = <b>" + requirement.isnt + "</b>";
+            text += " is not = " + requirement.isnt;
         } else {
-            text += " <b>is set and isn't 0</b>";
+            text += " is set and isn't 0";
         }
+        text += "</b>";
 
         $("<span>")
             .addClass('requirement')
