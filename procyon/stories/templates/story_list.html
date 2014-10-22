@@ -24,19 +24,21 @@
 {% endblock %}
 
 {% block banner %}
-    <h2>Stories</h2>
+    <h2>Stories {% if anthologies %}- Anthologies: {{ anthologies }}{% endif %}</h2>
+    {% if not anthologies %}
     <div>
         <form action="." class="form-inline">
             <input type="text" name="q" class="search-query" placeholder="Enter a search term.">  <input class="btn" type="submit" value="Search">
         </form>
     </div>
+    {% endif %}
 
 {% if stories %}
     <table id="stories">
         {% for story in stories %}
             <tr>
                 <td>#{{ story.id }}</td>
-                <td>{% if object.anthology %}[{{ object.anthology }}] {% endif %}</td>
+                <td>{% if story.anthology %}[<a href="{% url 'story-list-anthology' story.anthology %}">{{ story.anthology }}</a>] {% endif %}</td>
                 <td><a href="{% url 'story-detail' story.id%}" class="see_detail">{{ story.name }}</a></td>
                 <td>(Years: {{ story.year_min }} - {{ story.year_max }})</td>
             </tr>

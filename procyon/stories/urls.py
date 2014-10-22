@@ -6,6 +6,7 @@ from django.views.generic.edit import DeleteView, UpdateView
 from views import *
 
 urlpatterns = patterns('',
-    url(r'^$', StoryViewList.as_view(), name='story-list'),
-    url(r'^(?P<pk>\d+)/?$', StoryDetailView.as_view(), name='story-detail'),
-    )
+                       url(r'^$', StoryViewList.as_view(), name='story-list'),
+                       url(r'^(?P<pk>\d+)/?$', StoryDetailView.as_view(), name='story-detail'),
+                       url(r'anthology/(?P<anthology>[a-zA-Z_,]+)?/?$', StoryViewList.as_view(), name='story-list-anthology'),
+)

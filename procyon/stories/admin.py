@@ -10,17 +10,22 @@ class CommentInline(admin.TabularInline):
     verbose_name = "Story Comments"
 
 
+class StoryImageInline(admin.TabularInline):
+    model = StoryImage
+    extra = 2
+
+
 class StoryAdmin(admin.ModelAdmin):
     model = Story
-    list_display = ['id', 'active', 'anthology', 'tags', 'type', 'name', 'year_min', 'year_max', ]
+    list_display = ['name', 'id', 'active', 'anthology', 'tags', 'type', 'year_min', 'year_max', ]
     fields = [('active', 'anthology', 'tags', 'type'), 'name', 'description',
-              ('year_min', 'year_max', 'times_used', 'force_usage'), 'requirements', 'story', 'options',
+              ('year_min', 'year_max', 'times_used', 'force_usage'), ('requirements', 'story',), ('options', 'variables',),
               ('following_stories', 'not_if_previous_stories',), ]
     search_fields = ['id', 'name', 'anthology', 'tags', 'type', 'description']
     list_filter = ('anthology', 'type',)
 
     # actions = ['refresh']
-    inlines = [CommentInline]
+    inlines = [CommentInline, StoryImageInline]
 
 
 admin.site.register(Story, StoryAdmin)

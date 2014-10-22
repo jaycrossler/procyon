@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import json
+import os
 from django.db import models
 from jsonfield import JSONField
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 
 
 class Story(models.Model):
@@ -37,14 +39,46 @@ class Story(models.Model):
     requirements = JSONField(help_text="List of all requirements that must be met before this story is an option")
     story = JSONField(help_text="Story and details")
     options = JSONField(help_text="Options user can take after story")
+    variables = JSONField(help_text="Objects, People, Names within the story that can be overridden")
 
     following_stories = JSONField(help_text="Pointers to stories that can occur afterwards (with likelihood)")
     not_if_previous_stories = JSONField(
         help_text="Pointers to stories that prevent this story from being a possible response")
 
     @property
-    def comment_log(self):
+    def comments(self):
         return Comment.objects.filter(story=self).order_by('-importance, created_at')
+
+    @property
+    def open_comments(self):
+        return Comment.objects.filter(story=self).having(reviewed=False).order_by('-importance, created_at')
+
+    def to_json(self):
+        return json.dumps({
+                              "id": str(self.id),
+                              "name": self.name,
+                              "active": self.active,
+                              "anthology": self.anthology,
+                              "tags": self.tags,
+                              "type": self.type,
+                              "year_min": str(self.year_min),
+                              "year_max": str(self.year_max),
+                              "description": self.description,
+                              "times_used": str(self.times_used),
+                              "force_usage": str(self.force_usage),
+
+                              "requirements": self.requirements,
+                              "story": self.story,
+                              "variables": self.variables,
+                              "options": self.options,
+
+                              "images": [
+                                  {"url": str(i.image), "width": int(i.image.width), "height": int(i.image.height)} for
+                                  i in self.images.all()]
+                          }, ensure_ascii=True)
+
+    def get_absolute_url(self):
+        return reverse('story-detail', args=[self.id])
 
     def __unicode__(self):
         anthology = ""
@@ -55,7 +89,7 @@ class Story(models.Model):
 
     class Meta:
         abstract = False
-        ordering = ('-created_at',)
+        ordering = ('year_min', '-created_at',)
         verbose_name_plural = "stories"
 
 
@@ -73,7 +107,7 @@ class Comment(models.Model):
     importance = models.IntegerField(default=0,
                                      help_text="How critical is it to look at this comment?  0 for low, 5 for high")
     reviewed = models.BooleanField(default=False,
-                                   help_text="Has this comment been reviewed? Checked means not to show as an open comment")
+                                   help_text="Has this comment been reviewed? Checked means to not show as an open comment")
 
     def __unicode__(self):
         comment_obj = '%s Comment on %s' % (self.user, self.story)
@@ -87,3 +121,13 @@ class Comment(models.Model):
     class Meta:
         abstract = False
         ordering = ('-importance', '-created_at',)
+
+
+def get_storyimage_path(instance, filename):
+    return os.path.join('story_images/', str(instance.story.id), filename)
+
+
+class StoryImage(models.Model):
+    story = models.ForeignKey(Story, related_name="images")
+    image = models.ImageField(upload_to=get_storyimage_path, blank=True, null=True,
+                              help_text="Upload an icon (now only in Admin menu) that will go with the story here, then refer to the image by name (without path) in your story")

@@ -3,28 +3,58 @@
 {% load i18n bootstrap_pagination %}
 {% load url from future %}
 
-{% block head_title_base %}Chronicler - story{{ object.id }}{% endblock %}
+{% block head_title_base %}Chronicler - {{ object.type }} #{{ object.id }} - {{ object.name }}{% endblock %}
 
 {% block head_title %}{% trans "Stories" %}{% endblock %}
 
 {% block body_class %}home{% endblock %}
 
 {% block extra_style %}
-<link rel="stylesheet" href="{{STATIC_URL}}css/front_page.css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/front_page.css">
+    <style>
+        .story_text {border: 2px solid #000000; padding: 10px;}
+        .requirement {padding: 4px; margin:2px; background-color: lightblue; border-radius: 4px;}
+        .effect {padding: 4px; margin:2px; background-color: lightyellow; border-radius: 4px;}
+        .chance {padding: 4px; margin:2px; background-color: lightgreen; border-radius: 4px;}
+        .option {padding: 10px; margin:2px; border:2px solid darkolivegreen;}
+    </style>
 {% endblock %}
 
 {% block extra_script %}
-<script type="text/javascript" src="{{STATIC_URL}}js/underscore-min.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/underscore.string.min.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/helpers.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/underscore-min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/underscore.string.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/helpers.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/story_detail.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            story_details.edit_url = "{% url 'story-detail' object.id %}";
+            story_details.default_story = {{ object.to_json|safe|default:"{}" }};
+
+            story_details.init(story_details.default_story);
+        });
+    </script>
 {% endblock %}
 
 {% block banner %}
-<a href="{% url 'story-list' %}">Back to Stories</a>
+    <a href="{% url 'story-list' %}">Back to Stories</a>
 
-<h2>#{{ object.id }} {% if object.anthology %}[{{ object.anthology }}] {% endif %}{{ object.name }}</h2>
-<p>{{ object.description }}</p>
-
+    <h2>#{{ object.id }} {% if object.anthology %}
+        [<a href="{% url 'story-list-anthology' object.anthology %}">{{ object.anthology }}</a>]
+        {% endif %}{{ object.name }}</h2>
+    <p>Valid during years ({{ object.year_min }} - {{ object.year_max }}) <span id="requirements"></span></p>
+    <p>{% if object.tags %}<b>Tags:</b> {{ object.tags }} -- {% endif %}<b>Type:</b> {{ object.type }}</p>
+    {% if object.description %}<div class="story_text"><b>Description:</b> {{ object.description }}</div>{% endif %}
+    {% if object.force_usage %}<p>
+        <i>Will be returned the next {{ object.force_usage }} times a story is requested that matches requirements</i>
+        </p>{% endif %}
+    {% if object.following_stories %}<p><b>Following Stories:</b> {{ object.following_stories }}</p>{% endif %}
+    {% if object.not_if_previous_stories %}<p><b>Ignore if Previous Stories:</b> {{ object.not_if_previous_stories }}
+        </p>{% endif %}
+    <p id="story"></p>
+    <p id="options"></p>
+    <p id="variables"></p>
+    <hr/>
+    <p id="downloads"></p>
 
 {% endblock %}
 

@@ -53,10 +53,21 @@ class StoryViewList(SearchView, ListView):
     search_fields = ['id', 'name', 'anthology', 'tags', 'type']
 
     def get_queryset(self):
-        return Story.objects.filter(active=True)
+        stories = Story.objects.filter(active=True)
+        if 'anthology' in self.kwargs:
+            anthology = str(self.kwargs['anthology']) or ""
+            if len(anthology) > 0:
+                anthology_list = anthology.split(",")
+                stories = stories.filter(anthology__in=anthology_list)
+        return stories
 
     def get_context_data(self, **kwargs):
         cv = super(StoryViewList, self).get_context_data(**kwargs)
+        if 'anthology' in self.kwargs:
+            anthology = str(self.kwargs['anthology']) or ""
+            if len(anthology) > 0:
+                anthology_list = anthology.split(",")
+                cv['anthologies'] = ", ".join(anthology_list)
         return cv
 
 
