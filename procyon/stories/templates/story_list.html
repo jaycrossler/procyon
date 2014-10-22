@@ -41,6 +41,7 @@
                 <td>{% if story.anthology %}[<a href="{% url 'story-list-anthology' story.anthology %}">{{ story.anthology }}</a>] {% endif %}</td>
                 <td><a href="{% url 'story-detail' story.id%}" class="see_detail">{{ story.name }}</a></td>
                 <td>(Years: {{ story.year_min }} - {{ story.year_max }})</td>
+                <td>{% if story.tags %}Tags: <b>{{ story.tags }}</b>{% endif %}</td>
             </tr>
         {% endfor %}
     </table>

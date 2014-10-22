@@ -26,6 +26,8 @@ class StoryAdmin(admin.ModelAdmin):
 
     # actions = ['refresh']
     inlines = [CommentInline, StoryImageInline]
+    save_as = True
+    view_on_site = True
 
 
 admin.site.register(Story, StoryAdmin)

@@ -42,7 +42,7 @@
     <h2>#{{ object.id }} {% if object.anthology %}
         [<a href="{% url 'story-list-anthology' object.anthology %}">{{ object.anthology }}</a>]
         {% endif %}{{ object.name }}</h2>
-    <p>Valid during years ({{ object.year_min }} - {{ object.year_max }}) <span id="requirements"></span></p>
+    <p>Valid during years (<b>{{ object.year_min }}</b> - <b>{{ object.year_max }}</b>) <span id="requirements"></span></p>
     <p>{% if object.tags %}<b>Tags:</b> {{ object.tags }} -- {% endif %}<b>Type:</b> {{ object.type }}</p>
     {% if object.description %}<div class="story_text"><b>Description:</b> {{ object.description }}</div>{% endif %}
     {% if object.force_usage %}<p>
