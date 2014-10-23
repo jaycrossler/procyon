@@ -189,7 +189,7 @@ story_details.nodeTexts.effect = function (effect) {
     return text;
 };
 story_details.nodeTexts.variable = function (variable) {
-    var text = "<b>Variable: [" + variable.nickname + "]</b>: " + variable.name + ", Type: <b>" + variable.type + "</b>";
+    var text = "[" + variable.nickname + "]: " + variable.name + ", Type: " + variable.type;
     if (variable.subtype) {
         text += " (" + variable.subtype + ")";
     }
@@ -309,12 +309,12 @@ story_details.replaceParsedVariables = function (text, variables) {
 
 story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
 
-    var isNodeAFolder = function (node) {
+    var nodeIsNotFolder = function (node) {
         return !(node.text && !node.data);
     };
     var buildANode = function (parent, text, type, tree, data) {
         var new_node = tree.create_node(parent);
-        tree.edit(new_node, text);
+        tree.set_text(new_node, text);
 
         var new_node_pointer = tree.get_node(new_node);
         new_node_pointer.a_attr.class = new_node_pointer.a_attr.class || "";
@@ -323,6 +323,7 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
 
         if (data) {
             new_node_pointer.data = data;
+            tree.edit(new_node, text);
         }
         story_details.showNodeDetail(new_node_pointer, $tree_node_holder);
 
@@ -330,7 +331,7 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
     };
     var preventSubFolders = function (node, parent_type) {
         var type = treeNodeStoryType(node);
-        return !isNodeAFolder(node)
+        return !nodeIsNotFolder(node)
             || (node.parent == "#")
             || (type == "requirement")
             || (type == "effect")
@@ -341,15 +342,6 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
     var treeNodeStoryType = function (node) {
         var type = (node.data) ? node.data.type : node.text || null;
 
-//        if (node.children && node.children.length) {
-//            type = (node.data) ? node.data.type : node.text || null;
-//        } else {
-//            type = (node.data) ? node.data.type : null;
-//            if (!type) {
-//                var parent = $treeHolder.jstree().get_node(node.parent);
-//                type = parent.data ? parent.data.type : 'unknown';
-//            }
-//        }
         type = type ? type.toLowerCase() : null;
 
         if (type == "requirements") {
@@ -446,11 +438,22 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
                     "separator_after": false,
                     "label": "Add Item",
                     "_disabled": function () {
-                        return isNodeAFolder(node) || (node.text == story_details.new_tree_node_text);
+                        return nodeIsNotFolder(node) || (node.text == story_details.new_tree_node_text);
                     },
                     "action": function () {
                         var type = treeNodeStoryType(node);
                         buildANode(node, story_details.new_tree_node_text, type, tree, baseDataFromType(type))
+                    }
+                },
+                "Rename": {
+                    "separator_before": true,
+                    "separator_after": false,
+                    "label": "Rename",
+                    "_disabled": function () {
+                        return !nodeIsNotFolder(node);
+                    },
+                    "action": function () {
+                        tree.edit(node);
                     }
                 },
                 "Remove": {
@@ -488,6 +491,30 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
     $treeHolder.on("select_node.jstree",
         function (evt, holder) {
             var node = holder.node || {};
+            story_details.showNodeDetail(node, $tree_node_holder);
+        }
+    );
+    $treeHolder.on("rename_node.jstree",
+        function (evt, holder) {
+            var node = holder.node || {};
+            var data = node.data || {};
+            var newText = node.text || "unknown";
+            var type = data.type || "unknown";
+            var field = "";
+
+            if (type == "requirements") {
+                field = "name"
+            } else if (type == "options") {
+                field = "title";
+            } else if (type == "chances") {
+                field = "title";
+            } else if (type == "effects") {
+                field = "function";
+            } else if (type == "variables") {
+                field = "nickname";
+            }
+
+            data[field] = newText;
             story_details.showNodeDetail(node, $tree_node_holder);
         }
     );
