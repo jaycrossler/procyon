@@ -13,6 +13,7 @@ class Story(models.Model):
     A story object based on constraints
     """
 
+    #TODO: Add GUID for long-term pointers between systems
     active = models.BooleanField(default=True, help_text='If checked, this story will be listed in the active list')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -35,15 +36,17 @@ class Story(models.Model):
                                      help_text="Pointers to stories that can occur afterwards (with likelihood)")
     force_usage = models.IntegerField(default=0,
                                       help_text="For testing, how many times should this story be shown immediately if someone passes in that developer=true?")
+    max_times_usable = models.IntegerField(default=1, help_text="How many times can this story be given to a user?")
 
     requirements = JSONField(help_text="List of all requirements that must be met before this story is an option")
     story = JSONField(help_text="Story and details")
     options = JSONField(help_text="Options user can take after story")
     variables = JSONField(help_text="Objects, People, Names within the story that can be overridden")
 
-    following_stories = JSONField(help_text="Pointers to stories that can occur afterwards (with likelihood)")
-    not_if_previous_stories = JSONField(
-        help_text="Pointers to stories that prevent this story from being a possible response")
+    following_stories = JSONField(default=[],
+                                  help_text="Pointers to stories that can occur afterwards (with likelihood)")
+    not_if_previous_stories = JSONField(default=[],
+                                        help_text="Pointers to stories that prevent this story from being a possible response")
 
     @property
     def comments(self):
@@ -66,6 +69,7 @@ class Story(models.Model):
                               "description": self.description,
                               "times_used": str(self.times_used),
                               "force_usage": str(self.force_usage),
+                              "max_times_usable": str(self.max_times_usable),
 
                               "requirements": self.requirements,
                               "story": self.story,

@@ -11,12 +11,15 @@
 
 {% block extra_style %}
     <link rel="stylesheet" href="{{ STATIC_URL }}css/front_page.css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}js/jstree/themes/default/style.min.css">
     <style>
         .story_text {border: 2px solid #000000; padding: 10px;}
-        .requirement {padding: 4px; margin:2px; background-color: lightblue; border-radius: 4px;}
-        .effect {padding: 4px; margin:2px; background-color: lightyellow; border-radius: 4px;}
-        .chance {padding: 4px; margin:2px; background-color: lightgreen; border-radius: 4px;}
-        .option {padding: 10px; margin:2px; border:2px solid darkolivegreen;}
+        .spacer {padding: 4px; margin:2px;}
+        .requirement { background-color: lightblue; border-radius: 4px;}
+        .effect {background-color: lightyellow; border-radius: 4px;}
+        .chance {background-color: lightgreen; border-radius: 4px;}
+        .option_holder {padding: 10px; margin:2px; border:2px solid darkolivegreen;}
+        .option {background-color: lightsalmon; border-radius: 4px;}
         .option_title {padding: 4px; margin:2px; background-color: lightsalmon; border-radius: 4px;}
     </style>
 {% endblock %}
@@ -24,8 +27,10 @@
 {% block extra_script %}
     <script type="text/javascript" src="{{ STATIC_URL }}js/underscore-min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/underscore.string.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jstree/jstree.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/helpers.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/story_detail.js"></script>
+
     <script type="text/javascript">
         $(document).ready(function () {
             story_details.edit_url = "{% url 'story-detail' object.id %}";
@@ -52,7 +57,7 @@
     {% if object.not_if_previous_stories %}<p><b>Ignore if Previous Stories:</b> {{ object.not_if_previous_stories }}
         </p>{% endif %}
     <p id="story"></p>
-    <p id="options"></p>
+    <div id="options"></div>
     <p id="variables"></p>
     <hr/>
     <p id="downloads"></p>
