@@ -4,7 +4,9 @@ story_details.default_story = {variables: [], story: [], options: [], requiremen
 story_details.all_images = {};
 story_details.show_parsed_variables = true;
 story_details.show_options_as_tree = true;
-story_details.option_tree_shrink = true;
+story_details.option_tree_shrink = false;
+story_details.new_tree_node_text = "-New added Item-";
+story_details.$tree_node_holder = null;
 
 story_details.init = function (story) {
     story = story || story_details.default_story;
@@ -26,11 +28,15 @@ story_details.drawStory = function (story) {
     story_details.showStory(story.story);
     story_details.buildDownloadButtons();
 
+    var $options = $("#options");
     if (story_details.show_options_as_tree) {
-        var $tree = $("<div>").appendTo($("#options"));
-        story_details.treeFromData(story, $tree);
+        var $tree_node_holder = story_details.$tree_node_holder = $("<div>").appendTo($options);
+        var $tree = $("<div>").appendTo($options);
+        story_details.treeFromData(story, $tree, $tree_node_holder);
+        $('#variables').hide();
     } else {
-        $("#options").append(story_details.buildOptions(story.options));
+        $options.append(story_details.buildOptions(story.options));
+        $('#variables').show();
     }
 
 };
@@ -49,6 +55,7 @@ story_details.showStory = function (data) {
     });
 };
 
+//Tis is the older div-based layout. Possibly delete if tree works well
 story_details.buildOptions = function (options) {
     var $holder = $("<div>");
 
@@ -300,62 +307,158 @@ story_details.replaceParsedVariables = function (text, variables) {
 
 //------------------------------------
 
-story_details.treeFromData = function (story, $treeHolder) {
+story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
+
+    var isNodeAFolder = function (node) {
+        return !(node.text && !node.data);
+    };
+    var buildANode = function (parent, text, type, tree, data) {
+        var new_node = tree.create_node(parent);
+        tree.edit(new_node, text);
+
+        var new_node_pointer = tree.get_node(new_node);
+        new_node_pointer.a_attr.class = new_node_pointer.a_attr.class || "";
+        new_node_pointer.a_attr.class += " " + type;
+        new_node_pointer.a_attr.class = _.str.trim(new_node_pointer.a_attr.class);
+
+        if (data) {
+            new_node_pointer.data = data;
+        }
+        story_details.showNodeDetail(new_node_pointer, $tree_node_holder);
+
+        return new_node_pointer;
+    };
+    var preventSubFolders = function (node, parent_type) {
+        var type = treeNodeStoryType(node);
+        return !isNodeAFolder(node)
+            || (node.parent == "#")
+            || (type == "requirement")
+            || (type == "effect")
+            || (type == "variable")
+            || (node.text == story_details.new_tree_node_text)
+            || (type == parent_type);
+    };
+    var treeNodeStoryType = function (node) {
+        var type = (node.data) ? node.data.type : node.text || null;
+
+//        if (node.children && node.children.length) {
+//            type = (node.data) ? node.data.type : node.text || null;
+//        } else {
+//            type = (node.data) ? node.data.type : null;
+//            if (!type) {
+//                var parent = $treeHolder.jstree().get_node(node.parent);
+//                type = parent.data ? parent.data.type : 'unknown';
+//            }
+//        }
+        type = type ? type.toLowerCase() : null;
+
+        if (type == "requirements") {
+            type = "requirement"
+        } else if (type == "options") {
+            type = "option";
+        } else if (type == "chances") {
+            type = "chance";
+        } else if (type == "effects") {
+            type = "effect";
+        } else if (type == "variables") {
+            type = "variable";
+        }
+        return type;
+    };
+    var baseDataFromType = function (type) {
+        var data = null;
+        if (type == "requirement") {
+            data = {concept: "", has: "", name: story_details.new_tree_node_text}
+        } else if (type == "option") {
+            data = {title: story_details.new_tree_node_text}
+        } else if (type == "chance") {
+            data = {title: story_details.new_tree_node_text}
+        } else if (type == "effect") {
+            data = {function: "functionToRun"}
+        } else if (type == "variable") {
+            data = {name: "story_details.new_tree_node_text", nickname: "item"}
+        }
+        if (data) data.type = type;
+        return data;
+    };
 
     var customMenu = {
-        "items": function ($node) {
+        "items": function (node) {
             var tree = $treeHolder.jstree(true);
             return {
-                "AddRequirement": {
+                "AddRequirements": {
                     "separator_before": false,
                     "separator_after": false,
-                    "label": "Add Requirement",
-                    "action": function (obj) {
-                        $node = tree.create_node($node);
-                        tree.edit($node);
+                    "label": "Add Requirements",
+                    "_disabled": function () {
+                        return preventSubFolders(node, 'requirement');
+                    },
+                    "action": function () {
+                        buildANode(node, 'Requirements', 'tree_header', tree)
                     }
                 },
-                "AddOption": {
+                "AddOptions": {
                     "separator_before": false,
                     "separator_after": false,
-                    "label": "Add Option",
-                    "action": function (obj) {
-                        $node = tree.create_node($node);
-                        tree.edit($node);
+                    "label": "Add Options",
+                    "_disabled": function () {
+                        return preventSubFolders(node, 'option');
+                    },
+                    "action": function () {
+                        buildANode(node, 'Options', 'tree_header', tree)
                     }
                 },
-                "AddChance": {
+                "AddChances": {
                     "separator_before": false,
                     "separator_after": false,
-                    "label": "Add Chance",
-                    "action": function (obj) {
-                        $node = tree.create_node($node);
-                        tree.edit($node);
+                    "label": "Add Chances",
+                    "_disabled": function () {
+                        return preventSubFolders(node, 'chance');
+                    },
+                    "action": function () {
+                        buildANode(node, 'Chances', 'tree_header', tree)
                     }
                 },
-                 "AddEffect": {
+                "AddEffects": {
                     "separator_before": false,
                     "separator_after": false,
-                    "label": "Add Effect",
-                    "action": function (obj) {
-                        $node = tree.create_node($node);
-                        tree.edit($node);
+                    "label": "Add Effects",
+                    "_disabled": function () {
+                        return preventSubFolders(node, 'effect');
+                    },
+                    "action": function () {
+                        buildANode(node, 'Effects', 'tree_header', tree)
                     }
                 },
-                "Reword": {
-                    "separator_before": true,
+                "AddVariables": {
+                    "separator_before": false,
                     "separator_after": false,
-                    "label": "Rename",
-                    "action": function (obj) {
-                        tree.edit($node);
+                    "label": "Add Variables",
+                    "_disabled": function () {
+                        return node.id != "j1_2";
+                    },
+                    "action": function () {
+                        buildANode(node, 'Variables', 'tree_header', tree)
+                    }
+                },
+                "AddItem": {
+                    "separator_before": false,
+                    "separator_after": false,
+                    "label": "Add Item",
+                    "_disabled": function () {
+                        return isNodeAFolder(node) || (node.text == story_details.new_tree_node_text);
+                    },
+                    "action": function () {
+                        var type = treeNodeStoryType(node);
+                        buildANode(node, story_details.new_tree_node_text, type, tree, baseDataFromType(type))
                     }
                 },
                 "Remove": {
                     "separator_before": true,
                     "separator_after": false,
                     "label": "Delete",
-                    "action": function (obj) {
-                        tree.delete_node($node);
+                    "action": function () {
+                        tree.delete_node(node);
                     }
                 }
             };
@@ -379,8 +482,50 @@ story_details.treeFromData = function (story, $treeHolder) {
             check_callback: true
         }
     });
+    $tree_node_holder
+        .addClass("tree_detail");
+
+    $treeHolder.on("select_node.jstree",
+        function (evt, holder) {
+            var node = holder.node || {};
+            story_details.showNodeDetail(node, $tree_node_holder);
+        }
+    );
 
 };
+story_details.showNodeDetail = function (node, $tree_node_holder) {
+    $tree_node_holder = $tree_node_holder || story_details.$tree_node_holder;
+    var data = node.data || {};
+    var variables = [];
+
+    $tree_node_holder.empty();
+    if (data && !_.isEmpty(data)) {
+        for (key in data) {
+            var val = data[key];
+            if (!_.isArray(val) && !_.isObject(val)) {
+                if (key != "type") variables.push(key);
+            }
+        }
+        _.each(variables, function (field) {
+            var val = data[field];
+            $("<span>")
+                .html("<b>" + field + ":</b> " + val)
+                .addClass("field")
+                .appendTo($tree_node_holder);
+        })
+
+    } else {
+        //It's an array holder
+        var text = node.text;
+        if (text) {
+            $("<span>")
+                .html("<b>Folder of " + text + "</b>")
+                .appendTo($tree_node_holder);
+        }
+    }
+};
+
+
 story_details.convertStoryToTree = function (stories, type) {
     if (_.isObject(stories) && !_.isArray(stories)) {
         stories = [stories]; //Make sure it's an array
@@ -392,23 +537,21 @@ story_details.convertStoryToTree = function (stories, type) {
     });
 
     var result;
-    if (story_details.option_tree_shrink){
+    if (story_details.option_tree_shrink) {
         result = nodeList;
     } else {
-        result = {text: _.str.titleize(type), children: nodeList, state:{opened:true}, a_attr:{class:'tree_header'}}
+        result = {text: _.str.titleize(type), children: nodeList, state: {opened: true}, a_attr: {class: 'tree_header'}}
     }
 
     return result;
 };
-
-
 story_details.convertNodeToStoryNode = function (storyItem, type) {
     if (_.isArray(storyItem)) {
         console.error("convertNodeToStoryNode - An Array was passed in through an array in a story item");
         console.error(storyItem);
         return storyItem;
     }
-    var output = {item: storyItem, state: {opened: true}}; //Store a pointer to the item for later usage
+    var output = {state: {opened: true}};
     var text = "";
     var children = [];
 
@@ -416,17 +559,17 @@ story_details.convertNodeToStoryNode = function (storyItem, type) {
         text = story_details.nodeTexts.story(storyItem.story);
         //output.icon = ""; //TODO: Set these
     } else if (type == "images") {
-        text =  story_details.nodeTexts.image(storyItem);
+        text = story_details.nodeTexts.image(storyItem);
     } else if (type == "chances") {
         //TODO: Incorporate parseInt(100 / num_chances);
         text = story_details.nodeTexts.chance(storyItem);
         output.state = {opened: false};
         output.a_attr = {class: 'chance bold'};
     } else if (type == "effects") {
-        text =  story_details.nodeTexts.effect(storyItem);
+        text = story_details.nodeTexts.effect(storyItem);
         output.a_attr = {class: 'effect'};
     } else if (type == "requirements") {
-        text =  story_details.nodeTexts.requirement(storyItem);
+        text = story_details.nodeTexts.requirement(storyItem);
         output.a_attr = {class: 'requirement'};
     } else if (type == "variables") {
         text = story_details.nodeTexts.variable(storyItem);
@@ -435,7 +578,7 @@ story_details.convertNodeToStoryNode = function (storyItem, type) {
         output.a_attr = {class: 'option bold'};
     }
     if (story_details.option_tree_shrink) {
-        text = "<b>"+ _.str.titleize(type) + "</b>: "+text;
+        text = "<b>" + _.str.titleize(type) + "</b>: " + text;
     }
     //For each item, add children if there is a sub-tree
     _.each("requirements,chances,options,effects,variables".split(","), function (key) {
@@ -452,6 +595,8 @@ story_details.convertNodeToStoryNode = function (storyItem, type) {
         children = _.flatten(children);
     }
     output.children = (children && children.length) ? children : null;
+    storyItem.type = type;
+    output.data = storyItem;
 
     return output;
 };
