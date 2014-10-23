@@ -164,7 +164,7 @@ story_details.nodeTexts.story = function (stories) {
 story_details.nodeTexts.chance = function (node, percent) {
     var text = "";
     if (percent) {
-         text  = percent+"%: ";
+        text = percent + "%: ";
     }
     text += (node.title || "Default");
     return text;
@@ -291,10 +291,78 @@ story_details.replaceParsedVariables = function (text, variables) {
 
 story_details.treeFromData = function (story, $treeHolder) {
 
+    var customMenu = {
+        "items": function ($node) {
+            var tree = $treeHolder.jstree(true);
+            return {
+                "AddRequirement": {
+                    "separator_before": false,
+                    "separator_after": false,
+                    "label": "Add Requirement",
+                    "action": function (obj) {
+                        $node = tree.create_node($node);
+                        tree.edit($node);
+                    }
+                },
+                "AddOption": {
+                    "separator_before": false,
+                    "separator_after": false,
+                    "label": "Add Option",
+                    "action": function (obj) {
+                        $node = tree.create_node($node);
+                        tree.edit($node);
+                    }
+                },
+                "AddChance": {
+                    "separator_before": false,
+                    "separator_after": false,
+                    "label": "Add Chance",
+                    "action": function (obj) {
+                        $node = tree.create_node($node);
+                        tree.edit($node);
+                    }
+                },
+                 "AddEffect": {
+                    "separator_before": false,
+                    "separator_after": false,
+                    "label": "Add Effect",
+                    "action": function (obj) {
+                        $node = tree.create_node($node);
+                        tree.edit($node);
+                    }
+                },
+                "Reword": {
+                    "separator_before": true,
+                    "separator_after": false,
+                    "label": "Rename",
+                    "action": function (obj) {
+                        tree.edit($node);
+                    }
+                },
+                "Remove": {
+                    "separator_before": true,
+                    "separator_after": false,
+                    "label": "Delete",
+                    "action": function (obj) {
+                        tree.delete_node($node);
+                    }
+                }
+            };
+        }
+    };
+
     var data = story_details.convertStoryToTree(story, "stories");
-    $treeHolder.jstree({'plugins': ["wholerow", "contextmenu", "dnd"], 'core': {
-        'data': data
-    }});
+    $treeHolder.jstree({
+        plugins: ["wholerow", "contextmenu", "dnd"],
+        ui: {
+            select_limit: 1
+        },
+        contextmenu: customMenu,
+        core: {
+            data: data,
+            check_callback: true
+        }
+    });
 
 };
 story_details.convertStoryToTree = function (stories, type) {
@@ -328,20 +396,20 @@ story_details.convertNodeToStoryNode = function (storyItem, type) {
         text = "<b>Image:</b> " + story_details.nodeTexts.image(storyItem);
     } else if (type == "chances") {
         //TODO: Incorporate parseInt(100 / num_chances);
-        text = "Chance: <b>" + story_details.nodeTexts.chance(storyItem) + "</b>";
+        text = "Chance:" + story_details.nodeTexts.chance(storyItem);
         output.state = {opened: false};
-        output.a_attr = {class:'chance'};
+        output.a_attr = {class: 'chance bold'};
     } else if (type == "effects") {
         text = "Effect: " + story_details.nodeTexts.effect(storyItem);
-        output.a_attr = {class:'effect'};
+        output.a_attr = {class: 'effect'};
     } else if (type == "requirements") {
-        text = "<i>Requires: " + story_details.nodeTexts.requirement(storyItem) + "</i>";
-        output.a_attr = {class:'requirement'};
+        text = "Requires: " + story_details.nodeTexts.requirement(storyItem);
+        output.a_attr = {class: 'requirement'};
     } else if (type == "variables") {
         text = story_details.nodeTexts.variable(storyItem);
     } else if (type == "options") {
-        text = "Option: <b>" + story_details.nodeTexts.option(storyItem) + "</b>";
-        output.a_attr = {class:'option'};
+        text = "Option: " + story_details.nodeTexts.option(storyItem);
+        output.a_attr = {class: 'option bold'};
     }
 
     //For each item, add children if there is a sub-tree
