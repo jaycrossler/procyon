@@ -4,6 +4,7 @@ story_details.default_story = {variables: [], story: [], options: [], requiremen
 story_details.all_images = {};
 story_details.show_parsed_variables = true;
 story_details.show_options_as_tree = true;
+story_details.option_tree_shrink = true;
 
 story_details.init = function (story) {
     story = story || story_details.default_story;
@@ -26,7 +27,8 @@ story_details.drawStory = function (story) {
     story_details.buildDownloadButtons();
 
     if (story_details.show_options_as_tree) {
-        story_details.treeFromData(story, $("#options"))
+        var $tree = $("<div>").appendTo($("#options"));
+        story_details.treeFromData(story, $tree);
     } else {
         $("#options").append(story_details.buildOptions(story.options));
     }
@@ -252,6 +254,15 @@ story_details.buildDownloadButtons = function () {
         })
         .appendTo($downloads);
 
+    $("<a>")
+        .addClass('btn')
+        .text("Toggle Tree Editability")
+        .on('click', function () {
+            story_details.option_tree_shrink = !story_details.option_tree_shrink;
+            story_details.drawStory();
+        })
+        .appendTo($downloads);
+
 };
 
 story_details.text = function (text) {
@@ -351,9 +362,14 @@ story_details.treeFromData = function (story, $treeHolder) {
         }
     };
 
+    var pluginsToUse = ["wholerow", "dnd"];
+    if (!story_details.option_tree_shrink) {
+        pluginsToUse.push("contextmenu");
+    }
+
     var data = story_details.convertStoryToTree(story, "stories");
     $treeHolder.jstree({
-        plugins: ["wholerow", "contextmenu", "dnd"],
+        plugins: pluginsToUse,
         ui: {
             select_limit: 1
         },
@@ -375,7 +391,14 @@ story_details.convertStoryToTree = function (stories, type) {
         nodeList.push(story_details.convertNodeToStoryNode(storyItem, type));
     });
 
-    return nodeList;
+    var result;
+    if (story_details.option_tree_shrink){
+        result = nodeList;
+    } else {
+        result = {text: _.str.titleize(type), children: nodeList, state:{opened:true}, a_attr:{class:'tree_header'}}
+    }
+
+    return result;
 };
 
 
@@ -393,25 +416,27 @@ story_details.convertNodeToStoryNode = function (storyItem, type) {
         text = story_details.nodeTexts.story(storyItem.story);
         //output.icon = ""; //TODO: Set these
     } else if (type == "images") {
-        text = "<b>Image:</b> " + story_details.nodeTexts.image(storyItem);
+        text =  story_details.nodeTexts.image(storyItem);
     } else if (type == "chances") {
         //TODO: Incorporate parseInt(100 / num_chances);
-        text = "Chance:" + story_details.nodeTexts.chance(storyItem);
+        text = story_details.nodeTexts.chance(storyItem);
         output.state = {opened: false};
         output.a_attr = {class: 'chance bold'};
     } else if (type == "effects") {
-        text = "Effect: " + story_details.nodeTexts.effect(storyItem);
+        text =  story_details.nodeTexts.effect(storyItem);
         output.a_attr = {class: 'effect'};
     } else if (type == "requirements") {
-        text = "Requires: " + story_details.nodeTexts.requirement(storyItem);
+        text =  story_details.nodeTexts.requirement(storyItem);
         output.a_attr = {class: 'requirement'};
     } else if (type == "variables") {
         text = story_details.nodeTexts.variable(storyItem);
     } else if (type == "options") {
-        text = "Option: " + story_details.nodeTexts.option(storyItem);
+        text = story_details.nodeTexts.option(storyItem);
         output.a_attr = {class: 'option bold'};
     }
-
+    if (story_details.option_tree_shrink) {
+        text = "<b>"+ _.str.titleize(type) + "</b>: "+text;
+    }
     //For each item, add children if there is a sub-tree
     _.each("requirements,chances,options,effects,variables".split(","), function (key) {
         var val = storyItem[key];
@@ -423,7 +448,9 @@ story_details.convertNodeToStoryNode = function (storyItem, type) {
 
     output.text = _.str.truncate(text || "Unrecognized item", 80);
 
-    children = _.flatten(children);
+    if (story_details.option_tree_shrink) {
+        children = _.flatten(children);
+    }
     output.children = (children && children.length) ? children : null;
 
     return output;
