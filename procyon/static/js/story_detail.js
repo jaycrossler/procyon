@@ -1,12 +1,13 @@
 var story_details = {};
 story_details.MEDIA_PREFIX = "/site_media/media/";
-story_details.default_story = {variables: [], story: [], options: [], requirements: []};
+story_details.default_story = {variables: [], story: [], choices: [], requirements: []};
 story_details.all_images = {};
 story_details.show_parsed_variables = true;
-story_details.show_options_as_tree = true;
-story_details.option_tree_shrink = false;
+story_details.show_choices_as_tree = true;
+story_details.choice_tree_shrink = false;
 story_details.new_tree_node_text = "-New added Item-";
 story_details.$tree_node_holder = null;
+story_details.$tree = null;
 
 story_details.init = function (story) {
     story = story || story_details.default_story;
@@ -20,7 +21,7 @@ story_details.drawStory = function (story) {
     story = story || story_details.default_story;
 
     //Draw story complex details
-    $("#story, #options, #variables, #downloads").empty();
+    $("#story, #choices, #variables, #downloads").empty();
 
 //    $("#requirements").append(story_details.buildRequirementsHolder(story.requirements));
 
@@ -28,14 +29,14 @@ story_details.drawStory = function (story) {
     story_details.showStory(story.story);
     story_details.buildDownloadButtons();
 
-    var $options = $("#options");
-    if (story_details.show_options_as_tree) {
-        var $tree_node_holder = story_details.$tree_node_holder = $("<div>").appendTo($options);
-        var $tree = $("<div>").appendTo($options);
+    var $choices = $("#choices");
+    if (story_details.show_choices_as_tree) {
+        var $tree_node_holder = story_details.$tree_node_holder = $("<div>").appendTo($choices);
+        var $tree = $("<div>").appendTo($choices);
         story_details.treeFromData(story, $tree, $tree_node_holder);
         $('#variables').hide();
     } else {
-        $options.append(story_details.buildOptions(story.options));
+        $choices.append(story_details.buildChoices(story.choices));
         $('#variables').show();
     }
 
@@ -56,24 +57,24 @@ story_details.showStory = function (data) {
 };
 
 //Tis is the older div-based layout. Possibly delete if tree works well
-story_details.buildOptions = function (options) {
+story_details.buildChoices = function (choices) {
     var $holder = $("<div>");
 
-    _.each(options || [], function (option) {
+    _.each(choices || [], function (choice) {
         var $opt = $("<div>")
-            .addClass('option_holder')
+            .addClass('choice_holder')
             .appendTo($holder);
 
-        var title = "Player Option: <b>" + story_details.nodeTexts.option(option) + "</b>";
+        var title = "Player choice: <b>" + story_details.nodeTexts.choice(choice) + "</b>";
         $("<span>")
-            .addClass('option_title')
+            .addClass('choice_title')
             .html(title)
             .appendTo($opt);
 
-        $opt.append(story_details.buildRequirementsHolder(option.requirements));
-        $opt.append(story_details.buildEffectsHolder(option.effects));
+        $opt.append(story_details.buildRequirementsHolder(choice.requirements));
+        $opt.append(story_details.buildEffectsHolder(choice.effects));
 
-        var chances = option.chances || [];
+        var chances = choice.chances || [];
         var num_chances = chances.length;
         //TODO: Loop through each and find total probability
 
@@ -87,8 +88,8 @@ story_details.buildOptions = function (options) {
             $sub_opt.append(story_details.buildRequirementsHolder(chance.requirements));
             $sub_opt.append(story_details.buildEffectsHolder(chance.effects));
 
-            if (chance.options) {
-                $sub_opt.append(story_details.buildOptions(chance.options));
+            if (chance.choices) {
+                $sub_opt.append(story_details.buildChoices(chance.choices));
             }
         });
 
@@ -158,6 +159,7 @@ story_details.nodeTexts.image = function (image) {
                 url = story_details.MEDIA_PREFIX + imageLookup.url;
             }
         });
+        if (!url) url = image.url;
     }
     return url;
 };
@@ -166,7 +168,9 @@ story_details.nodeTexts.story = function (stories) {
     if (!_.isArray(stories)) stories = [stories];
 
     _.each(stories, function (story) {
-        text += story.text;
+        if (story && story.text) {
+            text += story.text;
+        }
     });
     return story_details.text(text);
 };
@@ -198,8 +202,8 @@ story_details.nodeTexts.variable = function (variable) {
     }
     return text;
 };
-story_details.nodeTexts.option = function (option) {
-    return story_details.text(option.title);
+story_details.nodeTexts.choice = function (choice) {
+    return story_details.text(choice.title);
 };
 
 //---------------------
@@ -254,9 +258,9 @@ story_details.buildDownloadButtons = function () {
 
     $("<a>")
         .addClass('btn')
-        .text("Show Options Differently")
+        .text("Show choices Differently")
         .on('click', function () {
-            story_details.show_options_as_tree = !story_details.show_options_as_tree;
+            story_details.show_choices_as_tree = !story_details.show_choices_as_tree;
             story_details.drawStory();
         })
         .appendTo($downloads);
@@ -265,7 +269,7 @@ story_details.buildDownloadButtons = function () {
         .addClass('btn')
         .text("Toggle Tree Editability")
         .on('click', function () {
-            story_details.option_tree_shrink = !story_details.option_tree_shrink;
+            story_details.choice_tree_shrink = !story_details.choice_tree_shrink;
             story_details.drawStory();
         })
         .appendTo($downloads);
@@ -321,6 +325,8 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
         new_node_pointer.a_attr.class += " " + type;
         new_node_pointer.a_attr.class = _.str.trim(new_node_pointer.a_attr.class);
 
+        new_node_pointer.state = {opened:"true"};
+
         if (data) {
             new_node_pointer.data = data;
             tree.edit(new_node, text);
@@ -346,8 +352,8 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
 
         if (type == "requirements") {
             type = "requirement"
-        } else if (type == "options") {
-            type = "option";
+        } else if (type == "choices") {
+            type = "choice";
         } else if (type == "chances") {
             type = "chance";
         } else if (type == "effects") {
@@ -358,17 +364,18 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
         return type;
     };
     var baseDataFromType = function (type) {
+        //TODO: Build a schema, pull these from there
         var data = null;
         if (type == "requirement") {
-            data = {concept: "", has: "", name: story_details.new_tree_node_text}
-        } else if (type == "option") {
+            data = {concept: "", has: "", exceeds:"", below:"", is:"", name: story_details.new_tree_node_text}
+        } else if (type == "choice") {
             data = {title: story_details.new_tree_node_text}
         } else if (type == "chance") {
             data = {title: story_details.new_tree_node_text}
         } else if (type == "effect") {
-            data = {function: "functionToRun"}
+            data = {function: "functionToRun", variable:"", value:""}
         } else if (type == "variable") {
-            data = {name: "story_details.new_tree_node_text", nickname: "item"}
+            data = {name: "story_details.new_tree_node_text", nickname: "item", tags:"", title:"", value:"", subkind:"", details:"", kind:"", strength:"", defense:"", armor:"", weapons:""}
         }
         if (data) data.type = type;
         return data;
@@ -389,15 +396,15 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
                         buildANode(node, 'Requirements', 'tree_header', tree)
                     }
                 },
-                "AddOptions": {
+                "AddChoices": {
                     "separator_before": false,
                     "separator_after": false,
-                    "label": "Add Options",
+                    "label": "Add Choices",
                     "_disabled": function () {
-                        return preventSubFolders(node, 'option');
+                        return preventSubFolders(node, 'choice');
                     },
                     "action": function () {
-                        buildANode(node, 'Options', 'tree_header', tree)
+                        buildANode(node, 'Choices', 'tree_header', tree)
                     }
                 },
                 "AddChances": {
@@ -469,12 +476,12 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
     };
 
     var pluginsToUse = ["wholerow", "dnd"];
-    if (!story_details.option_tree_shrink) {
+    if (!story_details.choice_tree_shrink) {
         pluginsToUse.push("contextmenu");
     }
 
     var data = story_details.convertStoryToTree(story, "stories");
-    $treeHolder.jstree({
+    story_details.$tree = $treeHolder.jstree({
         plugins: pluginsToUse,
         ui: {
             select_limit: 1
@@ -502,20 +509,21 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
             var type = data.type || "unknown";
             var field = "";
 
-            if (type == "requirements") {
+            if (type == "requirement") {
                 field = "name"
-            } else if (type == "options") {
+            } else if (type == "choice") {
                 field = "title";
-            } else if (type == "chances") {
+            } else if (type == "chance") {
                 field = "title";
-            } else if (type == "effects") {
+            } else if (type == "effect") {
                 field = "function";
-            } else if (type == "variables") {
+            } else if (type == "variable") {
                 field = "nickname";
             }
 
-            data[field] = newText;
+            node.data[field] = newText;
             story_details.showNodeDetail(node, $tree_node_holder);
+            story_details.transformTreeToStory();
         }
     );
 
@@ -564,7 +572,7 @@ story_details.convertStoryToTree = function (stories, type) {
     });
 
     var result;
-    if (story_details.option_tree_shrink) {
+    if (story_details.choice_tree_shrink) {
         result = nodeList;
     } else {
         result = {text: _.str.titleize(type), children: nodeList, state: {opened: true}, a_attr: {class: 'tree_header'}}
@@ -583,6 +591,8 @@ story_details.convertNodeToStoryNode = function (storyItem, type) {
     var children = [];
 
     if (type == "stories") {
+        text = storyItem.name || storyItem.description || "Story";
+    } else if (type == "story") {
         text = story_details.nodeTexts.story(storyItem.story);
         //output.icon = ""; //TODO: Set these
     } else if (type == "images") {
@@ -600,15 +610,15 @@ story_details.convertNodeToStoryNode = function (storyItem, type) {
         output.a_attr = {class: 'requirement'};
     } else if (type == "variables") {
         text = story_details.nodeTexts.variable(storyItem);
-    } else if (type == "options") {
-        text = story_details.nodeTexts.option(storyItem);
-        output.a_attr = {class: 'option bold'};
+    } else if (type == "choices") {
+        text = story_details.nodeTexts.choice(storyItem);
+        output.a_attr = {class: 'choice bold'};
     }
-    if (story_details.option_tree_shrink) {
+    if (story_details.choice_tree_shrink) {
         text = "<b>" + _.str.titleize(type) + "</b>: " + text;
     }
     //For each item, add children if there is a sub-tree
-    _.each("requirements,chances,options,effects,variables".split(","), function (key) {
+    _.each("story,images,requirements,chances,choices,effects,variables".split(","), function (key) {
         var val = storyItem[key];
         if (val) {
             var node = story_details.convertStoryToTree(val, key);
@@ -616,9 +626,13 @@ story_details.convertNodeToStoryNode = function (storyItem, type) {
         }
     });
 
+    if (!text && storyItem.text) {
+        text = story_details.text(storyItem.text);
+    }
+
     output.text = _.str.truncate(text || "Unrecognized item", 80);
 
-    if (story_details.option_tree_shrink) {
+    if (story_details.choice_tree_shrink) {
         children = _.flatten(children);
     }
     output.children = (children && children.length) ? children : null;
@@ -627,4 +641,39 @@ story_details.convertNodeToStoryNode = function (storyItem, type) {
 
     return output;
 };
+story_details.transformTreeToStory = function($tree) {
+    $tree = $tree || story_details.$tree;
+    var data = $tree.jstree().get_json();
 
+    var json = story_details.exportTreeNode(data);
+    var story = json[0].stories[0];
+
+    story_details.default_story = story;
+};
+story_details.exportTreeNode = function(data) {
+    var output = [];
+    _.each(data, function (item) {
+        var obj = item.data;
+        var output_obj = {};
+        if (_.isObject(obj) && _.isEmpty(obj) && item.children) {
+            var title = item.text.toLowerCase();
+            output_obj[title] = story_details.exportTreeNode(item.children);
+        } else  if (_.isObject(obj) && item.children) {
+            for (key in obj) {
+                var val = obj[key];
+                if (val && !_.isArray(val) && !_.isObject(val)) {
+                    output_obj[key] = obj[key];
+                }
+            }
+        }
+        _.each(item.children,function(nodeGroup){
+            var title = nodeGroup.text.toLowerCase();
+            output_obj[title] = story_details.exportTreeNode(nodeGroup.children);
+        });
+
+        if (output_obj){
+            output.push(output_obj);
+        }
+    });
+    return output;
+};

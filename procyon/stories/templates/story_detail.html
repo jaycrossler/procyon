@@ -18,9 +18,9 @@
         .requirement { background-color: lightblue; border-radius: 4px;}
         .effect {background-color: lightyellow; border-radius: 4px;}
         .chance {background-color: lightgreen; border-radius: 4px;}
-        .option_holder {padding: 10px; margin:2px; border:2px solid darkolivegreen;}
-        .option {background-color: lightsalmon; border-radius: 4px;}
-        .option_title {padding: 4px; margin:2px; background-color: lightsalmon; border-radius: 4px;}
+        .choice_holder {padding: 10px; margin:2px; border:2px solid darkolivegreen;}
+        .choice {background-color: lightsalmon; border-radius: 4px;}
+        .choice_title {padding: 4px; margin:2px; background-color: lightsalmon; border-radius: 4px;}
         .bold {font-weight: bold}
         .tree_header {font-style: italic}
         .tree_detail {border:2px solid black; padding: 4px;}
@@ -40,7 +40,7 @@
             story_details.edit_url = "{% url 'story-detail' object.id %}";
             story_details.default_story = {{ object.to_json|safe|default:"{}" }};
 
-            story_details.init(story_details.default_story);
+            story_details.init();
         });
     </script>
 {% endblock %}
@@ -61,7 +61,7 @@
     {% if object.not_if_previous_stories %}<p><b>Ignore if Previous Stories:</b> {{ object.not_if_previous_stories }}
         </p>{% endif %}
     <p id="story"></p>
-    <div id="options"></div>
+    <div id="choices"></div>
     <p id="variables"></p>
     <hr/>
     <p id="downloads"></p>

@@ -38,9 +38,9 @@ class Story(models.Model):
                                       help_text="For testing, how many times should this story be shown immediately if someone passes in that developer=true?")
     max_times_usable = models.IntegerField(default=1, help_text="How many times can this story be given to a user?")
 
-    requirements = JSONField(help_text="List of all requirements that must be met before this story is an option")
+    requirements = JSONField(help_text="List of all requirements that must be met before this story is an choice")
     story = JSONField(help_text="Story and details")
-    options = JSONField(help_text="Options user can take after story")
+    choices = JSONField(help_text="Choices user can make after story is shown to them")
     variables = JSONField(help_text="Objects, People, Names within the story that can be overridden")
 
     following_stories = JSONField(default=[],
@@ -74,7 +74,7 @@ class Story(models.Model):
                               "requirements": self.requirements,
                               "story": self.story,
                               "variables": self.variables,
-                              "options": self.options,
+                              "choices": self.choices,
 
                               "images": [
                                   {"url": str(i.image), "width": int(i.image.width), "height": int(i.image.height)} for
