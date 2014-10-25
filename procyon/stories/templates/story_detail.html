@@ -25,6 +25,7 @@
         .tree_header {font-style: italic}
         .tree_detail {border:2px solid black; padding: 4px;}
         .field {margin: 4px;}
+        #story_tree {max-height: 400px; overflow-y: scroll; border: 1px solid #000000;}
     </style>
 {% endblock %}
 
@@ -51,8 +52,8 @@
     <h2>#{{ object.id }} {% if object.anthology %}
         [<a href="{% url 'story-list-anthology' object.anthology %}">{{ object.anthology }}</a>]
         {% endif %}{{ object.name }}</h2>
-    <p>Valid during years (<b>{{ object.year_min }}</b> - <b>{{ object.year_max }}</b>) <span id="requirements"></span></p>
-    <p>{% if object.tags %}<b>Tags:</b> {{ object.tags }} -- {% endif %}<b>Type:</b> {{ object.type }}</p>
+    <p>Valid during years (<b>{{ object.year_min }}</b> - <b>{{ object.year_max }}</b>) <span id="requirements"></span>
+    {% if object.tags %}<b>Tags:</b> {{ object.tags }} -- {% endif %}<b>Type:</b> {{ object.type }}</p>
     {% if object.description %}<div class="story_text"><b>Description:</b> {{ object.description }}</div>{% endif %}
     {% if object.force_usage %}<p>
         <i>Will be returned the next {{ object.force_usage }} times a story is requested that matches requirements</i>

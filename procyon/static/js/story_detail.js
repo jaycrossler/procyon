@@ -9,6 +9,83 @@ story_details.new_tree_node_text = "-New added Item-";
 story_details.$tree_node_holder = null;
 story_details.$tree = null;
 
+//-------------------------------------
+story_details.suggested = {};
+
+story_details.suggested.values = "none small low medium much high most all".split(" ");
+story_details.suggested.requirement_concept = ["world", "city", "character"];
+story_details.suggested.requirement_name = {
+    world: "magic technology war culture".split(" "),
+    city: "near defense offense culture religion ocean wealth science industry".split(" "),
+    character: "strength constitution dexterity intelligence wisdom charisma luck health wealth".split(" ")
+};
+story_details.suggested.effect_function = "characterGainsMoney characterGainsTreasure".split(" "); //TODO: Auto add:  worldDecreaseMagic worldIncreaseMagic worldIncreaseTechnology worldDecreaseTechnology worldIncrease
+story_details.suggested.variable_kind = "item animal pet friend spell skill knowledge business child".split(" ");
+//-------------------------------------
+
+story_details.schema = {
+    requirement: [
+        {field: "concept", choices: story_details.suggested.requirement_concept, required: true, type: "options", default: "world"},
+        {field: "name", required: true, type: "options-suggested", options_relate_to: "concept", heading: true, default: "magic", options: story_details.suggested.requirement_name},
+        {field: "has", type: "string"},
+        {field: "exceeds", default: "medium", type: "options-suggested", options: story_details.suggested.values},
+        {field: "below", type: "options-suggested", options: story_details.suggested.values},
+        {field: "is", type: "string"}
+    ],
+    effect: [
+        {field: "function", required: true, type: "options-suggested", heading: true, default: "characterGainsMoney", options: story_details.suggested.effect_function},
+        {field: "variable", type: "string"},
+        {field: "value", type: "options-suggested", options: story_details.suggested.values},
+    ],
+    variable: [
+        {field: "name", required: true, type: "string", default: "gem"},
+        {field: "nickname", required: true, heading: true, type: "string", default: "Azure sparkling Gemstone"},
+        {field: "tags", type: "string"},
+        {field: "title", type: "string"},
+        {field: "value", type: "options-suggested", options: story_details.suggested.values},
+        {field: "kind", type: "options", required: true, choices: story_details.suggested.variable_kind, default: "item"},
+        {field: "subkind", type: "string"},
+        {field: "strength", type: "options-suggested", options: story_details.suggested.values}, //TODO: Rethink this for use in fighting games...
+        {field: "defense", type: "options-suggested", options: story_details.suggested.values},
+        {field: "armor", type: "string"},
+        {field: "weapons", type: "string"},
+    ],
+    story: [
+        {field: "text", heading: true, required: true, type: "textblock", default: "'Twas a dark and story night..."}
+    ],
+    stories: [
+        {field: "name", required: true, type: "string", default: "Something important happened...", heading: true},
+        {field: "anthology", required: true, type: "string", default: "Everywhere"},
+        {field: "tags", type: "string"},
+        {field: "active", type: "boolean"},
+        {field: "max_times_usable", type: "integer"},
+        {field: "year_max", type: "integer"},
+        {field: "year_min", type: "integer"},
+        {field: "force_usage", type: "integer"},
+        {field: "description", type: "textblock", default: "Summary of story"}
+    ],
+    chance: [
+        {field: "title", heading: true, required: true, type: "textblock", default: "This is what happens..."}
+    ],
+    choice: [
+        {field: "title", heading: true, required: true, type: "textblock", default: "You can choose to..."}
+    ],
+    image: [
+        {field: "url", heading: true, required: true, type: "string", default: "image_name"}
+    ]
+};
+story_details.defaultObjectOfType = function (type) {
+    var data = {};
+    var schema = story_details.schema[type] || {};
+    _.each(schema, function (schemata) {
+        if (schemata.required) {
+            data[schemata.field] = schemata.default;
+        }
+    });
+    return data;
+};
+
+//=======================================
 story_details.init = function (story) {
     story = story || story_details.default_story;
 
@@ -31,8 +108,8 @@ story_details.drawStory = function (story) {
 
     var $choices = $("#choices");
     if (story_details.show_choices_as_tree) {
+        var $tree = $("<div>").attr('id', 'story_tree').appendTo($choices);
         var $tree_node_holder = story_details.$tree_node_holder = $("<div>").appendTo($choices);
-        var $tree = $("<div>").appendTo($choices);
         story_details.treeFromData(story, $tree, $tree_node_holder);
         $('#variables').hide();
     } else {
@@ -325,7 +402,7 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
         new_node_pointer.a_attr.class += " " + type;
         new_node_pointer.a_attr.class = _.str.trim(new_node_pointer.a_attr.class);
 
-        new_node_pointer.state = {opened:"true"};
+        new_node_pointer.state = {opened: "true"};
 
         if (data) {
             new_node_pointer.data = data;
@@ -337,6 +414,7 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
     };
     var preventSubFolders = function (node, parent_type) {
         var type = treeNodeStoryType(node);
+        //Only allow choices aad chances to be added below the root level
         return !nodeIsNotFolder(node)
             || (node.parent == "#")
             || (type == "requirement")
@@ -364,20 +442,12 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
         return type;
     };
     var baseDataFromType = function (type) {
-        //TODO: Build a schema, pull these from there
-        var data = null;
-        if (type == "requirement") {
-            data = {concept: "", has: "", exceeds:"", below:"", is:"", name: story_details.new_tree_node_text}
-        } else if (type == "choice") {
-            data = {title: story_details.new_tree_node_text}
-        } else if (type == "chance") {
-            data = {title: story_details.new_tree_node_text}
-        } else if (type == "effect") {
-            data = {function: "functionToRun", variable:"", value:""}
-        } else if (type == "variable") {
-            data = {name: "story_details.new_tree_node_text", nickname: "item", tags:"", title:"", value:"", subkind:"", details:"", kind:"", strength:"", defense:"", armor:"", weapons:""}
+        var data = story_details.defaultObjectOfType(type);
+        if (data && !_.isEmpty(data)) {
+            data.type = type;
+        } else {
+            data = null;
         }
-        if (data) data.type = type;
         return data;
     };
 
@@ -590,29 +660,36 @@ story_details.convertNodeToStoryNode = function (storyItem, type) {
     var text = "";
     var children = [];
 
+    //TODO: Apply these after any new node is created
     if (type == "stories") {
         text = storyItem.name || storyItem.description || "Story";
     } else if (type == "story") {
         text = story_details.nodeTexts.story(storyItem.story);
-        //output.icon = ""; //TODO: Set these
+        output.icon = "/static/icons/story.png";
     } else if (type == "images") {
         text = story_details.nodeTexts.image(storyItem);
+        output.icon = "/static/icons/image.png";
     } else if (type == "chances") {
         //TODO: Incorporate parseInt(100 / num_chances);
         text = story_details.nodeTexts.chance(storyItem);
         output.state = {opened: false};
         output.a_attr = {class: 'chance bold'};
+        output.icon = "/static/icons/chance.png";
     } else if (type == "effects") {
         text = story_details.nodeTexts.effect(storyItem);
         output.a_attr = {class: 'effect'};
+        output.icon = "/static/icons/star_empty.png";
     } else if (type == "requirements") {
         text = story_details.nodeTexts.requirement(storyItem);
         output.a_attr = {class: 'requirement'};
+        output.icon = "/static/icons/question.png";
     } else if (type == "variables") {
         text = story_details.nodeTexts.variable(storyItem);
+        output.icon = "/static/icons/gem.png";
     } else if (type == "choices") {
         text = story_details.nodeTexts.choice(storyItem);
         output.a_attr = {class: 'choice bold'};
+        output.icon = "/static/icons/choice.png";
     }
     if (story_details.choice_tree_shrink) {
         text = "<b>" + _.str.titleize(type) + "</b>: " + text;
@@ -641,7 +718,7 @@ story_details.convertNodeToStoryNode = function (storyItem, type) {
 
     return output;
 };
-story_details.transformTreeToStory = function($tree) {
+story_details.transformTreeToStory = function ($tree) {
     $tree = $tree || story_details.$tree;
     var data = $tree.jstree().get_json();
 
@@ -650,7 +727,7 @@ story_details.transformTreeToStory = function($tree) {
 
     story_details.default_story = story;
 };
-story_details.exportTreeNode = function(data) {
+story_details.exportTreeNode = function (data) {
     var output = [];
     _.each(data, function (item) {
         var obj = item.data;
@@ -658,7 +735,7 @@ story_details.exportTreeNode = function(data) {
         if (_.isObject(obj) && _.isEmpty(obj) && item.children) {
             var title = item.text.toLowerCase();
             output_obj[title] = story_details.exportTreeNode(item.children);
-        } else  if (_.isObject(obj) && item.children) {
+        } else if (_.isObject(obj) && item.children) {
             for (key in obj) {
                 var val = obj[key];
                 if (val && !_.isArray(val) && !_.isObject(val)) {
@@ -666,12 +743,12 @@ story_details.exportTreeNode = function(data) {
                 }
             }
         }
-        _.each(item.children,function(nodeGroup){
+        _.each(item.children, function (nodeGroup) {
             var title = nodeGroup.text.toLowerCase();
             output_obj[title] = story_details.exportTreeNode(nodeGroup.children);
         });
 
-        if (output_obj){
+        if (output_obj) {
             output.push(output_obj);
         }
     });
