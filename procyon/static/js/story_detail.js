@@ -25,7 +25,7 @@ story_details.suggested.variable_kind = "item animal pet friend spell skill know
 
 story_details.schema = {
     requirements: [
-        {field: "concept", choices: story_details.suggested.requirement_concept, required: true, type: "options", default: "world"},
+        {field: "concept", options: story_details.suggested.requirement_concept, required: true, type: "options", default: "world"},
         {field: "name", required: true, type: "options-suggested", options_relate_to: "concept", heading: true, default: "magic", options: story_details.suggested.requirement_name},
         {field: "has", type: "string"},
         {field: "exceeds", default: "medium", type: "options-suggested", options: story_details.suggested.values},
