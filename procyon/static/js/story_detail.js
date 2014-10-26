@@ -13,18 +13,18 @@ story_details.$tree = null;
 story_details.suggested = {};
 
 story_details.suggested.values = "none small low medium much high most all".split(" ");
-story_details.suggested.requirement_concept = ["world", "city", "character"];
+story_details.suggested.requirement_concept = "world city character".split(" ");
 story_details.suggested.requirement_name = {
     world: "magic technology war culture".split(" "),
     city: "near defense offense culture religion ocean wealth science industry".split(" "),
     character: "strength constitution dexterity intelligence wisdom charisma luck health wealth".split(" ")
 };
-story_details.suggested.effect_function = "characterGainsMoney characterGainsTreasure".split(" "); //TODO: Auto add:  worldDecreaseMagic worldIncreaseMagic worldIncreaseTechnology worldDecreaseTechnology worldIncrease
+story_details.suggested.effect_function = "characterGainsMoney characterGainsTreasure characterWounded battle".split(" "); //TODO: Auto add:  worldDecreaseMagic worldIncreaseMagic worldIncreaseTechnology worldDecreaseTechnology worldIncrease
 story_details.suggested.variable_kind = "item animal pet friend spell skill knowledge business child".split(" ");
 //-------------------------------------
 
 story_details.schema = {
-    requirement: [
+    requirements: [
         {field: "concept", choices: story_details.suggested.requirement_concept, required: true, type: "options", default: "world"},
         {field: "name", required: true, type: "options-suggested", options_relate_to: "concept", heading: true, default: "magic", options: story_details.suggested.requirement_name},
         {field: "has", type: "string"},
@@ -32,23 +32,23 @@ story_details.schema = {
         {field: "below", type: "options-suggested", options: story_details.suggested.values},
         {field: "is", type: "string"}
     ],
-    effect: [
+    effects: [
         {field: "function", required: true, type: "options-suggested", heading: true, default: "characterGainsMoney", options: story_details.suggested.effect_function},
         {field: "variable", type: "string"},
-        {field: "value", type: "options-suggested", options: story_details.suggested.values},
+        {field: "value", type: "options-suggested", options: story_details.suggested.values}
     ],
-    variable: [
+    variables: [
         {field: "name", required: true, type: "string", default: "gem"},
         {field: "nickname", required: true, heading: true, type: "string", default: "Azure sparkling Gemstone"},
         {field: "tags", type: "string"},
         {field: "title", type: "string"},
         {field: "value", type: "options-suggested", options: story_details.suggested.values},
-        {field: "kind", type: "options", required: true, choices: story_details.suggested.variable_kind, default: "item"},
+        {field: "kind", type: "options", required: true, options: story_details.suggested.variable_kind, default: "item"},
         {field: "subkind", type: "string"},
         {field: "strength", type: "options-suggested", options: story_details.suggested.values}, //TODO: Rethink this for use in fighting games...
         {field: "defense", type: "options-suggested", options: story_details.suggested.values},
         {field: "armor", type: "string"},
-        {field: "weapons", type: "string"},
+        {field: "weapons", type: "string"}
     ],
     story: [
         {field: "text", heading: true, required: true, type: "textblock", default: "'Twas a dark and story night..."}
@@ -64,13 +64,13 @@ story_details.schema = {
         {field: "force_usage", type: "integer"},
         {field: "description", type: "textblock", default: "Summary of story"}
     ],
-    chance: [
+    chances: [
         {field: "title", heading: true, required: true, type: "textblock", default: "This is what happens..."}
     ],
-    choice: [
+    choices: [
         {field: "title", heading: true, required: true, type: "textblock", default: "You can choose to..."}
     ],
-    image: [
+    images: [
         {field: "url", heading: true, required: true, type: "string", default: "image_name"}
     ]
 };
@@ -87,6 +87,8 @@ story_details.defaultObjectOfType = function (type) {
 
 //=======================================
 story_details.init = function (story) {
+    story_details.schema.requirements[1].options = _.flatten(_.toArray(story_details.suggested.requirement_name));
+
     story = story || story_details.default_story;
 
     //Link all images into the class object
@@ -601,23 +603,22 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
 story_details.showNodeDetail = function (node, $tree_node_holder) {
     $tree_node_holder = $tree_node_holder || story_details.$tree_node_holder;
     var data = node.data || {};
-    var variables = [];
+    var variables_already_set = [];
 
     $tree_node_holder.empty();
     if (data && !_.isEmpty(data)) {
         for (key in data) {
             var val = data[key];
             if (!_.isArray(val) && !_.isObject(val)) {
-                if (key != "type") variables.push(key);
+                if (key != "type") variables_already_set.push(key);
             }
         }
-        _.each(variables, function (field) {
-            var val = data[field];
-            $("<span>")
-                .html("<b>" + field + ":</b> " + val)
-                .addClass("field")
-                .appendTo($tree_node_holder);
-        })
+        //TODO: Set if options are linked and one is set to change other options
+
+        var schema = story_details.schema[data.type] || [];
+        _.each(schema,function(schema_item){
+            story_details.buildEditControl(schema_item,node).appendTo($tree_node_holder);
+        });
 
     } else {
         //It's an array holder
@@ -753,4 +754,82 @@ story_details.exportTreeNode = function (data) {
         }
     });
     return output;
+};
+story_details.buildEditControl = function(schema_item, node) {
+    var $div = $("<div>");
+    var $control;
+    var field = schema_item.field || "Field";
+    var $label = $("<label>")
+        .text(_.str.titleize(field) + ": ")
+        .appendTo($div);
+    if (schema_item.required) $label.css({textWeight:"bold"});
+
+    var name = "edit_control_"+field;
+    if (schema_item.type == "options-suggested" || schema_item.type == "options") {
+        //TODO: Link Selected
+        $control = $("<select>")
+            .attr({
+                id:name,
+                name:name
+            });
+        var opts = schema_item.options || [];
+        if (!schema_item.required) {
+            opts = [" "].concat(opts);
+        }
+        var existing = node.data[field];
+        var foundExisting = false;
+        _.each(opts,function(option){
+            var $opt = $("<option>")
+                .val(option)
+                .text(option)
+                .appendTo($control);
+            if (existing && option == existing) {
+                $opt.attr('selected',true);
+                foundExisting = true;
+            }
+        });
+        if (!foundExisting && existing && _.isString(existing) && existing.trim()) {
+            $("<option>")
+                .val(existing)
+                .text(existing)
+                .attr('selected',true)
+                .appendTo($control);
+        }
+    } else {
+        $control = $("<input>")
+            .attr({
+                type:"text",
+                id:name,
+                name:name
+            })
+            .addClass("edit_input");
+        if (node.data[field]) {
+            $control.val(node.data[field]);
+        }
+
+    }
+
+    $control
+        .on('change',function(ev){
+            var newText = $(this).val();
+            node.data[field] = newText;
+
+            var tree = story_details.$tree.jstree(true);
+            tree.set_text(node, newText);
+
+            story_details.transformTreeToStory();
+        })
+        .appendTo($div);
+
+    if (schema_item.style) {
+        $control.css(schema_item.style);
+    }
+
+
+//        {field: "name", required: true, type: "options-suggested", options_relate_to: "concept", heading: true, default: "magic", options: story_details.suggested.requirement_name},
+//        {field: "function", required: true, type: "options-suggested", heading: true, default: "characterGainsMoney", options: story_details.suggested.effect_function},
+//        {field: "variable", type: "string"},
+//        {field: "value", type: "options-suggested", options: story_details.suggested.values}
+
+    return $div;
 };
