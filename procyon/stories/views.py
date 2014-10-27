@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core import serializers
 from django.core.exceptions import PermissionDenied
@@ -12,7 +13,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.db.models.loading import get_model
 import operator
 from models import *
-#from datetime import datetime
+# from datetime import datetime
 #import logging
 #import json
 
@@ -35,9 +36,10 @@ class SearchView(object):
             search_query = []
             for field in self.search_fields:
                 if field == 'id':
-                    search_query.append(Q(**{field+'__{search_type}'.format(search_type='iexact'): search_term}))
+                    search_query.append(Q(**{field + '__{search_type}'.format(search_type='iexact'): search_term}))
                 else:
-                    search_query.append(Q(**{field+'__{search_type}'.format(search_type=self.search_type): search_term}))
+                    search_query.append(
+                        Q(**{field + '__{search_type}'.format(search_type=self.search_type): search_term}))
 
             if search_query:
                 queryset = queryset.filter(reduce(operator.or_, search_query))
@@ -72,10 +74,46 @@ class StoryViewList(SearchView, ListView):
 
 
 class StoryDetailView(DetailView):
-
+    http_method_names = ['post', 'get']
     model = Story
     template_name = 'story_detail.html'
 
     def get_context_data(self, **kwargs):
         context = super(StoryDetailView, self).get_context_data(**kwargs)
         return context
+
+    def post(self, request, *args, **kwargs):
+        story = get_object_or_404(Story, id=self.kwargs.get('pk'))
+
+        story_body = request.body
+        try:
+            story_data = json.loads(story_body)
+
+            story.choices = json.dumps(story_data.get('choices'))
+            story.requirements = json.dumps(story_data.get('requirements'))
+            story.story = json.dumps(story_data.get('story'))
+            story.variables = json.dumps(story_data.get('variables'))
+            #story.images = json.dumps(story_data.get('images'))
+
+            story.description = story_data.get('description')
+            story.anthology = story_data.get('anthology')
+            story.name = story_data.get('name')
+            story.type = story_data.get('type')
+            story.tags = story_data.get('tags')
+            story.active = bool(story_data.get('active'))
+            story.force_usage = int(story_data.get('force_usage'))
+            story.max_times_usable = int(story_data.get('max_times_usable'))
+            story.times_used = int(story_data.get('times_used'))
+            story.year_min = int(story_data.get('year_min'))
+            story.year_max = int(story_data.get('year_max'))
+
+            story.save()
+            result = {"status": "OK", "message": "updated"}
+        except Exception, e:
+            import traceback
+
+            result = dict(status="Error!", error=500, message='Generic Exception',
+                          details=traceback.format_exc(), exception=str(e))
+
+        return HttpResponse(json.dumps(result, ensure_ascii=True), mimetype="application/json")
+

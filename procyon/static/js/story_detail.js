@@ -9,6 +9,13 @@ story_details.new_tree_node_text = "-New Node-";
 story_details.$tree_node_holder = null;
 story_details.$tree = null;
 
+//TODO: Change one dd, change other
+//TODO: Pick variables in event variables list
+//TODO: Generate random variables from generators
+//TODO: View Grpahically with map background
+//TODO: Textboxes, WYSIWYG viewers for story text
+//TODO: Create new story
+
 //-------------------------------------
 story_details.suggested = {};
 
@@ -19,8 +26,8 @@ story_details.suggested.requirement_name = {
     city: "near defense offense culture religion ocean wealth science industry".split(" "),
     character: "strength constitution dexterity intelligence wisdom charisma luck health wealth".split(" ")  //TODO: Use Fate?
 };
-story_details.suggested.effect_function = "characterGainsMoney characterGainsTreasure characterWounded battle".split(" "); //TODO: Auto add:  worldDecreaseMagic worldIncreaseMagic worldIncreaseTechnology worldDecreaseTechnology worldIncrease
-story_details.suggested.variable_kind = "item animal pet friend spell skill knowledge business child".split(" ");
+story_details.suggested.effect_function = "characterGainsMoney characterGainsServant characterGainsTreasure characterWounded battle familyCursed familyBlessed".split(" "); //TODO: Auto add:  worldDecreaseMagic worldIncreaseMagic worldIncreaseTechnology worldDecreaseTechnology worldIncrease
+story_details.suggested.variable_kind = "item character location animal pet friend spell skill knowledge business child".split(" ");
 //-------------------------------------
 
 story_details.schema = {
@@ -95,6 +102,15 @@ story_details.init = function (story) {
     story_details.all_images = story.images;
 
     story_details.drawStory(story);
+
+    $(document).on('showalert', '.alert', function(){
+        window.setTimeout($.proxy(function() {
+            $(this).fadeTo(500, 0).slideUp(500, function(){
+                $(this).remove();
+            });
+        }, this), 5000);
+})
+
 };
 story_details.drawStory = function (story) {
     story = story || story_details.default_story;
@@ -345,11 +361,36 @@ story_details.buildDownloadButtons = function () {
         .appendTo($downloads);
 
     $("<a>")
-        .addClass('btn')
+        .addClass('btn btn-warning')
         .text("Toggle Tree Editability")
         .on('click', function () {
             story_details.choice_tree_shrink = !story_details.choice_tree_shrink;
             story_details.drawStory();
+        })
+        .appendTo($downloads);
+
+    $("<a>")
+        .addClass('btn btn-success')
+        .attr('id','btn_submit')
+        .text("Submit Changes")
+        .on('click', function () {
+
+            $.ajax({
+                url: '',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(story_details.default_story),
+                dataType: 'text',
+                success: function (result) {
+                    result = JSON.parse(result);
+                    if (result && result.status=="OK") {
+                        $('<div class="alert alert-success">Update Saved</div>').appendTo('#downloads').trigger('showalert');
+                    } else {
+                        $('<div class="alert alert-error">Error - Update Not Saved</div>').appendTo('#downloads').trigger('showalert');
+                    }
+                    console.log(result);
+                }
+            });
         })
         .appendTo($downloads);
 
@@ -427,10 +468,10 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
         return !nodeIsNotFolder(node)
             || (node.parent == "#")
             || (type == "requirement")
-            || (type == "effect")
-            || (type == "variable")
+            || (type == "variable");
+//            || (type == "effect")
 //            || (node.text == story_details.new_tree_node_text)
-            || (type == parent_type);
+//            || (type == parent_type);
     };
     var treeNodeStoryType = function (node) {
         var type = (node.data) ? node.data.type : node.text || null;
