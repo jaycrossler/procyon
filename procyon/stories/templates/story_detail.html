@@ -42,6 +42,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             story_details.edit_url = "{% url 'story-detail' object.id %}";
+            story_details.edit_new_url = "{% url 'story-detail-new'%}";
             story_details.default_story = {{ object.to_json|safe|default:"{}" }};
 
             story_details.init();

@@ -8,5 +8,6 @@ from views import *
 urlpatterns = patterns('',
                        url(r'^$', StoryViewList.as_view(), name='story-list'),
                        url(r'^(?P<pk>\d+)/?$', StoryDetailView.as_view(), name='story-detail'),
+                       url(r'new/?$', create_new_story_post, name='story-detail-new'),
                        url(r'anthology/(?P<anthology>[a-zA-Z_,]+)?/?$', StoryViewList.as_view(), name='story-list-anthology'),
 )

@@ -13,7 +13,7 @@ story_details.$tree = null;
 //TODO: Generate random variables from generators
 //TODO: View Grpahically with map background
 //TODO: Textboxes, WYSIWYG viewers for story text
-//TODO: Create new story
+//TODO: Show percentages of chances occurring
 
 //-------------------------------------
 story_details.suggested = {};
@@ -27,6 +27,7 @@ story_details.suggested.requirement_name = {
 };
 story_details.suggested.effect_function = "characterGainsMoney characterGainsServant characterGainsTreasure characterWounded battle familyCursed familyBlessed".split(" "); //TODO: Auto add:  worldDecreaseMagic worldIncreaseMagic worldIncreaseTechnology worldDecreaseTechnology worldIncrease
 story_details.suggested.variable_kind = "item character location animal pet friend spell skill knowledge business child".split(" ");
+story_details.suggested.stories_type = "quest location battle".split(" ");
 //-------------------------------------
 
 story_details.schema = {
@@ -63,7 +64,8 @@ story_details.schema = {
         {field: "name", required: true, type: "string", default: "Something important happened...", heading: true},
         {field: "anthology", required: true, type: "string", default: "Everywhere"},
         {field: "tags", type: "string"},
-        {field: "active", type: "boolean"},
+        {field: "type", type: "options", options:story_details.suggested.stories_type},
+        {field: "active", required: true, type: "options", options:["True", "False"]},
         {field: "max_times_usable", type: "integer"},
         {field: "year_max", type: "integer"},
         {field: "year_min", type: "integer"},
@@ -392,6 +394,35 @@ story_details.buildDownloadButtons = function () {
             });
         })
         .appendTo($downloads);
+
+
+    $("<a>")
+        .addClass('btn btn-info')
+        .attr('id','btn_submit')
+        .text("Add new story")
+        .on('click', function () {
+
+            $.ajax({
+                url: story_details.edit_new_url,
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(story_details.default_story),
+                dataType: 'text',
+                success: function (result) {
+                    result = JSON.parse(result);
+                    if (result && result.status=="OK") {
+                        var text = "New Story #"+result.id+" Created <a href='"+result.id+"'>Go there</a>";
+                        $('<div class="alert alert-success">'+text+'</div>').appendTo('#downloads').trigger('showalert');
+                    } else {
+                        $('<div class="alert alert-error">Error - Story not created</div>').appendTo('#downloads').trigger('showalert');
+                    }
+                    console.log(result);
+                }
+            });
+        })
+        .appendTo($downloads);
+
+
 
 };
 

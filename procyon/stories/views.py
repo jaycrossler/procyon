@@ -14,7 +14,7 @@ from django.db.models.loading import get_model
 import operator
 from models import *
 # from datetime import datetime
-#import logging
+# import logging
 #import json
 
 # Get an instance of a logger
@@ -117,3 +117,30 @@ class StoryDetailView(DetailView):
 
         return HttpResponse(json.dumps(result, ensure_ascii=True), mimetype="application/json")
 
+
+def create_new_story_post(request):
+    story_body = request.body
+    try:
+        story_data = json.loads(story_body)
+
+        anthology = story_data.get('anthology')
+        name = 'New Story'
+        stype = story_data.get('type')
+        tags = story_data.get('tags')
+        active = True
+        force_usage = 0
+        year_min = int(story_data.get('year_min'))
+        year_max = int(story_data.get('year_max'))
+
+        story = Story(name=name, anthology=anthology, type=stype, tags=tags, active=active, force_usage=force_usage,
+                      year_min=year_min, year_max=year_max)
+        story.save()
+
+        result = {"status": "OK", "message": "updated", "id": story.id}
+    except Exception, e:
+        import traceback
+
+        result = dict(status="Error!", error=500, message='Generic Exception',
+                      details=traceback.format_exc(), exception=str(e))
+
+    return HttpResponse(json.dumps(result, ensure_ascii=True), mimetype="application/json")
