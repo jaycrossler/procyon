@@ -9,7 +9,6 @@ story_details.new_tree_node_text = "-New Node-";
 story_details.$tree_node_holder = null;
 story_details.$tree = null;
 
-//TODO: Change one dd, change other
 //TODO: Pick variables in event variables list
 //TODO: Generate random variables from generators
 //TODO: View Grpahically with map background
@@ -94,7 +93,7 @@ story_details.defaultObjectOfType = function (type) {
 
 //=======================================
 story_details.init = function (story) {
-    story_details.schema.requirements[1].options = _.flatten(_.toArray(story_details.suggested.requirement_name));
+//    story_details.schema.requirements[1].options = _.flatten(_.toArray(story_details.suggested.requirement_name));
 
     story = story || story_details.default_story;
 
@@ -811,7 +810,7 @@ story_details.exportTreeNode = function (data) {
 };
 story_details.buildEditControl = function(schema_item, node) {
     var $div = $("<div>");
-    var $control;
+    var $control, $control2;
     var field = schema_item.field || "Field";
     var $label = $("<label>")
         .text(_.str.titleize(field) + ": ")
@@ -820,13 +819,28 @@ story_details.buildEditControl = function(schema_item, node) {
 
     var name = "edit_control_"+field;
     if (schema_item.type == "options-suggested" || schema_item.type == "options") {
-        //TODO: Link Selected
         $control = $("<select>")
             .attr({
                 id:name,
                 name:name
-            });
+            })
+            .addClass("edit_input")
+            .appendTo($div);
         var opts = schema_item.options || [];
+        if (schema_item.options_relate_to) {
+            //Use the options depending on what another var is set to
+            var related = $("#edit_control_" + schema_item.options_relate_to).val();
+            var new_opts = [];
+            if (related) {
+                for (key in opts) {
+                    if (key.toLowerCase() == related.toLowerCase()) {
+                        new_opts = opts[key];
+                    }
+                }
+                opts = new_opts;
+            }
+        }
+
         if (!schema_item.required) {
             opts = [" "].concat(opts);
         }
@@ -849,6 +863,22 @@ story_details.buildEditControl = function(schema_item, node) {
                 .attr('selected',true)
                 .appendTo($control);
         }
+        if (schema_item.type == "options-suggested") {
+            $("<span>or</span>")
+                .appendTo($div);
+            $control2 = $("<input>")
+                .attr({
+                    type:"text",
+                    id:name+"_text",
+                    name:name+"_text"
+                })
+                .addClass("edit_input")
+                .appendTo($div);
+            if (node.data[field]) {
+                $control2.val(node.data[field]);
+            }
+
+        }
     } else {
         $control = $("<input>")
             .attr({
@@ -856,15 +886,19 @@ story_details.buildEditControl = function(schema_item, node) {
                 id:name,
                 name:name
             })
-            .addClass("edit_input");
+            .addClass("edit_input")
+            .appendTo($div);
         if (node.data[field]) {
             $control.val(node.data[field]);
         }
 
     }
 
-    $control
-        .on('change',function(ev){
+    var controls = [$control];
+    if ($control2) controls.push($control2);
+
+    _.each(controls,function(control) {
+        control.on('change', function (ev) {
             node.data[field] = $(this).val();
 
             var tree = story_details.$tree.jstree(true);
@@ -887,18 +921,14 @@ story_details.buildEditControl = function(schema_item, node) {
             tree.select_node(node);
 
             story_details.transformTreeToStory();
-        })
-        .appendTo($div);
+        });
 
-    if (schema_item.style) {
-        $control.css(schema_item.style);
-    }
-
+        if (schema_item.style) {
+            contro.css(schema_item.style);
+        }
+    });
 
 //        {field: "name", required: true, type: "options-suggested", options_relate_to: "concept", heading: true, default: "magic", options: story_details.suggested.requirement_name},
-//        {field: "function", required: true, type: "options-suggested", heading: true, default: "characterGainsMoney", options: story_details.suggested.effect_function},
-//        {field: "variable", type: "string"},
-//        {field: "value", type: "options-suggested", options: story_details.suggested.values}
 
     return $div;
 };
