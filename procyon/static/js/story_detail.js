@@ -11,8 +11,7 @@ story_details.$tree = null;
 
 //TODO: Pick variables in event variables list
 //TODO: Generate random variables from generators
-//TODO: View Grpahically with map background
-//TODO: Textboxes, WYSIWYG viewers for story text
+//TODO: View Graphically with map background
 //TODO: Show percentages of chances occurring
 
 //-------------------------------------
@@ -23,11 +22,11 @@ story_details.suggested.requirement_concept = "world city character".split(" ");
 story_details.suggested.requirement_name = {
     world: "magic technology war culture".split(" "),
     city: "near defense offense culture religion ocean wealth science industry".split(" "),
-    character: "strength constitution dexterity intelligence wisdom charisma luck health wealth".split(" ")  //TODO: Use Fate?
+    character: "strength constitution dexterity intelligence wisdom charisma luck health wealth".split(" ")  //TODO: Import Schema from some game obj
 };
 story_details.suggested.effect_function = "characterGainsMoney characterGainsServant characterGainsTreasure characterWounded battle familyCursed familyBlessed".split(" "); //TODO: Auto add:  worldDecreaseMagic worldIncreaseMagic worldIncreaseTechnology worldDecreaseTechnology worldIncrease
 story_details.suggested.variable_kind = "item character location animal pet friend spell skill knowledge business child".split(" ");
-story_details.suggested.stories_type = "quest location battle".split(" ");
+story_details.suggested.stories_type = "quest location story fight".split(" ");
 //-------------------------------------
 
 story_details.schema = {
@@ -64,8 +63,8 @@ story_details.schema = {
         {field: "name", required: true, type: "string", default: "Something important happened...", heading: true},
         {field: "anthology", required: true, type: "string", default: "Everywhere"},
         {field: "tags", type: "string"},
-        {field: "type", type: "options", options:story_details.suggested.stories_type},
-        {field: "active", required: true, type: "options", options:["True", "False"]},
+        {field: "type", type: "options", options: story_details.suggested.stories_type},
+        {field: "active", required: true, type: "options", options: ["True", "False"]},
         {field: "max_times_usable", type: "integer"},
         {field: "year_max", type: "integer"},
         {field: "year_min", type: "integer"},
@@ -76,7 +75,7 @@ story_details.schema = {
         {field: "title", heading: true, required: true, type: "textblock", default: "This is what happens..."}
     ],
     choices: [
-        {field: "title", heading: true, required: true, type: "textblock", default: "You can choose to..."}
+        {field: "title", heading: true, required: true, type: "string", default: "You can choose to..."}
     ],
     images: [
         {field: "url", heading: true, required: true, type: "string", default: "image_name"}
@@ -84,7 +83,7 @@ story_details.schema = {
 };
 story_details.defaultObjectOfType = function (type) {
     var data = {};
-    var schema = story_details.schema[type] || story_details.schema[type+"s"] || {};
+    var schema = story_details.schema[type] || story_details.schema[type + "s"] || {};
     _.each(schema, function (schemata) {
         if (schemata.required) {
             data[schemata.field] = schemata.default;
@@ -104,13 +103,13 @@ story_details.init = function (story) {
 
     story_details.drawStory(story);
 
-    $(document).on('showalert', '.alert', function(){
-        window.setTimeout($.proxy(function() {
-            $(this).fadeTo(500, 0).slideUp(500, function(){
+    $(document).on('showalert', '.alert', function () {
+        window.setTimeout($.proxy(function () {
+            $(this).fadeTo(500, 0).slideUp(500, function () {
                 $(this).remove();
             });
         }, this), 5000);
-})
+    })
 
 };
 story_details.drawStory = function (story) {
@@ -152,7 +151,7 @@ story_details.showStory = function (data) {
     });
 };
 
-//Tis is the older div-based layout. Possibly delete if tree works well
+//This is the older div-based layout. Possibly delete if tree works well
 story_details.buildChoices = function (choices) {
     var $holder = $("<div>");
 
@@ -372,7 +371,7 @@ story_details.buildDownloadButtons = function () {
 
     $("<a>")
         .addClass('btn btn-success')
-        .attr('id','btn_submit')
+        .attr('id', 'btn_submit')
         .text("Submit Changes")
         .on('click', function () {
 
@@ -384,7 +383,7 @@ story_details.buildDownloadButtons = function () {
                 dataType: 'text',
                 success: function (result) {
                     result = JSON.parse(result);
-                    if (result && result.status=="OK") {
+                    if (result && result.status == "OK") {
                         $('<div class="alert alert-success">Update Saved</div>').appendTo('#downloads').trigger('showalert');
                     } else {
                         $('<div class="alert alert-error">Error - Update Not Saved</div>').appendTo('#downloads').trigger('showalert');
@@ -398,7 +397,7 @@ story_details.buildDownloadButtons = function () {
 
     $("<a>")
         .addClass('btn btn-info')
-        .attr('id','btn_submit')
+        .attr('id', 'btn_submit')
         .text("Add new story")
         .on('click', function () {
 
@@ -410,9 +409,9 @@ story_details.buildDownloadButtons = function () {
                 dataType: 'text',
                 success: function (result) {
                     result = JSON.parse(result);
-                    if (result && result.status=="OK") {
-                        var text = "New Story #"+result.id+" Created <a href='"+result.id+"'>Go there</a>";
-                        $('<div class="alert alert-success">'+text+'</div>').appendTo('#downloads').trigger('showalert');
+                    if (result && result.status == "OK") {
+                        var text = "New Story #" + result.id + " Created <a href='" + result.id + "'>Go there</a>";
+                        $('<div class="alert alert-success">' + text + '</div>').appendTo('#downloads').trigger('showalert');
                     } else {
                         $('<div class="alert alert-error">Error - Story not created</div>').appendTo('#downloads').trigger('showalert');
                     }
@@ -421,7 +420,6 @@ story_details.buildDownloadButtons = function () {
             });
         })
         .appendTo($downloads);
-
 
 
 };
@@ -467,9 +465,9 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
         return !(node.text && !node.data);
     };
     var buildANode = function (parent, text, type, tree, data) {
-        var new_node = tree.create_node(parent,{text: text},"first");
+        var new_node = tree.create_node(parent, {text: text}, "first");
 
-        var outputNode = story_details.titleNodeFromType(data,type);
+        var outputNode = story_details.titleNodeFromType(data, type);
 
         if (outputNode.icon) {
             tree.set_icon(new_node, outputNode.icon);
@@ -694,9 +692,9 @@ story_details.showNodeDetail = function (node, $tree_node_holder) {
         }
         //TODO: Set if options are linked and one is set to change other options
 
-        var schema = story_details.schema[data.type] || story_details.schema[data.type+"s"] || [];
-        _.each(schema,function(schema_item){
-            story_details.buildEditControl(schema_item,node).appendTo($tree_node_holder);
+        var schema = story_details.schema[data.type] || story_details.schema[data.type + "s"] || [];
+        _.each(schema, function (schema_item) {
+            story_details.buildEditControl(schema_item, node).appendTo($tree_node_holder);
         });
 
     } else {
@@ -710,12 +708,12 @@ story_details.showNodeDetail = function (node, $tree_node_holder) {
     }
 };
 
-story_details.titleNodeFromType = function(storyItem, type) {
+story_details.titleNodeFromType = function (storyItem, type) {
     type = type || storyItem.type || "unknown";
     storyItem = storyItem || {};
 
 //    var output = {state: {}, text:""};
-    var output = {state: {opened: true}, text:""};
+    var output = {state: {opened: true}, text: ""};
     if (type == "stories") {
         output.text = storyItem.name || storyItem.description || "Story";
     } else if (type == "story") {
@@ -780,7 +778,7 @@ story_details.convertNodeToStoryNode = function (storyItem, type) {
         console.error(storyItem);
         return storyItem;
     }
-    var output = story_details.titleNodeFromType(storyItem,type);
+    var output = story_details.titleNodeFromType(storyItem, type);
     var children = [];
 
     //For each item, add children if there is a sub-tree
@@ -839,21 +837,21 @@ story_details.exportTreeNode = function (data) {
     });
     return output;
 };
-story_details.buildEditControl = function(schema_item, node) {
+story_details.buildEditControl = function (schema_item, node) {
     var $div = $("<div>");
     var $control, $control2;
     var field = schema_item.field || "Field";
     var $label = $("<label>")
         .text(_.str.titleize(field) + ": ")
         .appendTo($div);
-    if (schema_item.required) $label.css({textWeight:"bold"});
+    if (schema_item.required) $label.css({textWeight: "bold"});
 
-    var name = "edit_control_"+field;
+    var name = "edit_control_" + field;
     if (schema_item.type == "options-suggested" || schema_item.type == "options") {
         $control = $("<select>")
             .attr({
-                id:name,
-                name:name
+                id: name,
+                name: name
             })
             .addClass("edit_input")
             .appendTo($div);
@@ -877,13 +875,13 @@ story_details.buildEditControl = function(schema_item, node) {
         }
         var existing = node.data[field];
         var foundExisting = false;
-        _.each(opts,function(option){
+        _.each(opts, function (option) {
             var $opt = $("<option>")
                 .val(option)
                 .text(option)
                 .appendTo($control);
             if (existing && option == existing) {
-                $opt.attr('selected',true);
+                $opt.attr('selected', true);
                 foundExisting = true;
             }
         });
@@ -891,7 +889,7 @@ story_details.buildEditControl = function(schema_item, node) {
             $("<option>")
                 .val(existing)
                 .text(existing)
-                .attr('selected',true)
+                .attr('selected', true)
                 .appendTo($control);
         }
         if (schema_item.type == "options-suggested") {
@@ -899,9 +897,10 @@ story_details.buildEditControl = function(schema_item, node) {
                 .appendTo($div);
             $control2 = $("<input>")
                 .attr({
-                    type:"text",
-                    id:name+"_text",
-                    name:name+"_text"
+                    type: "text",
+                    placeholder: schema_item.default,
+                    id: name + "_text",
+                    name: name + "_text"
                 })
                 .addClass("edit_input")
                 .appendTo($div);
@@ -910,12 +909,28 @@ story_details.buildEditControl = function(schema_item, node) {
             }
 
         }
+    } else if (schema_item.type == "textblock") {
+        $control = $("<textarea>")
+            .attr({
+                placeholder: schema_item.default,
+                required: schema_item.required,
+                id: name,
+                name: name
+            })
+            .addClass("textarea")
+            .appendTo($div);
+        if (node.data[field]) {
+            $control.val(node.data[field]);
+        }
+
     } else {
         $control = $("<input>")
             .attr({
-                type:"text",
-                id:name,
-                name:name
+                type: "text",
+                placeholder: schema_item.default,
+                required: schema_item.required,
+                id: name,
+                name: name
             })
             .addClass("edit_input")
             .appendTo($div);
@@ -928,7 +943,7 @@ story_details.buildEditControl = function(schema_item, node) {
     var controls = [$control];
     if ($control2) controls.push($control2);
 
-    _.each(controls,function(control) {
+    _.each(controls, function (control) {
         control.on('change', function (ev) {
             node.data[field] = $(this).val();
 

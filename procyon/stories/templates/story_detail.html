@@ -25,6 +25,7 @@
         .tree_header {font-style: italic}
         .tree_detail {border:2px solid black; padding: 4px;}
         .field {margin: 4px;}
+        .textarea {height: 40px; width:700px;}
         #story_tree {max-height: 400px; overflow-y: scroll; border: 1px solid #000000;}
         label {display: inline-block; width: 200px; text-align: right; }
         select {width: 350px;}
@@ -51,23 +52,23 @@
 {% endblock %}
 
 {% block banner %}
-    <a href="{% url 'story-list' %}">Back to Stories</a>
-
-    <h2>#{{ object.id }} {% if object.anthology %}
+    <h2><a href="{% url 'story-list' %}">#{{ object.id }}</a> {% if object.anthology %}
         [<a href="{% url 'story-list-anthology' object.anthology %}">{{ object.anthology }}</a>]
         {% endif %}{{ object.name }}</h2>
-    <p>Valid during years (<b>{{ object.year_min }}</b> - <b>{{ object.year_max }}</b>) <span id="requirements"></span>
+    <h3>{{ object.description }}</h3>
+    <p>Valid during years (<b>{{ object.year_min }}</b> - <b>{{ object.year_max }}</b>)
     {% if object.tags %}<b>Tags:</b> {{ object.tags }} -- {% endif %}<b>Type:</b> {{ object.type }}</p>
-    {% if object.description %}<div class="story_text"><b>Description:</b> {{ object.description }}</div>{% endif %}
-    {% if object.force_usage %}<p>
-        <i>Will be returned the next {{ object.force_usage }} times a story is requested that matches requirements</i>
-        </p>{% endif %}
-    {% if object.following_stories %}<p><b>Following Stories:</b> {{ object.following_stories }}</p>{% endif %}
-    {% if object.not_if_previous_stories %}<p><b>Ignore if Previous Stories:</b> {{ object.not_if_previous_stories }}
-        </p>{% endif %}
-    <p id="story"></p>
+
     <div id="choices"></div>
+
+    <p id="story"></p>
     <p id="variables"></p>
+{#    {% if object.force_usage %}#}
+{#        <p><i>Will be returned the next {{ object.force_usage }} times a story is requested that matches requirements</i></p>#}
+{#    {% endif %}#}
+    {% if object.following_stories %}<p><b>Following Stories:</b> {{ object.following_stories }}</p>{% endif %}
+    {% if object.not_if_previous_stories %}<p><b>Ignore if Previous Stories:</b> {{ object.not_if_previous_stories }}</p>{% endif %}
+
     <hr/>
     <p id="downloads"></p>
 
