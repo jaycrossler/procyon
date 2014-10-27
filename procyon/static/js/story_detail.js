@@ -5,19 +5,19 @@ story_details.all_images = {};
 story_details.show_parsed_variables = true;
 story_details.show_choices_as_tree = true;
 story_details.choice_tree_shrink = false;
-story_details.new_tree_node_text = "-New added Item-";
+story_details.new_tree_node_text = "-New Node-";
 story_details.$tree_node_holder = null;
 story_details.$tree = null;
 
 //-------------------------------------
 story_details.suggested = {};
 
-story_details.suggested.values = "none small low medium much high most all".split(" ");
+story_details.suggested.values = "epic fantastic superb great good fair average mediocre poor terrible none".split(" ");
 story_details.suggested.requirement_concept = "world city character".split(" ");
 story_details.suggested.requirement_name = {
     world: "magic technology war culture".split(" "),
     city: "near defense offense culture religion ocean wealth science industry".split(" "),
-    character: "strength constitution dexterity intelligence wisdom charisma luck health wealth".split(" ")
+    character: "strength constitution dexterity intelligence wisdom charisma luck health wealth".split(" ")  //TODO: Use Fate?
 };
 story_details.suggested.effect_function = "characterGainsMoney characterGainsTreasure characterWounded battle".split(" "); //TODO: Auto add:  worldDecreaseMagic worldIncreaseMagic worldIncreaseTechnology worldDecreaseTechnology worldIncrease
 story_details.suggested.variable_kind = "item animal pet friend spell skill knowledge business child".split(" ");
@@ -28,7 +28,7 @@ story_details.schema = {
         {field: "concept", options: story_details.suggested.requirement_concept, required: true, type: "options", default: "world"},
         {field: "name", required: true, type: "options-suggested", options_relate_to: "concept", heading: true, default: "magic", options: story_details.suggested.requirement_name},
         {field: "has", type: "string"},
-        {field: "exceeds", default: "medium", type: "options-suggested", options: story_details.suggested.values},
+        {field: "exceeds", default: "mediocre", type: "options-suggested", options: story_details.suggested.values},
         {field: "below", type: "options-suggested", options: story_details.suggested.values},
         {field: "is", type: "string"}
     ],
@@ -76,7 +76,7 @@ story_details.schema = {
 };
 story_details.defaultObjectOfType = function (type) {
     var data = {};
-    var schema = story_details.schema[type] || {};
+    var schema = story_details.schema[type] || story_details.schema[type+"s"] || {};
     _.each(schema, function (schemata) {
         if (schemata.required) {
             data[schemata.field] = schemata.default;
@@ -396,15 +396,21 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
         return !(node.text && !node.data);
     };
     var buildANode = function (parent, text, type, tree, data) {
-        var new_node = tree.create_node(parent);
-        tree.set_text(new_node, text);
+        var new_node = tree.create_node(parent,{text: text},"first");
+
+        var outputNode = story_details.titleNodeFromType(data,type);
+
+        if (outputNode.icon) {
+            tree.set_icon(new_node, outputNode.icon);
+        }
 
         var new_node_pointer = tree.get_node(new_node);
-        new_node_pointer.a_attr.class = new_node_pointer.a_attr.class || "";
-        new_node_pointer.a_attr.class += " " + type;
-        new_node_pointer.a_attr.class = _.str.trim(new_node_pointer.a_attr.class);
-
-        new_node_pointer.state = {opened: "true"};
+        if (outputNode.a_attr && outputNode.a_attr.class) {
+            new_node_pointer.a_attr = new_node_pointer.a_attr || {};
+            new_node_pointer.a_attr.class = new_node_pointer.a_attr.class || "";
+            new_node_pointer.a_attr.class += " " + outputNode.a_attr.class;
+            new_node_pointer.a_attr.class = _.str.trim(new_node_pointer.a_attr.class);
+        }
 
         if (data) {
             new_node_pointer.data = data;
@@ -412,7 +418,8 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
         }
         story_details.showNodeDetail(new_node_pointer, $tree_node_holder);
 
-        return new_node_pointer;
+        tree.deselect_all();
+        tree.select_node(new_node);
     };
     var preventSubFolders = function (node, parent_type) {
         var type = treeNodeStoryType(node);
@@ -422,7 +429,7 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
             || (type == "requirement")
             || (type == "effect")
             || (type == "variable")
-            || (node.text == story_details.new_tree_node_text)
+//            || (node.text == story_details.new_tree_node_text)
             || (type == parent_type);
     };
     var treeNodeStoryType = function (node) {
@@ -596,6 +603,7 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
             node.data[field] = newText;
             story_details.showNodeDetail(node, $tree_node_holder);
             story_details.transformTreeToStory();
+//            story_details.$tree.jstree('refresh');
         }
     );
 
@@ -615,7 +623,7 @@ story_details.showNodeDetail = function (node, $tree_node_holder) {
         }
         //TODO: Set if options are linked and one is set to change other options
 
-        var schema = story_details.schema[data.type] || [];
+        var schema = story_details.schema[data.type] || story_details.schema[data.type+"s"] || [];
         _.each(schema,function(schema_item){
             story_details.buildEditControl(schema_item,node).appendTo($tree_node_holder);
         });
@@ -631,6 +639,50 @@ story_details.showNodeDetail = function (node, $tree_node_holder) {
     }
 };
 
+story_details.titleNodeFromType = function(storyItem, type) {
+    type = type || storyItem.type || "unknown";
+    storyItem = storyItem || {};
+
+//    var output = {state: {}, text:""};
+    var output = {state: {opened: true}, text:""};
+    if (type == "stories") {
+        output.text = storyItem.name || storyItem.description || "Story";
+    } else if (type == "story") {
+        output.text = story_details.nodeTexts.story(storyItem.story);
+        output.icon = "/static/icons/story.png";
+    } else if (type == "images" || type == "image") {
+        output.text = story_details.nodeTexts.image(storyItem);
+        output.icon = "/static/icons/image.png";
+    } else if (type == "chances" || type == "chance") {
+        //TODO: Incorporate parseInt(100 / num_chances);
+        output.text = story_details.nodeTexts.chance(storyItem);
+        output.state = {opened: false};
+        output.a_attr = {class: 'chance bold'};
+        output.icon = "/static/icons/chance.png";
+    } else if (type == "effects" || type == "effect") {
+        output.text = story_details.nodeTexts.effect(storyItem);
+        output.a_attr = {class: 'effect'};
+        output.icon = "/static/icons/star_empty.png";
+    } else if (type == "requirements" || type == "requirement") {
+        output.text = story_details.nodeTexts.requirement(storyItem);
+        output.a_attr = {class: 'requirement'};
+        output.icon = "/static/icons/question.png";
+    } else if (type == "variables" || type == "variable") {
+        output.text = story_details.nodeTexts.variable(storyItem);
+        output.icon = "/static/icons/gem.png";
+    } else if (type == "choices" || type == "choice") {
+        output.text = story_details.nodeTexts.choice(storyItem);
+        output.a_attr = {class: 'choice bold'};
+        output.icon = "/static/icons/choice.png";
+    }
+    if (!output.text && storyItem.text) {
+        output.text = story_details.text(storyItem.text);
+    }
+    if (story_details.choice_tree_shrink) {
+        output.text = "<b>" + _.str.titleize(type) + "</b>: " + output.text;
+    }
+    return output;
+};
 
 story_details.convertStoryToTree = function (stories, type) {
     if (_.isObject(stories) && !_.isArray(stories)) {
@@ -657,44 +709,9 @@ story_details.convertNodeToStoryNode = function (storyItem, type) {
         console.error(storyItem);
         return storyItem;
     }
-    var output = {state: {opened: true}};
-    var text = "";
+    var output = story_details.titleNodeFromType(storyItem,type);
     var children = [];
 
-    //TODO: Apply these after any new node is created
-    if (type == "stories") {
-        text = storyItem.name || storyItem.description || "Story";
-    } else if (type == "story") {
-        text = story_details.nodeTexts.story(storyItem.story);
-        output.icon = "/static/icons/story.png";
-    } else if (type == "images") {
-        text = story_details.nodeTexts.image(storyItem);
-        output.icon = "/static/icons/image.png";
-    } else if (type == "chances") {
-        //TODO: Incorporate parseInt(100 / num_chances);
-        text = story_details.nodeTexts.chance(storyItem);
-        output.state = {opened: false};
-        output.a_attr = {class: 'chance bold'};
-        output.icon = "/static/icons/chance.png";
-    } else if (type == "effects") {
-        text = story_details.nodeTexts.effect(storyItem);
-        output.a_attr = {class: 'effect'};
-        output.icon = "/static/icons/star_empty.png";
-    } else if (type == "requirements") {
-        text = story_details.nodeTexts.requirement(storyItem);
-        output.a_attr = {class: 'requirement'};
-        output.icon = "/static/icons/question.png";
-    } else if (type == "variables") {
-        text = story_details.nodeTexts.variable(storyItem);
-        output.icon = "/static/icons/gem.png";
-    } else if (type == "choices") {
-        text = story_details.nodeTexts.choice(storyItem);
-        output.a_attr = {class: 'choice bold'};
-        output.icon = "/static/icons/choice.png";
-    }
-    if (story_details.choice_tree_shrink) {
-        text = "<b>" + _.str.titleize(type) + "</b>: " + text;
-    }
     //For each item, add children if there is a sub-tree
     _.each("story,images,requirements,chances,choices,effects,variables".split(","), function (key) {
         var val = storyItem[key];
@@ -704,11 +721,7 @@ story_details.convertNodeToStoryNode = function (storyItem, type) {
         }
     });
 
-    if (!text && storyItem.text) {
-        text = story_details.text(storyItem.text);
-    }
-
-    output.text = _.str.truncate(text || "Unrecognized item", 80);
+    output.text = _.str.truncate(output.text || "Unrecognized item", 80);
 
     if (story_details.choice_tree_shrink) {
         children = _.flatten(children);
@@ -811,11 +824,26 @@ story_details.buildEditControl = function(schema_item, node) {
 
     $control
         .on('change',function(ev){
-            var newText = $(this).val();
-            node.data[field] = newText;
+            node.data[field] = $(this).val();
 
             var tree = story_details.$tree.jstree(true);
-            tree.set_text(node, newText);
+            var outputNode = story_details.titleNodeFromType(node.data);
+            tree.set_text(node, outputNode.text);
+
+            if (outputNode.icon) {
+                tree.set_icon(node, outputNode.icon);
+            }
+
+            var new_node_pointer = tree.get_node(node);
+            if (outputNode.a_attr && outputNode.a_attr.class) {
+                new_node_pointer.a_attr = new_node_pointer.a_attr || {};
+                new_node_pointer.a_attr.class = new_node_pointer.a_attr.class || "";
+                new_node_pointer.a_attr.class += " " + outputNode.a_attr.class;
+                new_node_pointer.a_attr.class = _.str.trim(new_node_pointer.a_attr.class);
+            }
+
+            tree.deselect_all();
+            tree.select_node(node);
 
             story_details.transformTreeToStory();
         })
