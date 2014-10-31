@@ -30,6 +30,7 @@
         label {display: inline-block; width: 200px; text-align: right; }
         select {width: 350px;}
         .edit_input {width:350px;}
+        .drag {border: 2px solid black; border-radius: 4px;}
     </style>
 {% endblock %}
 
@@ -58,6 +59,8 @@
     <h3>{{ object.description }}</h3>
     <p>Valid during years (<b>{{ object.year_min }}</b> - <b>{{ object.year_max }}</b>)
     {% if object.tags %}<b>Tags:</b> {{ object.tags }} -- {% endif %}<b>Type:</b> {{ object.type }}</p>
+
+    Drag onto <b>Chance</b> or <b>Choice</b>: <span class="drag effect" id="battle_nodes">Battle</span>
 
     <div id="choices"></div>
 

@@ -22,7 +22,7 @@ story_details.suggested.requirement_name = {
     city: "near defense offense culture religion ocean wealth science industry".split(" "),
     character: "strength constitution dexterity intelligence wisdom charisma luck health wealth".split(" ")  //TODO: Import Schema from some game obj
 };
-story_details.suggested.effect_function = "characterGainsMoney characterGainsServant characterGainsTreasure characterWounded battle familyCursed familyBlessed".split(" "); //TODO: Auto add:  worldDecreaseMagic worldIncreaseMagic worldIncreaseTechnology worldDecreaseTechnology worldIncrease
+story_details.suggested.effect_function = "increase decrease characterGainsMoney characterGainsServant characterGainsTreasure characterWounded battle familyCursed familyBlessed".split(" "); //TODO: Auto add:  worldDecreaseMagic worldIncreaseMagic worldIncreaseTechnology worldDecreaseTechnology worldIncrease
 story_details.suggested.variable_kind = "item character location animal pet friend spell skill knowledge business child".split(" ");
 story_details.suggested.stories_type = "quest location story fight".split(" ");
 //-------------------------------------
@@ -38,8 +38,11 @@ story_details.schema = {
     ],
     effects: [
         {field: "function", required: true, type: "options-suggested", heading: true, default: "characterGainsMoney", options: story_details.suggested.effect_function},
-        {field: "variable", type: "options", options_holder: 'variables', options_sub:'nickname'},
-        {field: "value", type: "options-suggested", options: story_details.suggested.values}
+        {field: "value", type: "options-suggested", options: story_details.suggested.values, help_text:"What to pass to function, either named variable or concept.named or value"},
+        {field: "variable", type: "options", options_holder: 'variables', options_sub: 'nickname', help_text:"What to pass to function, wither named variable or concept.named or value"},
+        {field: "concept", type: "options", options: story_details.suggested.requirement_concept, default:"", help_text:"What to pass to function, either named variable or concept.named or value"},
+        {field: "named", type: "options-suggested", options_relate_to: "concept", default: "", options: story_details.suggested.requirement_name, help_text:"What to pass to function, either named variable or concept.named or value"}
+
     ],
     variables: [
         {field: "name", required: true, type: "string", default: "gem"},
@@ -70,9 +73,13 @@ story_details.schema = {
         {field: "description", type: "textblock", default: "Summary of story"}
     ],
     chances: [
+        {field: "id_link", type: "string", default: "", help_text:"Optional link to another chance or choice that this can link to"},
+        {field: "id", type: "string", default: "Optional id that can be linked to"},
         {field: "title", heading: true, required: true, type: "textblock", default: "This is what happens..."}
     ],
     choices: [
+        {field: "id_link", type: "string", default: "", help_text:"Optional link to another chance or choice that this can link to"},
+        {field: "id", type: "string", default: "Optional id that can be linked to"},
         {field: "title", heading: true, required: true, type: "string", default: "You can choose to..."}
     ],
     images: [
@@ -107,7 +114,18 @@ story_details.init = function (story) {
                 $(this).remove();
             });
         }, this), 5000);
-    })
+    });
+
+    $('#battle_nodes')
+        .css({cursor:'pointer'})
+        .on('mousedown', function (e) {
+            var nodes = [
+                { id: true, text: 'Battle-node-holder', type: 'effect'}
+            ];
+
+            return $.vakata.dnd.start(e, { 'jstree': true, 'obj': $(this), 'nodes': nodes},
+                '<div id="jstree-dnd" class="jstree-default"><i class="jstree-icon jstree-er"></i>Battle Event</div>');
+        });
 
 };
 story_details.drawStory = function (story) {
@@ -456,36 +474,41 @@ story_details.replaceParsedVariables = function (text, variables) {
 
 //------------------------------------
 
+story_details.buildANode = function (parent, text, type, tree, data, dont_edit) {
+    var new_node = tree.create_node(parent, {text: text}, "first");
+
+    var outputNode = story_details.titleNodeFromType(data, type);
+
+    if (outputNode.icon) {
+        tree.set_icon(new_node, outputNode.icon);
+    }
+
+    var new_node_pointer = tree.get_node(new_node);
+    if (outputNode.a_attr && outputNode.a_attr.class) {
+        new_node_pointer.a_attr = new_node_pointer.a_attr || {};
+        new_node_pointer.a_attr.class = new_node_pointer.a_attr.class || "";
+        new_node_pointer.a_attr.class += " " + outputNode.a_attr.class;
+        new_node_pointer.a_attr.class = _.str.trim(new_node_pointer.a_attr.class);
+    }
+
+    if (data) {
+        new_node_pointer.data = data;
+        if (!dont_edit) {
+            tree.edit(new_node, text);
+        }
+    }
+    story_details.showNodeDetail(new_node_pointer);
+
+    tree.deselect_all();
+    tree.select_node(new_node);
+
+    return new_node;
+};
+
 story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
 
     var nodeIsNotFolder = function (node) {
         return !(node.text && !node.data);
-    };
-    var buildANode = function (parent, text, type, tree, data) {
-        var new_node = tree.create_node(parent, {text: text}, "first");
-
-        var outputNode = story_details.titleNodeFromType(data, type);
-
-        if (outputNode.icon) {
-            tree.set_icon(new_node, outputNode.icon);
-        }
-
-        var new_node_pointer = tree.get_node(new_node);
-        if (outputNode.a_attr && outputNode.a_attr.class) {
-            new_node_pointer.a_attr = new_node_pointer.a_attr || {};
-            new_node_pointer.a_attr.class = new_node_pointer.a_attr.class || "";
-            new_node_pointer.a_attr.class += " " + outputNode.a_attr.class;
-            new_node_pointer.a_attr.class = _.str.trim(new_node_pointer.a_attr.class);
-        }
-
-        if (data) {
-            new_node_pointer.data = data;
-            tree.edit(new_node, text);
-        }
-        story_details.showNodeDetail(new_node_pointer, $tree_node_holder);
-
-        tree.deselect_all();
-        tree.select_node(new_node);
     };
     var preventSubFolders = function (node, parent_type) {
         var type = treeNodeStoryType(node);
@@ -535,7 +558,7 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
                         return preventSubFolders(node, 'requirement');
                     },
                     "action": function () {
-                        buildANode(node, 'Requirements', 'tree_header', tree)
+                        story_details.buildANode(node, 'Requirements', 'tree_header', tree)
                     }
                 },
                 "AddChoices": {
@@ -546,7 +569,7 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
                         return preventSubFolders(node, 'choice');
                     },
                     "action": function () {
-                        buildANode(node, 'Choices', 'tree_header', tree)
+                        story_details.buildANode(node, 'Choices', 'tree_header', tree)
                     }
                 },
                 "AddChances": {
@@ -557,7 +580,7 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
                         return preventSubFolders(node, 'chance');
                     },
                     "action": function () {
-                        buildANode(node, 'Chances', 'tree_header', tree)
+                        story_details.buildANode(node, 'Chances', 'tree_header', tree)
                     }
                 },
                 "AddEffects": {
@@ -568,7 +591,7 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
                         return preventSubFolders(node, 'effect');
                     },
                     "action": function () {
-                        buildANode(node, 'Effects', 'tree_header', tree)
+                        story_details.buildANode(node, 'Effects', 'tree_header', tree)
                     }
                 },
                 "AddVariables": {
@@ -579,7 +602,7 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
                         return node.id != "j1_2";
                     },
                     "action": function () {
-                        buildANode(node, 'Variables', 'tree_header', tree)
+                        story_details.buildANode(node, 'Variables', 'tree_header', tree)
                     }
                 },
                 "AddItem": {
@@ -591,7 +614,7 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
                     },
                     "action": function () {
                         var type = treeNodeStoryType(node);
-                        buildANode(node, story_details.new_tree_node_text, type, tree, baseDataFromType(type))
+                        story_details.buildANode(node, story_details.new_tree_node_text, type, tree, baseDataFromType(type))
                     }
                 },
                 "Rename": {
@@ -667,6 +690,26 @@ story_details.treeFromData = function (story, $treeHolder, $tree_node_holder) {
             story_details.showNodeDetail(node, $tree_node_holder);
             story_details.transformTreeToStory();
 //            story_details.$tree.jstree('refresh');
+        }
+    );
+    $treeHolder.on("copy_node.jstree",
+        function (evt, holder) {
+            var node = holder.node || {};
+            var title = node.text;
+            if (title == "Battle-node-holder") {
+                var tree = story_details.$tree.jstree(true);
+
+                tree.set_text(node, "battle");
+                tree.set_icon(node, "/static/icons/star_empty.png");
+                node.data = {function: "battle", type:"effect"};
+
+                var choices = story_details.buildANode(node,"Choices","tree_header",tree);
+                story_details.buildANode(choices,"accept surrender","choices",tree,{type:'choices',title:'accept surrender'},true);
+                story_details.buildANode(choices,"surrender","choices",tree,{type:'choices',title:'surrender'},true);
+                story_details.buildANode(choices,"lose","choices",tree,{type:'choices',title:'lose'},true);
+                story_details.buildANode(choices,"win","choices",tree,{type:'choices',title:'win'},true);
+            }
+
         }
     );
 
@@ -867,8 +910,8 @@ story_details.buildEditControl = function (schema_item, node) {
         } else if (schema_item.options_holder && schema_item.options_sub) {
             opts = story_details.default_story[schema_item.options_holder];
             var new_opts = [];
-            _.each(opts,function(opt){
-                if (opt && opt[schema_item.options_sub]){
+            _.each(opts, function (opt) {
+                if (opt && opt[schema_item.options_sub]) {
                     new_opts.push(opt[schema_item.options_sub]);
                 }
             });
@@ -973,9 +1016,12 @@ story_details.buildEditControl = function (schema_item, node) {
 
             story_details.transformTreeToStory();
         });
+        if (schema_item.help_text){
+            control.attr('title',schema_item.help_text);
+        }
 
         if (schema_item.style) {
-            contro.css(schema_item.style);
+            control.css(schema_item.style);
         }
     });
 
