@@ -47,6 +47,32 @@ class SearchView(object):
         return queryset
 
 
+class StoryComponentViewList(SearchView, ListView):
+    model = Component
+    paginate_by = 100
+    template_name = 'component_list.html'
+    context_object_name = 'components'
+    search_fields = ['id', 'name', 'anthology', 'tags', 'type']
+
+    def get_queryset(self):
+        components = Component.objects.filter(active=True)
+        if 'anthology' in self.kwargs:
+            anthology = str(self.kwargs['anthology']) or ""
+            if len(anthology) > 0:
+                anthology_list = anthology.split(",")
+                components = components.filter(anthology__in=anthology_list)
+        return components
+
+    def get_context_data(self, **kwargs):
+        cv = super(StoryComponentViewList, self).get_context_data(**kwargs)
+        if 'anthology' in self.kwargs:
+            anthology = str(self.kwargs['anthology']) or ""
+            if len(anthology) > 0:
+                anthology_list = anthology.split(",")
+                cv['anthologies'] = ", ".join(anthology_list)
+        return cv
+
+
 class StoryViewList(SearchView, ListView):
     model = Story
     paginate_by = 100
@@ -118,6 +144,90 @@ class StoryDetailView(DetailView):
         return HttpResponse(json.dumps(result, ensure_ascii=True), mimetype="application/json")
 
 
+class StoryComponentDetailView(DetailView):
+    http_method_names = ['post', 'get']
+    model = Component
+    template_name = 'component_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(StoryComponentDetailView, self).get_context_data(**kwargs)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        component = get_object_or_404(Component, id=self.kwargs.get('pk'))
+
+        try:
+            if request.POST.get('effects'):
+                effects = json.dumps(request.POST.get('effects'))
+            else:
+                effects = None
+
+            if request.POST.get('requirements'):
+                requirements = json.dumps(request.POST.get('requirements'))
+            else:
+                requirements = None
+
+            anthology = request.POST.get('anthology')
+            name = request.POST.get('name')
+            type = request.POST.get('type')
+            tags = request.POST.get('tags')
+            active = True #bool(request.POST.get('active'))
+
+            phrase_list = []
+            list_of_phrases = request.POST.get('list_of_phrases')
+            if isinstance(list_of_phrases, basestring) and len(list_of_phrases) and list_of_phrases.startswith('['):
+                #It's likely a JSON array of strings
+                phrases = json.loads(list_of_phrases)
+                if isinstance(phrases, list):
+                    phrase_list = phrases
+            elif isinstance(list_of_phrases, basestring) and len(list_of_phrases):
+                phrases = list_of_phrases.split(",")
+                if isinstance(phrases, list):
+                    phrase_list = phrases
+
+            if len(phrase_list) < 1:
+                phrase_list.append(name)
+
+            ids_of_added = []
+            for phrase in phrase_list:
+                if len(phrase_list) == 1:
+
+                    name = phrase.strip()
+                    if name and not name == 'tags-update':
+                        component.name = name
+
+                    if effects:
+                        component.effects = effects
+                    if requirements:
+                        component.requirements = requirements
+
+                    if anthology:
+                        component.anthology = anthology
+                    if type:
+                        component.type = type
+                    if tags:
+                        component.tags = tags
+                    if active:
+                        component.active = True
+
+                    component.save()
+                else:
+                    # Multiple were added. Instead of updating, add new ones
+                    component = Component(name=phrase, anthology=anthology, type=type, tags=tags, active=active, effects=effects, requirements=requirements)
+                    component.save()
+
+                ids_of_added.append(component.id)
+
+            result = {"status": "OK", "message": "updated", "ids": ids_of_added}
+        except Exception, e:
+            import traceback
+
+            result = dict(status="Error!", error=500, message='Generic Exception',
+                          details=traceback.format_exc(), exception=str(e))
+
+        return HttpResponse(json.dumps(result, ensure_ascii=True), mimetype="application/json")
+
+
 def create_new_story_post(request):
     story_body = request.body
     try:
@@ -137,6 +247,30 @@ def create_new_story_post(request):
         story.save()
 
         result = {"status": "OK", "message": "updated", "id": story.id}
+    except Exception, e:
+        import traceback
+
+        result = dict(status="Error!", error=500, message='Generic Exception',
+                      details=traceback.format_exc(), exception=str(e))
+
+    return HttpResponse(json.dumps(result, ensure_ascii=True), mimetype="application/json")
+
+
+def create_new_components_post(request):
+    story_body = request.body
+    try:
+        component_data = json.loads(story_body)
+
+        anthology = component_data.get('anthology')
+        name = 'New Component'
+        ctype = component_data.get('type')
+        tags = component_data.get('tags')
+        active = True
+
+        component = Component(name=name, anthology=anthology, type=ctype, tags=tags, active=active)
+        component.save()
+
+        result = {"status": "OK", "message": "updated", "id": component.id}
     except Exception, e:
         import traceback
 

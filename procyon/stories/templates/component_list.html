@@ -1,0 +1,153 @@
+{% extends "banner_base.html" %}
+
+{% load i18n bootstrap_pagination %}
+{% load url from future %}
+
+{% block head_title_base %}Chronicler Story Components{% endblock %}
+
+{% block head_title %}{% trans "Welcome" %}{% endblock %}
+
+{% block body_class %}home{% endblock %}
+
+{% block extra_style %}
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/front_page.css">
+    <style>
+        #components {
+            padding: 10px;
+        }
+
+        .tag_edits {
+            width: 350px;
+        }
+    </style>
+
+{% endblock %}
+
+{% block extra_script %}
+    <script type="text/javascript" src="{{ STATIC_URL }}js/underscore-min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/underscore.string.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/helpers.js"></script>
+    <script type="text/javascript">
+        var edit_url = "{% url 'component-detail' 1 %}";
+
+        $(document).ready(function () {
+            $('input.edit_btn')
+                    .on('click', function () {
+                        var $btn = $(this);
+                        var id = $btn.attr('id');
+                        var num = id.split('_');
+                        if (num && num[1]) {
+                            num = num[1];
+                            var $tags = $('#tag_' + num);
+                            var tags = $tags.val();
+
+                            var url = edit_url.substr(0, edit_url.length - 1) + num;
+
+                            $.ajax({
+                                url: url,
+                                type: "POST",
+                                data: {name: 'tags-update', tags: tags},
+                                success: function (result) {
+                                    if (result && result.status && result.status == "OK") {
+                                        $btn.css({backgroundColor: 'green'});
+                                    } else {
+                                        $btn.css({backgroundColor: 'red'});
+                                    }
+                                },
+                                fail: function () {
+                                    $btn.css({backgroundColor: 'red'});
+                                }
+                            });
+
+                        }
+                    });
+            $('input.tag_edits')
+                    .on('input', function () {
+                        var $btn = $(this);
+                        var id = $btn.attr('id');
+                        var num = id.split('_');
+                        if (num && num[1]) {
+                            num = num[1];
+                            $('#btn_' + num)
+                                    .css('backgroundColor', 'yellow');
+                        }
+
+                    })
+                    .keypress(function (e) {
+                        if (e.which == 13) {
+                            var $btn = $(this);
+                            var id = $btn.attr('id');
+                            var num = id.split('_');
+                            if (num && num[1]) {
+                                num = num[1];
+                                $('#btn_' + num).trigger('click');
+                                var tab = $(this).attr("tabindex");
+                                tab++;
+                                $("[tabindex='"+tab+"']").focus();
+                            }
+
+                        }
+                    });
+        });
+
+    </script>
+{% endblock %}
+
+{% block banner %}
+    <h2>Components {% if anthologies %}- Anthologies: {{ anthologies }}{% endif %}</h2>
+    {% if not anthologies %}
+        <div>
+            <form action="." class="form-inline">
+                <input type="text" name="q" class="search-query" placeholder="Enter a search term."> <input class="btn"
+                                                                                                            type="submit"
+                                                                                                            value="Search">
+            </form>
+        </div>
+    {% endif %}
+
+    {% if components %}
+        <table id="components">
+            {% for component in components %}
+                <tr>
+                    <td>#{{ component.id }}</td>
+                    <td>{% if component.anthology %}[<a href="{% url 'components-list-anthology' component.anthology %}" tabindex="-1">{{ component.anthology }}</a>] {% endif %}</td>
+                    <td>{% if component.type %}{{ component.type }} {% endif %}</td>
+                    <td><a href="{% url 'component-detail' component.id %}" class="see_detail" tabindex="-1">{{ component.name }}</a></td>
+                    <td><input type="text" class='tag_edits' id="tag_{{ component.id }}" tabindex="{{ forloop.counter }}"
+                               value="{{ component.tags }}"/><input class='edit_btn' id="btn_{{ component.id }}" type="submit" value="Update" tabindex="-1"></td>
+                </tr>
+            {% endfor %}
+        </table>
+
+        {% if is_paginated %}
+            <div class="pagination">
+            <span class="page-links">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                {% endif %}
+                <span class="page-current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">next</a>
+                {% endif %}
+            </span>
+            </div>
+        {% endif %}
+    {% else %}
+        <h3>Components</h3>
+        <p>No components found</p>
+    {% endif %}
+
+
+{% endblock %}
+
+{% block column-1 %}
+{% endblock %}
+
+{% block column-2 %}
+{% endblock %}
+
+{% block column-3 %}
+{% endblock %}
+

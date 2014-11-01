@@ -8,22 +8,37 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
 
-class Story(models.Model):
+class SnippetBase(models.Model):
     """
-    A story object based on constraints
+    An object builder based on constraints
     """
 
-    #TODO: Add GUID for long-term pointers between systems
-    active = models.BooleanField(default=True, help_text='If checked, this story will be listed in the active list')
+    active = models.BooleanField(default=True, help_text='If checked, this object will be listed in the active list')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     anthology = models.CharField(max_length=200, blank=True, default="",
-                                 help_text='Grouping of stories - could be the world or location. Only stories matching this will be returned')
-    name = models.CharField(max_length=200, default="Story", help_text='Name of the story for display and search')
+                                 help_text='Grouping of objects - could be the world or location. Only items matching this will be returned')
+    name = models.CharField(max_length=200, default="Text", blank=True, help_text='Name of the object for display and search')
+    tags = models.CharField(max_length=200, default="", null=True, blank=True, help_text='Tags to describe this object')
+
+    requirements = JSONField(help_text="List of all requirements that must be met before this object is an option")
+
+    def __unicode__(self):
+        anthology = ""
+        if self.anthology:
+            anthology = '[%s] ' % (self.anthology, )
+        return '%s%s' % (anthology, self.name)
+
+
+class Story(SnippetBase):
+    """
+    A story object based on constraints
+    """
+
+    # TODO: Add GUID for long-term pointers between systems
     description = models.TextField(blank=True, default="",
                                    help_text='Details of this story not to be displayed in the story itself')
-    tags = models.CharField(max_length=200, default="", null=True, help_text='Tags to describe this story')
     type = models.CharField(max_length=200, default="Quest",
                             help_text='Type of story (e.g. Quest, Tale, Location, Conversation)')
 
@@ -38,7 +53,6 @@ class Story(models.Model):
                                       help_text="For testing, how many times should this story be shown immediately if someone passes in that developer=true?")
     max_times_usable = models.IntegerField(default=1, help_text="How many times can this story be given to a user?")
 
-    requirements = JSONField(help_text="List of all requirements that must be met before this story is an choice")
     story = JSONField(help_text="Story and details")
     choices = JSONField(help_text="Choices user can make after story is shown to them")
     variables = JSONField(help_text="Objects, People, Names within the story that can be overridden")
@@ -135,3 +149,25 @@ class StoryImage(models.Model):
     story = models.ForeignKey(Story, related_name="images")
     image = models.ImageField(upload_to=get_storyimage_path, blank=True, null=True,
                               help_text="Upload an icon (now only in Admin menu) that will go with the story here, then refer to the image by name (without path) in your story")
+
+
+class Component(SnippetBase):
+    effects = JSONField(null=True, blank=True, help_text="Effects upon user when applied")
+    type = models.CharField(max_length=200, default="Power", blank=True,
+                            help_text='Type of item component (e.g. Power, Adjective, Quirk, etc)')
+
+    def to_json(self):
+        return json.dumps({
+                              "id": str(self.id),
+                              "name": self.name,
+                              "active": self.active,
+                              "anthology": self.anthology,
+                              "tags": self.tags,
+                              "type": self.type,
+
+                              "requirements": self.requirements,
+                              "effects": self.effects
+                          }, ensure_ascii=True)
+
+    class Meta:
+        ordering = ('type', 'name',)

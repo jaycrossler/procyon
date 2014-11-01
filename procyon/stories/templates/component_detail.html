@@ -1,0 +1,79 @@
+{% extends "banner_base.html" %}
+
+{% load i18n bootstrap_pagination %}
+{% load url from future %}
+
+{% block head_title_base %}Chronicler - {{ object.type }} #{{ object.id }} - {{ object.name }}{% endblock %}
+
+{% block head_title %}Component{% endblock %}
+
+{% block body_class %}home{% endblock %}
+
+{% block extra_style %}
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/front_page.css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}js/jstree/themes/default/style.min.css">
+    <style>
+        .story_text {border: 2px solid #000000; padding: 10px;}
+        .spacer {padding: 4px; margin:2px;}
+        .requirement { background-color: lightblue; border-radius: 4px;}
+        .effect {background-color: lightyellow; border-radius: 4px;}
+        .chance {background-color: lightgreen; border-radius: 4px;}
+        .choice_holder {padding: 10px; margin:2px; border:2px solid darkolivegreen;}
+        .choice {background-color: lightsalmon; border-radius: 4px;}
+        .choice_title {padding: 4px; margin:2px; background-color: lightsalmon; border-radius: 4px;}
+        .bold {font-weight: bold}
+        .tree_header {font-style: italic}
+        .tree_detail {border:2px solid black; padding: 4px;}
+        .field {margin: 4px;}
+        .textarea {height: 40px; width:700px;}
+        #story_tree {max-height: 400px; overflow-y: scroll; border: 1px solid #000000;}
+        label {display: inline-block; width: 200px; text-align: right; }
+        select {width: 350px;}
+        .edit_input {width:350px;}
+        .drag {border: 2px solid black; border-radius: 4px;}
+
+        .list {height: 100px;width: 400px;}
+    </style>
+{% endblock %}
+
+{% block extra_script %}
+    <script type="text/javascript" src="{{ STATIC_URL }}js/underscore-min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/underscore.string.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jstree/jstree.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/helpers.js"></script>
+{% endblock %}
+
+{% block banner %}
+    <h2><a href="{% url 'components-list' %}">#{{ object.id }}</a> {% if object.anthology %}
+        [<a href="{% url 'components-list-anthology' object.anthology %}">{{ object.anthology }}</a>]
+        {% endif %}{{ object.name }}</h2>
+    <p>{% if object.tags %}<b>Tags:</b> {{ object.tags }} -- {% endif %}<b>Type:</b> {{ object.type }}</p>
+
+    <form target="" method="post">
+        {% csrf_token %}
+        <label>Anthology</label>: <input type="text" name="anthology" value="{{ object.anthology }}" /><br/>
+        <label>Tags</label>: <input type="text" name="tags" value="{{ object.tags }}" />
+        <label>Type</label>: <input type="text" name="type" value="{{ object.type }}" /><br/>
+        <label>Requirements</label>: <textarea name="requirements">{{ object.requirements }}</textarea>
+        <label>Effects</label>: <textarea name="effects">{{ object.effects }}</textarea><br/>
+
+        <hr>
+
+        <label>Edit Phrase:</label> <input type="text" name="name" value="{{ object.name }}" /> or add multiple new ones:<br/>
+        <textarea class='list' name="list_of_phrases" placeholder="Either json list of phrases or comma-separated list or blank to add just one"></textarea>
+
+        <input type="submit" value="Submit Changes"/>
+    </form>
+    <hr/>
+    <p id="downloads"></p>
+
+{% endblock %}
+
+{% block column-1 %}
+{% endblock %}
+
+{% block column-2 %}
+{% endblock %}
+
+{% block column-3 %}
+{% endblock %}
