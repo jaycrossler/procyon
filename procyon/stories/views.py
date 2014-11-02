@@ -167,6 +167,11 @@ class StoryComponentDetailView(DetailView):
             else:
                 requirements = None
 
+            if request.POST.get('properties'):
+                properties = json.dumps(request.POST.get('properties'))
+            else:
+                properties = None
+
             anthology = request.POST.get('anthology')
             name = request.POST.get('name')
             type = request.POST.get('type')
@@ -200,6 +205,8 @@ class StoryComponentDetailView(DetailView):
                         component.effects = effects
                     if requirements:
                         component.requirements = requirements
+                    if properties:
+                        component.properties = properties
 
                     if anthology:
                         component.anthology = anthology
@@ -213,7 +220,7 @@ class StoryComponentDetailView(DetailView):
                     component.save()
                 else:
                     # Multiple were added. Instead of updating, add new ones
-                    component = Component(name=phrase, anthology=anthology, type=type, tags=tags, active=active, effects=effects, requirements=requirements)
+                    component = Component(name=phrase, anthology=anthology, type=type, tags=tags, active=active, effects=effects, requirements=requirements, properties=properties)
                     component.save()
 
                 ids_of_added.append(component.id)

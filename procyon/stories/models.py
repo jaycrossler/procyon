@@ -22,7 +22,7 @@ class SnippetBase(models.Model):
     name = models.CharField(max_length=200, default="Text", blank=True, help_text='Name of the object for display and search')
     tags = models.CharField(max_length=200, default="", null=True, blank=True, help_text='Tags to describe this object')
 
-    requirements = JSONField(help_text="List of all requirements that must be met before this object is an option")
+    requirements = JSONField(help_text="List of all requirements that must be met before this object is an option", blank=True)
 
     def __unicode__(self):
         anthology = ""
@@ -152,9 +152,10 @@ class StoryImage(models.Model):
 
 
 class Component(SnippetBase):
-    effects = JSONField(null=True, blank=True, help_text="Effects upon user when applied")
+    effects = JSONField(null=True, blank=True, help_text="Effects upon user when applied", default="[]")
+    properties = JSONField(null=True, blank=True, help_text="Metadata to use when this component is applied", default="{}")
     type = models.CharField(max_length=200, default="Power", blank=True,
-                            help_text='Type of item component (e.g. Power, Adjective, Quirk, etc)')
+                            help_text='Type of item verbal grouping (e.g. Power, Adjective, Quirk, First Name, etc)')
 
     def to_json(self):
         return json.dumps({
@@ -166,6 +167,7 @@ class Component(SnippetBase):
                               "type": self.type,
 
                               "requirements": self.requirements,
+                              "properties": self.properties,
                               "effects": self.effects
                           }, ensure_ascii=True)
 

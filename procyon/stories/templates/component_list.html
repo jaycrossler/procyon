@@ -19,6 +19,9 @@
         .tag_edits {
             width: 350px;
         }
+        .input_holder {
+            white-space: nowrap;
+        }
     </style>
 
 {% endblock %}
@@ -113,7 +116,7 @@
                     <td>{% if component.anthology %}[<a href="{% url 'components-list-anthology' component.anthology %}" tabindex="-1">{{ component.anthology }}</a>] {% endif %}</td>
                     <td>{% if component.type %}{{ component.type }} {% endif %}</td>
                     <td><a href="{% url 'component-detail' component.id %}" class="see_detail" tabindex="-1">{{ component.name }}</a></td>
-                    <td><input type="text" class='tag_edits' id="tag_{{ component.id }}" tabindex="{{ forloop.counter }}"
+                    <td class="input_holder"><input type="text" class='tag_edits' id="tag_{{ component.id }}" tabindex="{{ forloop.counter }}"
                                value="{{ component.tags }}"/><input class='edit_btn' id="btn_{{ component.id }}" type="submit" value="Update" tabindex="-1"></td>
                 </tr>
             {% endfor %}

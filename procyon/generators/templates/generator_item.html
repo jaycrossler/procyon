@@ -1,0 +1,80 @@
+{% extends "banner_base.html" %}
+
+{% load i18n bootstrap_pagination %}
+{% load url from future %}
+
+{% block head_title_base %}Generator :: Item{% endblock %}
+
+{% block head_title %}{% trans "Welcome" %}{% endblock %}
+
+{% block body_class %}home{% endblock %}
+
+{% block extra_style %}
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/front_page.css">
+    <style>
+        textarea {
+            width: 350px;
+            height: 120px;
+        }
+        input
+    </style>
+
+{% endblock %}
+
+{% block banner %}
+    <h2>Generator :: Item</h2>
+    <a href="item">Generate a Random Item</a><br/>
+    <form action="" method="post">
+        {% csrf_token %}
+        <i>{{ note }}</i>
+
+        <h3>Item:</h3>
+        {{ item }}
+
+        {% if item_data %}<h4>Item Data:</h4>
+            {{ item_data|default:"" }}
+        {% endif %}
+
+        {% if effects_data %}<h4>Effects Data:</h4>
+            {{ effects_data|default:"" }}
+        {% endif %}
+
+        <p></p>
+        <input type="submit" value="Regenerate with this Random Seed"/>
+        <input name="regenerate" type="submit" value="Generate with different Seed"/>
+
+        <label>Tags to weight:</label>
+        <input type="text" name="tags" value="{{ tags }}"
+                  placeholder='Optional - Tags that should help design the object'/>
+
+        <label>Random Seed:</label>
+        <input type="text" name="rand_seed" value="{{ rand_seed }}"
+                  placeholder='Optional - Number to use to design the object. Same numbers and inputs will generate same objects'/>
+
+        <label>World JSON Data:</label>
+        <textarea name="world_json"
+                  placeholder='Optional - JSON data about the world to be used when matching items. Something like: {"magic":"medium","technology":"low","year":1492}'>{{ world_json }}</textarea>
+        <br/>
+
+        <label>Person JSON Data:</label>
+        <textarea name="person_json"
+                  placeholder='Optional - JSON data about the person to be used when matching items. Something like: {"money":"high","business":["bookshop"]}'>{{ person_json }}</textarea>
+
+        <label>Item Pattern:</label>
+        <input type="text" name="pattern" value="{{ pattern }}"
+                  placeholder='Optional - Comma-separated Component Types to assemble when building an item'/>
+{#TODO: Have some way to indicate power. Integer? Dropdown of levels?#}
+    </form>
+
+
+{% endblock %}
+
+{% block column-1 %}
+{% endblock %}
+
+{% block column-2 %}
+{% endblock %}
+
+{% block column-3 %}
+{% endblock %}
+
