@@ -13,10 +13,12 @@
     <link rel="stylesheet" href="{{ STATIC_URL }}css/front_page.css">
     <style>
         textarea {
-            width: 350px;
-            height: 120px;
+            width: 420px;
+            height: 80px;
         }
-        input
+        input[type=text] {
+            width: 420px;
+        }
     </style>
 
 {% endblock %}
@@ -51,18 +53,26 @@
         <input type="text" name="rand_seed" value="{{ rand_seed }}"
                   placeholder='Optional - Number to use to design the object. Same numbers and inputs will generate same objects'/>
 
+        <label>Override Item Data:</label>
+        <textarea name="override_json"
+                  placeholder='Optional - JSON that the object must use: {"item":"crown","adjective":"chilly"}. If these are known Components, their data will be used'>{{ override_json }}</textarea>
+        <br/>
+
         <label>World JSON Data:</label>
         <textarea name="world_json"
                   placeholder='Optional - JSON data about the world to be used when matching items. Something like: {"magic":"medium","technology":"low","year":1492}'>{{ world_json }}</textarea>
-        <br/>
 
         <label>Person JSON Data:</label>
         <textarea name="person_json"
                   placeholder='Optional - JSON data about the person to be used when matching items. Something like: {"money":"high","business":["bookshop"]}'>{{ person_json }}</textarea>
 
+        <br/>
+
         <label>Item Pattern:</label>
         <input type="text" name="pattern" value="{{ pattern }}"
-                  placeholder='Optional - Comma-separated Component Types to assemble when building an item'/>
+                  placeholder='Optional - Comma-separated Components of the item. Ex: adjective:.7,origin:.7,item:1,power:1:that,quirk:.9:and'/>
+
+
 {#TODO: Have some way to indicate power. Integer? Dropdown of levels?#}
     </form>
 

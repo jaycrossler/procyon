@@ -1,5 +1,6 @@
-Mother Winter
-Mother Summer
+Mother
+Winter
+Summer
 Sidhe
 Mab
 Maeve

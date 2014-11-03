@@ -182,15 +182,15 @@ def counts_to_probabilities(counts, padding=1):
     return probs
 
 
-def create_random_item(world, person, pattern, tags, rand_seed):
-    note = ""
-
+def create_random_item(world={}, person={}, override={},
+                       pattern='adjective:.7,origin:.7,item:1,power:1:that,quirk:.9:and', tags="", rand_seed=None):
     # Build the random number seed
     try:
         rand_seed = float(rand_seed)
     except Exception:
         rand_seed = numpy.random.random()
     rand_seed = set_rand_seed(rand_seed)
+    note = "Random Seed: " + str(rand_seed)
 
     pattern_list, pattern_probability, pattern_prefixes = turn_pattern_to_hash(pattern)
 
@@ -204,16 +204,28 @@ def create_random_item(world, person, pattern, tags, rand_seed):
         if numpy.random.random() <= pattern_probability[idx]:
             if ctype in component_types:
                 components = component_types.get(ctype)
-                component_counts = component_tag_counts.get(ctype)
+                if override and ctype in override:
+                    # Use this component instead
+                    component_name = override.get(ctype)
+                    component = {"name": component_name}
+                    for comp in components:
+                        if comp.name == component_name:
+                            component = comp
+                            break
 
-                component_tag_probabilities = counts_to_probabilities(component_counts)
+                else:
+                    # Randomly pick a component
+                    component_counts = component_tag_counts.get(ctype)
 
-                option = numpy.random.choice(components, 1, p=component_tag_probabilities)
-                component = option[0]
+                    component_tag_probabilities = counts_to_probabilities(component_counts)
+
+                    option = numpy.random.choice(components, 1, p=component_tag_probabilities)
+                    component = option[0]
 
                 prefix = pattern_prefixes[idx]
                 name = component.name
                 item += prefix + name + " "
+                #TODO: Add Type Used
 
                 if component.properties and isinstance(component.properties, dict):
                     properties = component.properties
@@ -225,3 +237,32 @@ def create_random_item(world, person, pattern, tags, rand_seed):
 
     item = item.strip().capitalize()
     return item, item_data, effects_data, rand_seed, note
+
+
+def create_random_name(world={}, person={}, override={}, pattern="", tags="", rand_seed=None):
+    # Build a pattern if it doesn't exist, based on time and asian/other influences
+    # Have name_files as Components
+    # Pass this into create_random_item
+
+    if 'year' in world:
+        year = int(world.get('year'))
+        if year < 1400:
+            if numpy.random.random() < .5:
+                pattern = 'namefile:1,namefile:.7,adjective:.4:the'
+            else:
+                pattern = 'namefile:1,namefile:.7,namefile:.2,placefile:.4:of'
+        else:
+            pattern = 'name:1,name:.7,adjective:.4:the'
+
+    # TODO: Count phonemes, retry until 'sounds right'
+
+    item, item_data, effects_data, rand_seed, note = create_random_item(world, person, override,
+                                                                        pattern, tags, rand_seed)
+
+    # TODO: Loop through item_data - and maybe item_data needs types added to track what was assembled
+    #  If it's a <namefile> or <placefile>, look up those corresponding files
+    # via name_library.list_of_names(name_file='')
+    # then rebuild the item name
+
+    item = item.strip()
+    return item, item_data, rand_seed, note
