@@ -4,9 +4,10 @@ from procyon.stories.models import Component
 import numpy
 import json
 from procyon.starsystemmaker.math_helpers import *
+from procyon.starsystemmaker.name_library import *
 
 
-def turn_pattern_to_hash(pattern):
+def turn_pattern_to_hash(pattern, override={}):
     pattern_parts = pattern.split(",")
     pattern_probability = []
     pattern_list = []
@@ -24,7 +25,10 @@ def turn_pattern_to_hash(pattern):
                 weight = 1
 
             if len(pieces) > 2:
-                prefix = pieces[2] + ' '
+                prefix = ' ' + pieces[2] + ' '
+
+        if type in override:
+            weight = 1
 
         pattern_list.append(type)
         pattern_probability.append(weight)
@@ -85,6 +89,8 @@ def check_requirements(requirements, world, person):
 
                 if concept == 'city':
                     source = get(world, 'city', {})
+                elif concept == 'family':
+                    source = get(world, 'family', {})
                 elif concept == 'character' or concept == 'person':
                     source = person
                 else:
@@ -110,6 +116,7 @@ def check_requirements(requirements, world, person):
                                 checks.append(r_below >= to_check)
                             if r_is:
                                 r_is = value_of_variable(r_is)
+                                #TODO: Also check if strings and matches
                                 r_is = float(r_is)
                                 checks.append(r_is == to_check)
                         except Exception:
@@ -190,15 +197,17 @@ def create_random_item(world={}, person={}, override={},
     except Exception:
         rand_seed = numpy.random.random()
     rand_seed = set_rand_seed(rand_seed)
-    note = "Random Seed: " + str(rand_seed)
+    note = ""
 
-    pattern_list, pattern_probability, pattern_prefixes = turn_pattern_to_hash(pattern)
+    pattern_list, pattern_probability, pattern_prefixes = turn_pattern_to_hash(pattern, override)
 
     component_types, component_tag_counts = breakout_component_types(world, person, tags, pattern_list)
 
-    item = ''
     item_data = {}
     effects_data = []
+    item_generators = []
+    item_prefixes = []
+    item_names = []
 
     for idx, ctype in enumerate(pattern_list):
         if numpy.random.random() <= pattern_probability[idx]:
@@ -222,10 +231,9 @@ def create_random_item(world={}, person={}, override={},
                     option = numpy.random.choice(components, 1, p=component_tag_probabilities)
                     component = option[0]
 
-                prefix = pattern_prefixes[idx]
-                name = component.name
-                item += prefix + name + " "
-                #TODO: Add Type Used
+                item_prefixes.append(pattern_prefixes[idx])
+                item_names.append(component.name)
+                item_generators.append(ctype)
 
                 if component.properties and isinstance(component.properties, dict):
                     properties = component.properties
@@ -235,34 +243,51 @@ def create_random_item(world={}, person={}, override={},
                     effect = component.effects
                     effects_data += effect
 
-    item = item.strip().capitalize()
-    return item, item_data, effects_data, rand_seed, note
+    item_name = generate_item_name(item_prefixes, item_names)
+
+    item_return = dict(name=item_name, data=item_data, effects=effects_data, note=note, rand_seed=rand_seed,
+                       prefixes=item_prefixes, name_parts=item_names, generators=item_generators)
+    return item_return
 
 
-def create_random_name(world={}, person={}, override={}, pattern="", tags="", rand_seed=None):
-    # Build a pattern if it doesn't exist, based on time and asian/other influences
-    # Have name_files as Components
-    # Pass this into create_random_item
+def generate_item_name(item_prefixes, item_names, titleize=False):
+    name = ""
+    for idx, item in enumerate(item_names):
+        name += item_prefixes[idx] + item_names[idx]
 
-    if 'year' in world:
-        year = int(world.get('year'))
-        if year < 1400:
-            if numpy.random.random() < .5:
-                pattern = 'namefile:1,namefile:.7,adjective:.4:the'
+    name = name.strip().capitalize()
+    if titleize:
+        name = name.title()
+
+    return name
+
+
+def create_random_name(world={}, person={}, override={}, pattern="", tags="", rand_seed=None, modifications=0):
+    # Build a pattern if it doesn't exist, based on time and asian/other influences - TODO: Expand these rules
+
+    if not pattern:
+        pattern = 'namefile:1,namefile:1'
+        if 'year' in world:
+            year = int(world.get('year'))
+            if year < 1400:
+                if numpy.random.random() < .5:
+                    pattern = 'rank:.1,namefile:1,namefile:.7,adjective:.4:the'
+                else:
+                    pattern = 'rank:.1,namefile:1,namefile:.7,namefile:.2,placefile:.4:of'
             else:
-                pattern = 'namefile:1,namefile:.7,namefile:.2,placefile:.4:of'
-        else:
-            pattern = 'name:1,name:.7,adjective:.4:the'
+                pattern = 'rank:.1,namefile:1,namefile:.7,adjective:.4:the'
 
+    generated_item = create_random_item(world, person, override, pattern, tags, rand_seed)
+
+    for idx, generator in enumerate(generated_item.get('generators')):
+        if generator == "namefile" or generator == "placefile":
+            filename = generated_item['name_parts'][idx]
+            names = list_of_names(name_file=filename, use_prefix=False)
+            generated_item['name_parts'][idx] = names[0]
+
+    generated_item['name_parts'] = name_part_fuzzer(generated_item['name_parts'], modifications)
+
+    generated_item['name'] = generate_item_name(generated_item['prefixes'], generated_item['name_parts'], titleize=True)
     # TODO: Count phonemes, retry until 'sounds right'
 
-    item, item_data, effects_data, rand_seed, note = create_random_item(world, person, override,
-                                                                        pattern, tags, rand_seed)
-
-    # TODO: Loop through item_data - and maybe item_data needs types added to track what was assembled
-    #  If it's a <namefile> or <placefile>, look up those corresponding files
-    # via name_library.list_of_names(name_file='')
-    # then rebuild the item name
-
-    item = item.strip()
-    return item, item_data, rand_seed, note
+    return generated_item

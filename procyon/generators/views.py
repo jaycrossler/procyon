@@ -30,40 +30,22 @@ def generator_item(request):
 
     item_data = {}
     effects_data = []
+    generated_item = {}
 
     try:
         world = json.loads(world_json) if world_json else {}
         person = json.loads(person_json) if person_json else {}
         override = json.loads(override_json) if override_json else {}
-        # if world_json:
-        #     world = json.loads(world_json)
-        # else:
-        #     world = {}
-        #
-        # if person_json:
-        #     person = json.loads(person_json)
-        # else:
-        #     person = {}
-        #
-        # if override_json:
-        #     override = json.loads(override_json)
-        # else:
-        #     override = {}
 
-        item, item_data, effects_data, rand_seed, note = story_helpers.create_random_item(world, person, override,
-                                                                                          pattern, tags, rand_seed)
+        generated_item = story_helpers.create_random_item(world, person, override, pattern, tags, rand_seed)
 
+        item_data = generated_item.get('data')
         item_data = json.dumps(item_data) if item_data else None
+        effects_data = generated_item.get('effects')
         effects_data = json.dumps(effects_data) if effects_data else None
-        # if item_data:
-        #     item_data = json.dumps(item_data)
-        # else:
-        #     item_data = None
-        # if effects_data:
-        #     effects_data = json.dumps(effects_data)
-        # else:
-        #     effects_data = None
-
+        item = generated_item.get('name')
+        note = generated_item.get('note')
+        rand_seed = generated_item.get('rand_seed')
     except ValueError:
         item = "Random Item"
         note = "Improper JSON variables passed in"
@@ -72,7 +54,7 @@ def generator_item(request):
         note = json.dumps(dict(error=500, message='Exception', details=traceback.format_exc(), exception=str(e)))
 
     if format_type == "json":
-        data = json.dumps(dict(name=item, data=item_data, effects=effects_data, note=note))
+        data = json.dumps(generated_item)
         output = HttpResponse(data, mimetype="application/json")
 
     elif format_type == "string":
@@ -103,21 +85,26 @@ def generator_name(request):
     pattern = request.REQUEST.get('pattern') or ''
     tags = request.REQUEST.get('tags') or ''
     rand_seed = request.REQUEST.get('rand_seed') or ''
+    modifications = request.REQUEST.get('modifications') or ''
     regenerate = request.REQUEST.get('regenerate') or ''
     if regenerate:
         #A button was pushed with the name 'regenerate'
         rand_seed = ''
 
     item_data = {}
+    generated_item = {}
     try:
         world = json.loads(world_json) if world_json else {}
         person = json.loads(person_json) if person_json else {}
         override = json.loads(override_json) if override_json else {}
 
-        item, item_data, rand_seed, note = story_helpers.create_random_name(world, person, override,
-                                                                            pattern, tags, rand_seed)
+        generated_item = story_helpers.create_random_name(world, person, override, pattern, tags, rand_seed, modifications)
 
+        item_data = generated_item.get('data')
         item_data = json.dumps(item_data) if item_data else None
+        item = generated_item.get('name')
+        note = generated_item.get('note')
+        rand_seed = generated_item.get('rand_seed')
 
     except ValueError:
         item = "Jon Snow"
@@ -127,7 +114,7 @@ def generator_name(request):
         note = json.dumps(dict(error=500, message='Exception', details=traceback.format_exc(), exception=str(e)))
 
     if format_type == "json":
-        data = json.dumps(dict(name=item, data=item_data, note=note))
+        data = json.dumps(generated_item)
         output = HttpResponse(data, mimetype="application/json")
 
     elif format_type == "string":
@@ -139,6 +126,7 @@ def generator_name(request):
                                                             "pattern": pattern,
                                                             "tags": tags,
                                                             "rand_seed": rand_seed,
+                                                            "modifications": modifications,
                                                             "world_json": world_json,
                                                             "person_json": person_json,
                                                             "override_json": override_json,

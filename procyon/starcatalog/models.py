@@ -1,4 +1,3 @@
-from procyon.starsystemmaker.space_helpers import *
 from django.contrib.gis.db import models
 import json
 

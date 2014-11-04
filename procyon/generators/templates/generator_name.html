@@ -3,7 +3,7 @@
 {% load i18n bootstrap_pagination %}
 {% load url from future %}
 
-{% block head_title_base %}Generator :: Item{% endblock %}
+{% block head_title_base %}Generator :: Name{% endblock %}
 
 {% block head_title %}{% trans "Welcome" %}{% endblock %}
 
@@ -24,8 +24,8 @@
 {% endblock %}
 
 {% block banner %}
-    <h2>Generator :: Item</h2>
-    <a href="item">Generate a Random Item</a><br/>
+    <h2>Generator :: Name</h2>
+    <a href="item">Generate a Random Name</a><br/>
     <form action="" method="post">
         {% csrf_token %}
         <i>{{ note }}</i>
@@ -35,10 +35,6 @@
 
         {% if item_data %}<h4>Item Data:</h4>
             {{ item_data|default:"" }}
-        {% endif %}
-
-        {% if effects_data %}<h4>Effects Data:</h4>
-            {{ effects_data|default:"" }}
         {% endif %}
 
         <p></p>
@@ -53,9 +49,13 @@
         <input type="text" name="rand_seed" value="{{ rand_seed }}"
                   placeholder='Optional - Number to use to design the object. Same numbers and inputs will generate same objects'/>
 
-        <label>Override Item Data:</label>
+        <label>Modifications:</label>
+        <input type="text" name="modifications" value="{{ modifications }}"
+                  placeholder='Optional - Number of times to "fuzz" the name and modify it'/>
+
+        <label>Override Name Data:</label>
         <textarea name="override_json"
-                  placeholder='Optional - JSON that the object must use: {"item":"crown","adjective":"chilly"}. If these are known Components, their data will be used'>{{ override_json }}</textarea>
+                  placeholder='Optional - JSON that the object must use: {"rank":"Dr."}. If these are known Components, their data will be used'>{{ override_json }}</textarea>
         <br/>
 
         <label>World JSON Data:</label>
@@ -68,12 +68,10 @@
 
         <br/>
 
-        <label>Item Pattern:</label>
+        <label>Name Pattern:</label>
         <input type="text" name="pattern" value="{{ pattern }}"
-                  placeholder='Optional - Comma-separated Components of the item. Ex: adjective:.7,origin:.7,item:1,power:1:that,quirk:.9:and'/>
+                  placeholder='Optional - Comma-separated Components of the item. Ex: rank:.1,namefile:1,namefile:.7,namefile:.2,placefile:.4:of'/>
 
-
-{#TODO: Have some way to indicate power. Integer? Dropdown of levels?#}
     </form>
 
 
