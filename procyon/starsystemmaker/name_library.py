@@ -14,6 +14,7 @@ def list_of_names(name_file='', num_requested=20, use_prefix=True, prefix='New',
         name_file = name_file_list[name_num]
     if not name_file.endswith('txt'):
         name_file += '.txt'
+    name_file = name_file.strip()
 
     with open(name_file_dir + name_file, mode='r') as infile:
         name_list = [line.strip() for line in infile]
