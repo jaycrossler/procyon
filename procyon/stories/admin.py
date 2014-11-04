@@ -30,6 +30,12 @@ class StoryAdmin(admin.ModelAdmin):
     view_on_site = True
 
 
+class ComponentAdmin(admin.ModelAdmin):
+    model = Component
+    list_display = ['name', 'anthology', 'type', 'tags']
+    search_fields = ['name', 'anthology', 'type']
+    list_filter = ('anthology', 'type',)
+
 admin.site.register(Story, StoryAdmin)
 admin.site.register(Comment)
-admin.site.register(Component)
+admin.site.register(Component, ComponentAdmin)

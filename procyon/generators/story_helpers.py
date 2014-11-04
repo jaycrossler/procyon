@@ -177,7 +177,7 @@ def breakout_component_types(world, person, tags, pattern_list):
     return component_types, component_tag_counts
 
 
-def counts_to_probabilities(counts, padding=1):
+def counts_to_probabilities(counts, padding=.3):
     total = 0
     probs = []
     for count in counts:
@@ -189,14 +189,15 @@ def counts_to_probabilities(counts, padding=1):
     return probs
 
 
-def create_random_item(world={}, person={}, override={},
+def create_random_item(world={}, person={}, override={}, set_random_key=True,
                        pattern='adjective:.7,origin:.7,item:1,power:1:that,quirk:.9:and', tags="", rand_seed=None):
     # Build the random number seed
-    try:
-        rand_seed = float(rand_seed)
-    except Exception:
-        rand_seed = numpy.random.random()
-    rand_seed = set_rand_seed(rand_seed)
+    if set_random_key:
+        try:
+            rand_seed = float(rand_seed)
+        except Exception:
+            rand_seed = numpy.random.random()
+        rand_seed = set_rand_seed(rand_seed)
     note = ""
 
     pattern_list, pattern_probability, pattern_prefixes = turn_pattern_to_hash(pattern, override)
@@ -262,22 +263,42 @@ def generate_item_name(item_prefixes, item_names, titleize=False):
     return name
 
 
-def create_random_name(world={}, person={}, override={}, pattern="", tags="", rand_seed=None, modifications=0):
+def create_random_name(world={}, person={}, override={}, pattern="", tags="", rand_seed=None,
+                       modifications=0, set_random_key=True):
     # Build a pattern if it doesn't exist, based on time and asian/other influences - TODO: Expand these rules
 
+    if set_random_key:
+        try:
+            rand_seed = float(rand_seed)
+        except Exception:
+            rand_seed = numpy.random.random()
+        rand_seed = set_rand_seed(rand_seed)
+        set_random_key = False
+
+    name_patterns = {}
+    name_patterns['first_last'] = 'namefile:1,namefile:1'
+    name_patterns['rank_first_last_the_adj'] = 'rank:.1,namefile:1,namefile:.7,adjective:.4:the'
+    name_patterns['rank_three_of_place'] = 'rank:.1,namefile:1,namefile:.7,namefile:.2,placefile:.4:of'
+    name_patterns['rank_name_the_adj'] = 'rank:.1,namefile:1,namefile:.7,adjective:.4:the'
+    name_patterns['first_last'] = 'namefile:1,namefile:1'
+
     if not pattern:
-        pattern = 'namefile:1,namefile:1'
+        pattern = name_patterns[np.random.choice(name_patterns.keys(), 1)[0]]
+
         if 'year' in world:
             year = int(world.get('year'))
             if year < 1400:
                 if numpy.random.random() < .5:
-                    pattern = 'rank:.1,namefile:1,namefile:.7,adjective:.4:the'
+                    pattern = name_patterns['rank_first_last_the_adj']
                 else:
-                    pattern = 'rank:.1,namefile:1,namefile:.7,namefile:.2,placefile:.4:of'
+                    pattern = name_patterns['rank_three_of_place']
+            elif year > 1900:
+                pattern = name_patterns['first_last']
             else:
-                pattern = 'rank:.1,namefile:1,namefile:.7,adjective:.4:the'
+                pattern = name_patterns['rank_name_the_adj']
 
-    generated_item = create_random_item(world, person, override, pattern, tags, rand_seed)
+    generated_item = create_random_item(world=world, person=person, override=override, pattern=pattern, tags=tags,
+                                        rand_seed=rand_seed, set_random_key=set_random_key)
 
     for idx, generator in enumerate(generated_item.get('generators')):
         if generator == "namefile" or generator == "placefile":
@@ -288,6 +309,7 @@ def create_random_name(world={}, person={}, override={}, pattern="", tags="", ra
     generated_item['name_parts'] = name_part_fuzzer(generated_item['name_parts'], modifications)
 
     generated_item['name'] = generate_item_name(generated_item['prefixes'], generated_item['name_parts'], titleize=True)
-    # TODO: Count phonemes, retry until 'sounds right'
+
+    generated_item['pattern'] = pattern
 
     return generated_item

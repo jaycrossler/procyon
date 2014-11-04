@@ -20,18 +20,59 @@
             width: 430px;
         }
     </style>
+{% endblock %}
 
+{% block extra_script %}
+    <script type="text/javascript" src="{{ STATIC_URL }}js/underscore-min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/underscore.string.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+           $('#btn_string').on('click',function(){
+                var $btn = $(this);
+                var $form = $("#name_generator");
+                var arr = $form.serializeArray();
+
+                var query_string = "?format=string";
+                _.each(arr,function(input){
+                    if (input.name != "csrfmiddlewaretoken" && input.value) {
+                        query_string += "&" + input.name + "=" + input.value;
+                    }
+                });
+
+                window.open('name'+query_string, "_blank")
+                });
+
+            $('#btn_json').on('click',function(){
+                var $btn = $(this);
+                var $form = $("#name_generator");
+                var arr = $form.serializeArray();
+
+                var query_string = "?format=json";
+                _.each(arr,function(input){
+                    if (input.name != "csrfmiddlewaretoken" && input.value) {
+                        query_string += "&" + input.name + "=" + input.value;
+                    }
+                });
+
+                window.open('name'+query_string, "_blank")
+            })
+
+        });
+    </script>
 {% endblock %}
 
 {% block banner %}
-    <h2>Generator :: Name</h2>
-    <a href="name">Generate a Random Name</a><br/>
-    <form action="" method="post">
+    <h2><a href="./">Generators</a> :: Name</h2>
+    <form action="" method="post" id="name_generator">
         {% csrf_token %}
         <i>{{ note }}</i>
 
-        <h3>Item:</h3>
-        <b>{{ item }}</b>
+        <h3>"{{ item }}"</h3>
+
+        <hr/>
+
+        <input id="btn_json" type="button" value="JSON data of this name"/>
+        <input id="btn_string" type="button" value="Just this name" />
 
         {% if item_data %}<h4>Item Data:</h4>
             {{ item_data|default:"" }}

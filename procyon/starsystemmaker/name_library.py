@@ -37,7 +37,7 @@ def name_part_fuzzer(name_parts, modifications=4):
         name_parts = name_parts.split(" ")
     if modifications:
         part_count = len(name_parts)
-        function_names = ["name_nysiis", "name_vowel_switch", "name_chars_replace"]
+        function_names = ["name_nysiis", "name_vowel_switch", "name_chars_replace", "name_add_vowels"]
         for i in range(0, int(modifications)):
             idx_part = np.random.randint(part_count)
             name_part = name_parts[idx_part]
@@ -54,7 +54,12 @@ def name_part_fuzzer(name_parts, modifications=4):
 
 def name_nysiis(word):
     if word:
-        word = fuzzy.nysiis(word)
+        try:
+            result = fuzzy.nysiis(word)
+            if result:
+                word = result
+        except ValueError:
+            result = word
     return word
 
 
@@ -66,10 +71,13 @@ def name_vowel_switch(word):
         if not intab == outtab:
             try:
                 trantab = maketrans(intab, outtab)
-                result = word.translate(trantab)
+                result = word
+                result = result.translate(trantab)
             except Exception:
                 result = word
-            word = result
+            if result:
+                word = result
+
     return word
 
 
@@ -87,8 +95,32 @@ def name_chars_replace(word):
         if not intab == outtab:
             try:
                 trantab = maketrans(intab, outtab)
-                result = word.translate(trantab)
+                result = word
+                result = result.translate(trantab)
             except Exception:
                 result = word
+            if result:
+                word = result
+
+    return word
+
+
+def name_add_vowels(word):
+    if word:
+        vowels = "aeiouyAEIOUY ,1234567890-/"
+        vowels_lower = "a a e e i o o u u y".split()
+        result = ""
+
+        for idx, c in enumerate(word):
+            char = c
+            next = word[idx+1] if idx < len(word)-1 else ''
+            result += c
+            if char not in vowels and next not in vowels:
+                if np.random.random() < .3:
+                    result += np.random.choice(vowels_lower, 1)[0]
+                if np.random.random() < .3:
+                    result += np.random.choice(vowels_lower, 1)[0]
+
+        if result:
             word = result
     return word
