@@ -1,0 +1,142 @@
+{% extends "banner_base.html" %}
+
+{% load i18n bootstrap_pagination %}
+{% load url from future %}
+
+{% block head_title_base %}Generator :: {{ generator|title }}{% endblock %}
+
+{% block head_title %}{% trans "Welcome" %}{% endblock %}
+
+{% block body_class %}home{% endblock %}
+
+{% block extra_style %}
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/front_page.css">
+    <style>
+        textarea {
+            width: 430px;
+            height: 80px;
+        }
+        input[type=text] {
+            width: 430px;
+        }
+    </style>
+{% endblock %}
+
+{% block extra_script %}
+    <script type="text/javascript" src="{{ STATIC_URL }}js/underscore-min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/underscore.string.min.js"></script>
+    <script type="text/javascript">
+        var base_link="{{ generator|lower }}";
+        function buildLink(type, $btn){
+            var rand = $btn.attr('id');
+            if (rand) {
+                rand = rand.split("_")[1];
+                rand = parseInt(rand);
+            }
+            var $form = $("#generator");
+            var arr = $form.serializeArray();
+
+            var query_string = "?";
+            _.each(arr,function(input){
+                var val = input.value;
+                var name = input.name;
+                if (name != "csrfmiddlewaretoken" && val && name != "count" && !(name == "pattern" && val == "{{ pattern_default }}")) {
+                    if (name == "rand_seed") {
+                        val = rand;
+                    }
+                    query_string += name + "=" + val + "&";
+                }
+            });
+            query_string+="format="+type;
+
+            window.open(base_link+query_string, "_blank")
+        }
+        $(document).ready(function(){
+           $('.btn_string').on('click',function(){
+                var $btn = $(this);
+                buildLink('string', $btn)
+            });
+
+            $('.btn_json').on('click',function(){
+                var $btn = $(this);
+                buildLink('json', $btn)
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block banner %}
+    <h2><a href="./">Generators</a> :: {{ generator|title }}</h2>
+    <form action="" method="post" id="generator">
+        {% csrf_token %}
+        {% if note %}<i>{{ note }}</i>{% endif %}
+
+        <ol>
+        {% for item in items %}
+{#            TODO: Think about how to show item data better#}
+            <li title="{{ item.data|safe|default:"" }}">"{{ item.name }}"
+                <input class="btn_json" type="button" id="json_{{ item.rand_seed }}" value="JSON"/>
+                <input class="btn_string" type="button" id="string_{{ item.rand_seed }}" value="Text" />
+            </li>
+        {%  endfor %}
+        </ol>
+
+        <hr/>
+
+        <input type="submit" value="Regenerate with this Random Seed"/>
+        <input name="regenerate" type="submit" value="Generate with different Seed"/>
+
+        <label>Tags to search for:</label>
+        <input type="text" name="tags" value="{{ inputs.tags }}"
+                  placeholder='Optional - Tags that should help design the object'/>
+
+        <label>Random Seed:</label>
+        <input type="text" name="rand_seed" value="{{ inputs.rand_seed }}"
+                  placeholder='Optional - Number to use to design the object. Same numbers and inputs will generate same objects'/>
+
+        {% if inputs.modifications %}
+            <label>Modifications:</label>
+            <input type="text" name="modifications" value="{{ inputs.modifications }}"
+                      placeholder='Optional - Number of times to "fuzz" the name and modify it'/>
+        {% endif %}
+
+        <label>Count:</label>
+        <input type="text" name="count" value="{{ inputs.count }}"
+                  placeholder='Optional - Number of items to show in list above'/>
+
+        <label>Override Name Data:</label>
+        <textarea name="override_json"
+                  placeholder='Optional - JSON that the object must use: {"rank":"Dr.","placefile":"cities"}. If these are known Components, their data will be used'
+                >{{ inputs.override_json }}</textarea>
+        <br/>
+
+        <label>World JSON Data:</label>
+        <textarea name="world_json"
+                  placeholder='Optional - JSON data about the world to be used when matching items. Something like: {"magic":"medium","technology":"low","year":1492}'
+                >{{ inputs.world_json }}</textarea>
+
+        <label>Person JSON Data:</label>
+        <textarea name="person_json"
+                  placeholder='Optional - JSON data about the person to be used when matching items. Something like: {"money":"high","business":["bookshop"]}'
+                >{{ inputs.person_json }}</textarea>
+
+        <br/>
+
+        <label>Name Pattern:</label>
+        <input type="text" name="pattern" value="{{ inputs.pattern }}"
+                  placeholder='Optional - Comma-separated Components of the item. Ex: {{ pattern_default }}'/>
+
+    </form>
+
+
+{% endblock %}
+
+{% block column-1 %}
+{% endblock %}
+
+{% block column-2 %}
+{% endblock %}
+
+{% block column-3 %}
+{% endblock %}
+
