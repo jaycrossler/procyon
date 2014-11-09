@@ -46,8 +46,8 @@ def name_part_fuzzer(name_parts, modifications=4):
             method_to_call = globals()[func]
             result = method_to_call(name_part)
 
-            # result = locals()[func](name_part)
-            name_parts[idx_part] = result
+            if len(name_part) > 3:
+                name_parts[idx_part] = result
 
     return name_parts
 

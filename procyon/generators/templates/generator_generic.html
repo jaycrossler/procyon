@@ -90,11 +90,15 @@
         <input type="text" name="tags" value="{{ inputs.tags }}"
                   placeholder='Optional - Tags that should help design the object'/>
 
+        <label>Tag Weighting:</label>
+        <input type="text" name="tags" value="{{ inputs.tag_weight }}"
+                  placeholder='Optional - Weighting of how much to value non-matched tags. 0=No unmatched items, 1=Tags not heavily weighted'/>
+
         <label>Random Seed:</label>
         <input type="text" name="rand_seed" value="{{ inputs.rand_seed }}"
                   placeholder='Optional - Number to use to design the object. Same numbers and inputs will generate same objects'/>
 
-        {% if inputs.modifications %}
+        {% if inputs.modifications or inputs.modifications == 0 %}
             <label>Modifications:</label>
             <input type="text" name="modifications" value="{{ inputs.modifications }}"
                       placeholder='Optional - Number of times to "fuzz" the name and modify it'/>

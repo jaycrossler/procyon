@@ -11,6 +11,8 @@ story_details.$tree = null;
 
 //TODO: Generate random variables from generators
 //TODO: View Graphically with map background
+//TODO: Change to flatter JSON
+//TODO: Remove Story nodes - replace Chance with Story nodes
 
 //-------------------------------------
 story_details.suggested = {};

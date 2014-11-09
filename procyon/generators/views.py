@@ -14,6 +14,8 @@ def generator_list(request):
 
 
 def generator_default(request, generator_type="item", default_pattern='adjective:.7,origin:.7,item:1,power:1:that,quirk:.9:and'):
+    #TODO: Pass in Tag Weighting
+
     format_type = request.REQUEST.get('format') or 'html'
 
     world_json = request.REQUEST.get('world_json') or ''
@@ -23,6 +25,7 @@ def generator_default(request, generator_type="item", default_pattern='adjective
     pattern = request.REQUEST.get('pattern') or default_pattern
     count = request.REQUEST.get('count') or 20
     tags = request.REQUEST.get('tags') or ''
+    tag_weight = request.REQUEST.get('tag_weight') or 0.3
     rand_seed = request.REQUEST.get('rand_seed') or ''
 
     regenerate = request.REQUEST.get('regenerate') or ''
@@ -44,7 +47,8 @@ def generator_default(request, generator_type="item", default_pattern='adjective
         for i in range(0, count):
             rand = rand_seed if i == 0 else ''
             item = story_helpers.create_random_item(world=world, person=person, override=override,
-                                                    pattern=pattern, tags=tags, rand_seed=rand)
+                                                    pattern=pattern, tags=tags, rand_seed=rand,
+                                                    tag_weight=tag_weight)
             if i == 0:
                 first_item = item
             items.append(item)
@@ -72,6 +76,7 @@ def generator_default(request, generator_type="item", default_pattern='adjective
         inputs = {
             "pattern": pattern,
             "tags": tags,
+            "tag_weight": tag_weight,
             "rand_seed": rand_seed,
             "count": count,
             "world_json": world_json,
@@ -94,6 +99,9 @@ def generator_trap(request):
 
 
 def generator_name(request):
+    # TODO: Check for blank names
+    # TODO: Check for short names
+
     format_type = request.REQUEST.get('format') or 'html'
 
     world_json = request.REQUEST.get('world_json') or ''
@@ -102,6 +110,7 @@ def generator_name(request):
 
     pattern = request.REQUEST.get('pattern') or ''
     tags = request.REQUEST.get('tags') or ''
+    tag_weight = request.REQUEST.get('tag_weight') or 0.3
     rand_seed = request.REQUEST.get('rand_seed') or ''
     modifications = request.REQUEST.get('modifications') or 1
     count = request.REQUEST.get('count') or 20
@@ -127,7 +136,8 @@ def generator_name(request):
         for i in range(0, count):
             rand = rand_seed if i == 0 else ''
             item = story_helpers.create_random_name(world=world, person=person, override=override, pattern=pattern,
-                                                    tags=tags, rand_seed=rand, modifications=modifications)
+                                                    tags=tags, rand_seed=rand, modifications=modifications,
+                                                    tag_weight=tag_weight)
             if i == 0:
                 first_item = item
             items.append(item)
@@ -158,6 +168,7 @@ def generator_name(request):
             "rand_seed": rand_seed,
             "modifications": modifications,
             "count": count,
+            "tag_weight": tag_weight,
             "world_json": world_json,
             "person_json": person_json,
             "override_json": override_json
