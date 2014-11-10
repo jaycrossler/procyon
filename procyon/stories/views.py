@@ -176,7 +176,7 @@ class StoryComponentDetailView(DetailView):
             name = request.POST.get('name')
             type = request.POST.get('type')
             tags = request.POST.get('tags')
-            active = True #bool(request.POST.get('active'))
+            active = True
 
             phrase_list = []
             list_of_phrases = request.POST.get('list_of_phrases')
@@ -185,6 +185,11 @@ class StoryComponentDetailView(DetailView):
                 phrases = json.loads(list_of_phrases)
                 if isinstance(phrases, list):
                     phrase_list = phrases
+            elif isinstance(list_of_phrases, basestring) and len(list_of_phrases) and '\n' in list_of_phrases:
+                phrases = list_of_phrases.split('\n')
+                if isinstance(phrases, list):
+                    phrase_list = phrases
+
             elif isinstance(list_of_phrases, basestring) and len(list_of_phrases):
                 phrases = list_of_phrases.split(",")
                 if isinstance(phrases, list):
@@ -195,9 +200,9 @@ class StoryComponentDetailView(DetailView):
 
             ids_of_added = []
             for phrase in phrase_list:
+                name = phrase.strip()
                 if len(phrase_list) == 1:
 
-                    name = phrase.strip()
                     if name and not name == 'tags-update':
                         component.name = name
 
@@ -218,14 +223,16 @@ class StoryComponentDetailView(DetailView):
                         component.active = True
 
                     component.save()
+                    ids_of_added.append(component.id)
                 else:
                     # Multiple were added. Instead of updating, add new ones
-                    component = Component(name=phrase, anthology=anthology, type=type, tags=tags, active=active, effects=effects, requirements=requirements, properties=properties)
+                    component = Component(name=name, anthology=anthology, type=type, tags=tags, active=active,
+                                          effects=effects, requirements=requirements, properties=properties)
                     component.save()
+                    ids_of_added.append(component.id)
 
-                ids_of_added.append(component.id)
-
-            result = {"status": "OK", "message": "updated", "ids": ids_of_added}
+            result = {"status": "OK", "message": "updated", "ids": ids_of_added, "input_count": len(phrase_list),
+                      "added_count": len(ids_of_added)}
         except Exception, e:
             import traceback
 

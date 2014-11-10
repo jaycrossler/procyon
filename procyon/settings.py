@@ -139,16 +139,17 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.gis",
-    
+
     # theme
     "pinax_theme_bootstrap",
     "django_forms_bootstrap",
     'bootstrap-pagination',
-    
+
     # external
     "account",
     "metron",
     "eventlog",
+    "import_export",
 
     # project management
     "south",

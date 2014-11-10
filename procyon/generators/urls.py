@@ -10,6 +10,8 @@ urlpatterns = patterns('',
                        url(r'item/?$', generator_item, name='item-generator'),
                        url(r'name/?$', generator_name, name='name-generator'),
                        url(r'trap/?$', generator_trap, name='trap-generator'),
+                       url(r'junk/?$', generator_junk, name='junk-generator'),
+
                        url(r'solarsystem/?$', generator_solarsystem, name='solarsystem-generator'),
                        url(r'planet/?$', generator_item, name='plan-generator'),
                        url(r'person/?$', generator_item, name='person-generator'),

@@ -13,8 +13,8 @@ def generator_list(request):
     return render_to_response('generators_list.html', {}, RequestContext(request))
 
 
-def generator_default(request, generator_type="item", default_pattern='adjective:.7,origin:.7,item:1,power:1:that,quirk:.9:and'):
-    #TODO: Pass in Tag Weighting
+def generator_default(request, generator_type="item", parse_dice=False,
+                      default_pattern='adjective:.7,origin:.7,item:1,power:1:that,quirk:.9:and'):
 
     format_type = request.REQUEST.get('format') or 'html'
 
@@ -48,12 +48,12 @@ def generator_default(request, generator_type="item", default_pattern='adjective
             rand = rand_seed if i == 0 else ''
             item = story_helpers.create_random_item(world=world, person=person, override=override,
                                                     pattern=pattern, tags=tags, rand_seed=rand,
-                                                    tag_weight=tag_weight)
+                                                    tag_weight=tag_weight, parse_dice=parse_dice)
             if i == 0:
                 first_item = item
             items.append(item)
 
-        first_item['data'] = json.dumps(first_item.get('data')) if first_item.get('data') else None
+        # first_item['data'] = json.dumps(first_item.get('data')) if first_item.get('data') else None
         item_name = first_item.get('name')
         note = first_item.get('note')
         rand_seed = first_item.get('rand_seed')
@@ -91,16 +91,22 @@ def generator_default(request, generator_type="item", default_pattern='adjective
 
 
 def generator_item(request):
-    return generator_default(request, "item", "adjective:.7,origin:.7,item:1,power:1:that,quirk:.9:and")
+    return generator_default(request, generator_type="item",
+                             default_pattern="adjective:.7,origin:.7,item:1,power:1:that,quirk:.9:and")
+
+
+def generator_junk(request):
+    return generator_default(request, generator_type="junk", default_pattern="junk:1", parse_dice=True)
 
 
 def generator_trap(request):
-    return generator_default(request, "trap", "damage_adjective:1,damage_adjective:.6:and,weapon:1,trigger:1:triggered by")
+    return generator_default(request, generator_type="trap",
+                             default_pattern="damage_adjective:1,damage_adjective:.6:and,weapon:1,trigger:1:triggered by")
 
 
 def generator_name(request):
-    # TODO: Check for blank names
-    # TODO: Check for short names
+    #TODO: Have names of different regions
+    #TODO: Have different namefiles of male or female
 
     format_type = request.REQUEST.get('format') or 'html'
 

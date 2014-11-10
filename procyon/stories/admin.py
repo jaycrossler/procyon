@@ -1,6 +1,8 @@
 from django.contrib.contenttypes import generic
 from django.contrib.gis import admin
 from models import *
+from import_export import resources
+from import_export.admin import ImportExportModelAdmin
 
 
 class CommentInline(admin.TabularInline):
@@ -30,11 +32,20 @@ class StoryAdmin(admin.ModelAdmin):
     view_on_site = True
 
 
-class ComponentAdmin(admin.ModelAdmin):
+class ComponentResource(resources.ModelResource):
+
+    class Meta:
+        model = Component
+
+
+class ComponentAdmin(ImportExportModelAdmin):
     model = Component
     list_display = ['name', 'anthology', 'type', 'tags']
     search_fields = ['name', 'anthology', 'type']
     list_filter = ('anthology', 'type',)
+    resource_class = ComponentResource
+    pass
+
 
 admin.site.register(Story, StoryAdmin)
 admin.site.register(Comment)

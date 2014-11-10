@@ -1,24 +1,25 @@
 import numpy as np
 from django.http import HttpResponse
 import re
+import dice
 
-#--- Mathy functions for planetary things ----------------
+# --- Mathy functions for planetary things ----------------
+dice_parser = re.compile('[0-9]+[dD][0-9]+[e]{0,1}\s*[+-]{0,1}\s*[0-9]*(?![dD])')
 
 
 def rand_range(low=0, high=1, weight=1, avg=0.5):
-
     if low == 0 and high == 1:
         return rand_weighted(avg, weight)
 
     #convert numbers to 0 - 1
-    num_range = high-low
+    num_range = high - low
     if num_range <= 0:
         num_range = 1
-    new_avg = (avg-low) / num_range
+    new_avg = (avg - low) / num_range
 
     rand = rand_weighted(new_avg, weight)
 
-    rand = low + (num_range*rand)
+    rand = low + (num_range * rand)
     return rand
 
 
@@ -32,7 +33,7 @@ def rand_range_from_text(rand_text=""):
                 if high:
                     return rand_range(low, high, 2)
                 else:
-                    return rand_range(low*0.5, low*1.5, 3)
+                    return rand_range(low * 0.5, low * 1.5, 3)
     return rand_range()
 
 
@@ -47,7 +48,7 @@ def rand_weighted(midpoint=0.5, weight=3):
     """
 
     closest = np.random.sample()
-    for x in range(0, int(weight)-1):
+    for x in range(0, int(weight) - 1):
         tempnum = np.random.sample()
         if is_x_closer_to_mid_then_y(tempnum, closest, midpoint):
             closest = tempnum
@@ -55,8 +56,8 @@ def rand_weighted(midpoint=0.5, weight=3):
 
 
 def is_x_closer_to_mid_then_y(x, y, mid):
-    mid_to_x = abs(mid-x)
-    mid_to_y = abs(mid-y)
+    mid_to_x = abs(mid - x)
+    mid_to_y = abs(mid - y)
 
     is_x_closer = False
     if mid_to_x < mid_to_y:
@@ -84,6 +85,7 @@ def image_histogram_from_array(request, list_to_plot, bins=50):
 
 def parse_int(str):
     import re
+
     return int(re.match(r'\d+', str).group())
 
 
@@ -104,7 +106,7 @@ def average_numbers_clamped(num_1=0, num_2=0):
         return num_1
     if num_2 and not num_1:
         return num_2
-    return float((num_1+num_2) / 2)
+    return float((num_1 + num_2) / 2)
 
 
 def clamp(value, v_min=0, v_max=1):
@@ -120,24 +122,24 @@ def bigger_makes_smaller(start=5, start_min=0, start_max=8, end=5000, end_min=1,
     # For example, the bigger stars are usually younger (as they'd burn out quicker)
     #   so if start is higher than average and end is higher than average, make end lower
 
-    start_pct = clamp(float(start-start_min) / float(start_max-start_min), 0, 1)
-    end_pct = clamp(float(end-end_min) / float(end_max-end_min), 0, 1)
+    start_pct = clamp(float(start - start_min) / float(start_max - start_min), 0, 1)
+    end_pct = clamp(float(end - end_min) / float(end_max - end_min), 0, 1)
 
-    end_pct_guessed = rand_range(low=0, high=1, weight=tries_to_adjust, avg=(1-start_pct))
+    end_pct_guessed = rand_range(low=0, high=1, weight=tries_to_adjust, avg=(1 - start_pct))
     end_pct = average_numbers_clamped(end_pct, end_pct_guessed)
 
-    new_end = (end_pct * (end_max-end_min)) + end_min
+    new_end = (end_pct * (end_max - end_min)) + end_min
     return new_end
 
 
 def bigger_makes_bigger(start=5, start_min=0, start_max=10, end=5, end_min=0, end_max=10, tries_to_adjust=2):
-    start_pct = clamp((start-start_min) / (start_max-start_min))
-    end_pct = clamp((end-end_min) / (end_max-end_min))
+    start_pct = clamp((start - start_min) / (start_max - start_min))
+    end_pct = clamp((end - end_min) / (end_max - end_min))
 
     end_pct_guessed = rand_range(low=0, high=1, weight=tries_to_adjust, avg=start_pct)
     end_pct = average_numbers_clamped(end_pct, end_pct_guessed)
 
-    new_end = (end_pct * (end_max-end_min)) + end_min
+    new_end = (end_pct * (end_max - end_min)) + end_min
     return new_end
 
 
@@ -172,3 +174,11 @@ def randint(low, high):
     if low >= high:
         return high
     return np.random.randint(low, high)
+
+
+def parse_dice_text(text):
+    matches = dice_parser.findall(text)
+    for match in matches:
+        val = str(sum(dice.roll(match))) + " "
+        text = text.replace(match, val)
+    return text

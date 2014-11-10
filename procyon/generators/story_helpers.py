@@ -192,7 +192,7 @@ def counts_to_probabilities(counts, padding=.3):
     return probs
 
 
-def create_random_item(world={}, person={}, override={}, set_random_key=True,
+def create_random_item(world={}, person={}, override={}, set_random_key=True, parse_dice=False,
                        pattern='adjective:.7,origin:.7,item:1,power:1:that,quirk:.9:and', tags="", rand_seed=None,
                        tag_weight=.3):
     # Build the random number seed
@@ -236,8 +236,12 @@ def create_random_item(world={}, person={}, override={}, set_random_key=True,
                     option = numpy.random.choice(components, 1, p=component_tag_probabilities)
                     component = option[0]
 
+                text = component.name
+                if parse_dice:
+                    text = parse_dice_text(text)
+
                 item_prefixes.append(pattern_prefixes[idx])
-                item_names.append(component.name)
+                item_names.append(text)
                 item_generators.append(ctype)
 
                 if component.properties and isinstance(component.properties, dict):
