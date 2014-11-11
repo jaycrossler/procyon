@@ -74,7 +74,7 @@
         <ol>
         {% for item in items %}
 {#            TODO: Think about how to show item data better#}
-            <li title="{{ item.data|safe|default:"" }}">"{{ item.name }}"
+            <li>"{{ item.name }}"
                 <input class="btn_json" type="button" id="json_{{ item.rand_seed }}" value="JSON"/>
                 <input class="btn_string" type="button" id="string_{{ item.rand_seed }}" value="Text" />
             </li>

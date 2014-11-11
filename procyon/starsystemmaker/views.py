@@ -122,13 +122,14 @@ def system_builder(request):
     """
     View used for designing a star system.
     """
-    rand = request.GET.get('rand')
-    stellar = request.GET.get('stellar')
-    temp = request.GET.get('temp')
-    mass = request.GET.get('mass')
-    radius = request.GET.get('radius')
-    age = request.GET.get('age')
-    planets = request.GET.get('planets')
+    rand = request.REQUEST.get('rand')
+    stellar = request.REQUEST.get('stellar')
+    temp = request.REQUEST.get('temp')
+    mass = request.REQUEST.get('mass')
+    radius = request.REQUEST.get('radius')
+    age = request.REQUEST.get('age')
+    planets = request.REQUEST.get('planets')
+    format = request.REQUEST.get('format')
 
     options = {'rand_seed': rand, 'stellar': stellar, 'temp': temp, 'mass': mass, 'radius': radius, 'age': age, 'planets': planets}
     settings = star_variables(options)
@@ -137,7 +138,11 @@ def system_builder(request):
 
     settings = json.dumps(settings, ensure_ascii=True)
 
-    return render_to_response('system_builder.html', {'settings': settings}, RequestContext(request))
+    if format == "json":
+        output = HttpResponse(settings, mimetype="application/json")
+    else:
+        output = render_to_response('system_builder.html', {'settings': settings}, RequestContext(request))
+    return output
 
 
 def create_planet_texture_png(request):

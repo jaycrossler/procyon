@@ -39,12 +39,12 @@ class Story(SnippetBase):
     # TODO: Add GUID for long-term pointers between systems
     description = models.TextField(blank=True, default="",
                                    help_text='Details of this story not to be displayed in the story itself')
-    type = models.CharField(max_length=200, default="Quest",
+    type = models.CharField(db_index=True, max_length=200, default="Quest",
                             help_text='Type of story (e.g. Quest, Tale, Location, Conversation)')
 
-    year_min = models.IntegerField(default=1000,
+    year_min = models.IntegerField(db_index=True, default=1000,
                                    help_text="Minimum Year Number that this story can occur in (e.g. 1776)")
-    year_max = models.IntegerField(default=2100,
+    year_max = models.IntegerField(db_index=True, default=2100,
                                    help_text="Maximum Year Number that this story can occur in (e.g. 1801)")
 
     times_used = models.IntegerField(default=0,
@@ -154,7 +154,7 @@ class StoryImage(models.Model):
 class Component(SnippetBase):
     effects = JSONField(null=True, blank=True, help_text="Effects upon user when applied", default="[]")
     properties = JSONField(null=True, blank=True, help_text="Metadata to use when this component is applied", default="{}")
-    type = models.CharField(max_length=200, default="Power", blank=True,
+    type = models.CharField(db_index=True, max_length=200, default="Power", blank=True,
                             help_text='Type of item verbal grouping (e.g. Power, Adjective, Quirk, First Name, etc)')
 
     def to_json(self):

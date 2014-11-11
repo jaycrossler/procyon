@@ -2,6 +2,7 @@ import numpy as np
 from django.http import HttpResponse
 import re
 import dice
+import random
 
 # --- Mathy functions for planetary things ----------------
 dice_parser = re.compile('[0-9]+[dD][0-9]+[e]{0,1}\s*[+-]{0,1}\s*[0-9]*(?![dD])')
@@ -179,6 +180,58 @@ def randint(low, high):
 def parse_dice_text(text):
     matches = dice_parser.findall(text)
     for match in matches:
-        val = str(sum(dice.roll(match))) + " "
+        val = str(roll_dice(match)) + " "
         text = text.replace(match, val)
     return text
+
+
+def roll_dice(text, as_array=False):
+    if as_array:
+        output = dice.roll(text)
+    else:
+        output = text
+        d_spot = text.find('d')
+        if d_spot > -1:
+            num_dice = text[0:d_spot]
+            dice_type = text[d_spot+1:].strip()
+            modifier_type = ''
+            modifier_extra = ''
+
+            if ' ' in dice_type:
+                modifier_pos = dice_type.find(' ')
+                dice_front = dice_type[0:modifier_pos].strip()
+                modifier_extra = dice_type[modifier_pos:].strip()
+                dice_type = dice_front + modifier_extra
+
+            if '+' in dice_type:
+                modifier_pos = dice_type.find('+')
+                dice_front = dice_type[0:modifier_pos]
+                modifier_extra = dice_type[modifier_pos+1:].strip()
+                dice_type = dice_front
+                modifier_type = "+"
+            elif '-' in dice_type:
+                modifier_pos = dice_type.find('-')
+                dice_front = dice_type[0:modifier_pos]
+                modifier_extra = dice_type[modifier_pos+1:].strip()
+                dice_type = dice_front
+                modifier_type = "-"
+
+            num_dice = int(num_dice)
+            dice_type = int(dice_type)
+            result = 0
+            rolls = []
+            if num_dice > 0:
+                for roll_num in range(0, num_dice):
+                    rolls.append(random.randint(1, dice_type))
+                result += sum(rolls)
+
+            if modifier_type:
+                modifier_extra = int(modifier_extra)
+                if modifier_type == "+":
+                    result += modifier_extra
+                if modifier_type == "-":
+                    result -= modifier_extra
+
+            output = result
+
+    return output
