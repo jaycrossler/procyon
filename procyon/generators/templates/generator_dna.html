@@ -71,73 +71,46 @@
         {% csrf_token %}
         {% if note %}<i>{{ note }}</i>{% endif %}
 
-        <ol>
-        {% for item in items %}
-{#            TODO: Think about how to show item data better#}
-            <li>"{{ item.name }}"
-                <input class="btn_json" type="button" id="json_{{ item.rand_seed }}" value="JSON"/>
-                <input class="btn_string" type="button" id="string_{{ item.rand_seed }}" value="Text" />
-            </li>
-        {%  endfor %}
-        </ol>
+        <b>"{{ type }}"</b>: {{ dna }}
+        <ul>
+        {% for attribute in qualities %}
+            <li>{{ attribute.name }}: {{ attribute.value }}</li>
+        {% endfor %}
+        </ul>
 
         <hr/>
 
+        <input class="btn_json" type="button" id="json_{{ inputs.rand_seed }}" value="JSON"/>
+        <input class="btn_string" type="button" id="string_{{ inputs.rand_seed }}" value="Text" />
         <input type="submit" value="Regenerate with this Random Seed"/>
         <input name="regenerate" type="submit" value="Generate with different Seed"/>
-
-        <label>Tags to search for:</label>
-        <input type="text" name="tags" value="{{ inputs.tags }}"
-                  placeholder='Optional - Tags that should help design the object'/>
-
-        <label>Tag Weighting:</label>
-        <input type="text" name="tag_weight" value="{{ inputs.tag_weight }}"
-                  placeholder='Optional - Weighting of how much to value non-matched tags. 0=No unmatched items, 1=Tags not heavily weighted'/>
 
         <label>Random Seed:</label>
         <input type="text" name="rand_seed" value="{{ inputs.rand_seed }}"
                   placeholder='Optional - Number to use to design the object. Same numbers and inputs will generate same objects'/>
 
-        {% if inputs.modifications or inputs.modifications == 0 %}
-            <label>Modifications:</label>
-            <input type="text" name="modifications" value="{{ inputs.modifications }}"
-                      placeholder='Optional - Number of times to "fuzz" the name and modify it'/>
-        {% endif %}
+        <label>Use This DNA instead:</label>
+        <input type="text" name="dna" value="{{ dna }}"
+                  placeholder='Optional'/>
 
-        {% if inputs.gender or inputs.gender == '' %}
-            <label>Gender:</label>
-            <select name="gender">
-                <option value="" {% if inputs.gender == '' %}selected="selected"{% endif %}>Doesn't Matter</option>
-                <option value="female" {% if inputs.gender == 'female' %}selected="selected"{% endif %}>Female</option>
-                <option value="male" {% if inputs.gender == 'male' %}selected="selected"{% endif %}>Male</option>
+
+        {% if inputs.race or inputs.race == '' %}
+            <label>Race:</label>
+            <select name="race">
+                <option value="" {% if inputs.race == '' %}selected="selected"{% endif %}>Doesn't Matter</option>
+                <option value="human" {% if inputs.race == 'human' %}selected="selected"{% endif %}>Human</option>
+                <option value="elf" {% if inputs.race == 'elf' %}selected="selected"{% endif %}>Elf</option>
+                <option value="dwarf" {% if inputs.race == 'dwarf' %}selected="selected"{% endif %}>Dwarf</option>
+                <option value="ork" {% if inputs.race == 'ork' %}selected="selected"{% endif %}>Ork</option>
+                <option value="halfling" {% if inputs.race == 'halfling' %}selected="selected"{% endif %}>Halfling</option>
             </select>
         {% endif %}
 
-        <label>Count:</label>
-        <input type="text" name="count" value="{{ inputs.count }}"
-                  placeholder='Optional - Number of items to show in list above'/>
-
-        <label>Override Name Data:</label>
+        <label>Override Data:</label>
         <textarea name="override_json"
-                  placeholder='Optional - JSON that the object must use: {"rank":"Dr.","placefile":"cities"}. If these are known Components, their data will be used'
+                  placeholder='Optional - JSON that the object must use: {"Skin Pigment":"Tanned"}.'
                 >{{ inputs.override_json }}</textarea>
         <br/>
-
-        <label>World JSON Data:</label>
-        <textarea name="world_json"
-                  placeholder='Optional - JSON data about the world to be used when matching items. Something like: {"magic":"medium","technology":"low","year":1492}'
-                >{{ inputs.world_json }}</textarea>
-
-        <label>Person JSON Data:</label>
-        <textarea name="person_json"
-                  placeholder='Optional - JSON data about the person to be used when matching items. Something like: {"money":"high","business":["bookshop"]}'
-                >{{ inputs.person_json }}</textarea>
-
-        <br/>
-
-        <label>Name Pattern:</label>
-        <input type="text" name="pattern" value="{{ inputs.pattern }}"
-                  placeholder='Optional - Comma-separated Components of the item. Ex: {{ pattern_default }}'/>
 
     </form>
 

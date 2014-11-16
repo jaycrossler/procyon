@@ -4,17 +4,13 @@ Ajisai
 Alouette
 Apricot Blossom
 Ayame
-Beagle
 Cerise
 Chibis
 Dove
 Eagle
-Essaim
-Falcon
 Fuyo
 Garuda
 Hayabusa
-Himawari
 Jindai
 Jugnu
 Kiku
@@ -25,14 +21,6 @@ Mimosa
 Momo
 Mugunghwa
 Nahuel
-Polar Bear
 Sakura
 Shaheen
-Spider
-Sterkh
-Terriers
-Tiung
-Topol'
-Tournesol
 Tsikada
-Yuri

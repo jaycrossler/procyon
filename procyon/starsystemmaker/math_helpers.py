@@ -1,7 +1,9 @@
 import numpy as np
-from django.http import HttpResponse
+try:
+    from django.http import HttpResponse
+except:
+    pass
 import re
-import dice
 import random
 
 # --- Mathy functions for planetary things ----------------
@@ -171,10 +173,21 @@ def set_rand_seed(rand_seed=4815162342):
     return rand_seed_num
 
 
-def randint(low, high):
+def randint(low, high, normalized_weighting=1):
     if low >= high:
         return high
     return np.random.randint(low, high)
+
+    #TODO: Think about normalizing...
+    # if normalized_weighting == 1 or high-low < 3:
+    #     total = np.random.randint(low, high)
+    # else:
+    #     spread = high-low+1
+    #     each = spread / normalized_weighting
+    #     if each % 2 == 0: # It's even
+    #         total = np.random.randint(low, low+each-1)
+    #         total += np.random.randint(low, low+each) - 1
+    #     else:
 
 
 def parse_dice_text(text):
@@ -185,53 +198,86 @@ def parse_dice_text(text):
     return text
 
 
-def roll_dice(text, as_array=False):
-    if as_array:
-        output = dice.roll(text)
-    else:
-        output = text
-        d_spot = text.find('d')
-        if d_spot > -1:
-            num_dice = text[0:d_spot]
-            dice_type = text[d_spot+1:].strip()
-            modifier_type = ''
-            modifier_extra = ''
+def roll_dice(text):
+    output = text
+    d_spot = text.find('d')
+    if d_spot > -1:
+        num_dice = text[0:d_spot]
+        dice_type = text[d_spot+1:].strip()
+        modifier_type = ''
+        modifier_extra = ''
 
-            if ' ' in dice_type:
-                modifier_pos = dice_type.find(' ')
-                dice_front = dice_type[0:modifier_pos].strip()
-                modifier_extra = dice_type[modifier_pos:].strip()
-                dice_type = dice_front + modifier_extra
+        if ' ' in dice_type:
+            modifier_pos = dice_type.find(' ')
+            dice_front = dice_type[0:modifier_pos].strip()
+            modifier_extra = dice_type[modifier_pos:].strip()
+            dice_type = dice_front + modifier_extra
 
-            if '+' in dice_type:
-                modifier_pos = dice_type.find('+')
-                dice_front = dice_type[0:modifier_pos]
-                modifier_extra = dice_type[modifier_pos+1:].strip()
-                dice_type = dice_front
-                modifier_type = "+"
-            elif '-' in dice_type:
-                modifier_pos = dice_type.find('-')
-                dice_front = dice_type[0:modifier_pos]
-                modifier_extra = dice_type[modifier_pos+1:].strip()
-                dice_type = dice_front
-                modifier_type = "-"
+        if '+' in dice_type:
+            modifier_pos = dice_type.find('+')
+            dice_front = dice_type[0:modifier_pos]
+            modifier_extra = dice_type[modifier_pos+1:].strip()
+            dice_type = dice_front
+            modifier_type = "+"
+        elif '-' in dice_type:
+            modifier_pos = dice_type.find('-')
+            dice_front = dice_type[0:modifier_pos]
+            modifier_extra = dice_type[modifier_pos+1:].strip()
+            dice_type = dice_front
+            modifier_type = "-"
 
-            num_dice = int(num_dice)
-            dice_type = int(dice_type)
-            result = 0
-            rolls = []
-            if num_dice > 0:
-                for roll_num in range(0, num_dice):
-                    rolls.append(random.randint(1, dice_type))
-                result += sum(rolls)
+        num_dice = int(num_dice)
+        dice_type = int(dice_type)
+        result = 0
+        rolls = []
+        if num_dice > 0:
+            for roll_num in range(0, num_dice):
+                rolls.append(random.randint(1, dice_type))
+            result += sum(rolls)
 
-            if modifier_type:
-                modifier_extra = int(modifier_extra)
-                if modifier_type == "+":
-                    result += modifier_extra
-                if modifier_type == "-":
-                    result -= modifier_extra
+        if modifier_type:
+            modifier_extra = int(modifier_extra)
+            if modifier_type == "+":
+                result += modifier_extra
+            if modifier_type == "-":
+                result -= modifier_extra
 
-            output = result
+        output = result
 
     return output
+
+
+def expand_array_to_16(source_array):
+    #Take in any array, and expand it to 16 spots
+    in_len = len(source_array)
+    if in_len > 16:
+        return source_array[:16]
+
+    outs = [
+        '',
+        '0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0',
+        '0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1',
+        '0,0,0,0,0,1,1,1,1,1,1,2,2,2,2,2',
+        '0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3',
+        '0,0,0,1,1,1,2,2,2,2,3,3,3,4,4,4',
+        '0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5',
+        '0,0,1,1,2,2,2,3,3,3,4,4,5,5,6,6',
+        '0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7',
+        '0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8',
+        '0,1,2,2,3,3,4,4,5,5,6,6,7,7,8,9',
+        '0,1,2,3,3,4,4,5,5,6,6,7,7,8,9,10',
+        '0,1,2,3,3,4,4,5,5,6,6,7,8,9,10,11',
+        '0,1,2,3,4,5,5,6,6,7,7,8,9,10,11,12',
+        '0,1,2,3,4,5,6,6,7,7,8,9,10,11,12,13',
+        '0,1,2,3,4,5,6,7,7,8,9,10,11,12,13,14',
+        '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15'
+    ]
+    matched = outs[in_len].split(",")
+    out = ['Normal'] * 16
+    for idx, p in enumerate(matched):
+        if p:
+            val = source_array[int(p)]
+            if val:
+                out[idx] = val
+
+    return out

@@ -5,6 +5,7 @@ import numpy
 import json
 from procyon.starsystemmaker.math_helpers import *
 from procyon.starsystemmaker.name_library import *
+from django.core.cache import cache
 
 
 def turn_pattern_to_hash(pattern, override={}):
@@ -159,7 +160,13 @@ def count_tag_matches(component_tags, search_tags, base_num=0):
 def breakout_component_types(world, person, tags, pattern_list):
     component_types = {}
     component_tag_counts = {}
-    for component in Component.objects.filter(active=True):
+
+    active_components = cache.get('active_components', None)
+    if not active_components:
+        active_components = Component.objects.filter(active=True)
+        cache.set('active_components', active_components)
+
+    for component in active_components:
         ctype = str(component.type) or "None"
         ctype = ctype.lower().strip()
 
@@ -174,6 +181,7 @@ def breakout_component_types(world, person, tags, pattern_list):
                     component_tag_counts[ctype] = []
                 component_types[ctype].append(component)
                 component_tag_counts[ctype].append(tag_match)
+
     return component_types, component_tag_counts
 
 
@@ -272,8 +280,9 @@ def generate_item_name(item_prefixes, item_names, titleize=False):
 
 
 def create_random_name(world={}, person={}, override={}, pattern="", tags="", rand_seed=None,
-                       modifications=0, set_random_key=True, tag_weight=.3):
+                       modifications=0, set_random_key=True, tag_weight=.3, gender=""):
     # Build a pattern if it doesn't exist, based on time and asian/other influences - TODO: Expand these rules
+    # Can do {"namefile":"european"} to force country
 
     if set_random_key:
         try:
@@ -310,8 +319,13 @@ def create_random_name(world={}, person={}, override={}, pattern="", tags="", ra
     for idx, generator in enumerate(generated_item.get('generators')):
         if generator == "namefile" or generator == "placefile":
             filename = generated_item['name_parts'][idx]
-            names = list_of_names(name_file=filename, use_prefix=False)
-            generated_item['name_parts'][idx] = names[0]
+            restrictions = [filename]
+            if gender:
+                restrictions.append(gender)
+            names = list_of_names(file_sub_strings=restrictions, prefix_chance=0)
+
+            if len(names):
+                generated_item['name_parts'][idx] = names[0]
 
     generated_item['name_parts'] = name_part_fuzzer(generated_item['name_parts'], modifications)
 

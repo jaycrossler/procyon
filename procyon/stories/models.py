@@ -13,7 +13,7 @@ class SnippetBase(models.Model):
     An object builder based on constraints
     """
 
-    active = models.BooleanField(default=True, help_text='If checked, this object will be listed in the active list')
+    active = models.BooleanField(default=True, help_text='If checked, this object will be listed in the active list', db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

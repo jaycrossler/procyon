@@ -17,5 +17,4 @@ scipy==0.13.3
 fuzzy==1.0.0
 nltk==3.0.0
 django-import-export==0.2.6
-dice==1.0.1
 django-debug-toolbar==1.2.2

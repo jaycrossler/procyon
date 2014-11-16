@@ -1,34 +1,18 @@
 Challenger
 Compass
-Conestoga
 Discoverer
 Discovery
 Endeavour
 Explorer
-Fram
-Haruka
 Intrepid
 Kompass
 Mariner
-Michibiki
-Observer
 Odyssey
-Oktan
 Pioneer
-Poisk
-Polyot
 Ranger
-Rasad
-Rasat
-Sakigake
 Scout
-Sumbandila
 Surveyor
-Tan Ce
-Trailblazer
 Vanguard
 Viking
-Voskhod
 Voyager
 Yankee Clipper
-Zond

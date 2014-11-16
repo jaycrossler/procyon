@@ -205,7 +205,7 @@ def planet_from_variables(settings={}):
 
     planets = []
 
-    planet_name_list = list_of_names()
+    planet_name_list = list_of_names(prefix_chance=0.01, prefixes=['New', 'Old'])
 
     settings['name'] = planet_name_list[0]
     settings['planets'] = planet_count
@@ -220,7 +220,7 @@ def planet_from_variables(settings={}):
 def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_seed=''):
     num_planets = settings['planets']
     if not planet_name_list:
-        planet_name_list = list_of_names()
+        planet_name_list = list_of_names(prefix_chance=0.01, prefixes=['New', 'Old'])
 
     if len(planet_name_list) > planet_num:
         name = planet_name_list[planet_num]
@@ -376,7 +376,7 @@ def create_random_planet(settings={}, planet_num=1, planet_name_list=None, rand_
         if type(planet_data[v]) == float:
             planet_data[v] = round(planet_data[v] * 1000) / 1000
 
-    moon_name_list = list_of_names()
+    moon_name_list = list_of_names(prefix_chance=0.03, prefixes=['New', 'Old', 'Alde'])
     moons = []
     for i in range(num_moons):
         moon_data = create_random_moon(planet_data, i, moon_name_list)

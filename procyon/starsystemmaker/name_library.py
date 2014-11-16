@@ -6,28 +6,42 @@ import fuzzy
 from string import maketrans
 
 
-def list_of_names(name_file='', num_requested=20, use_prefix=True, prefix='New', prefix2='Old'):
+def list_of_names(file_sub_strings=list(), prefix_chance=0, prefixes=list(), max_count=50):
+    #TODO: Should this be list() not [] ?
+    # Can limit names like file_sub_strings=['korean','male'] or ['avian'] or ['male','1980']
+
     name_file_dir = 'procyon/fixtures/names/'
-    if not name_file:
-        name_file_list = os.listdir(name_file_dir)
-        name_num = np.random.randint(len(name_file_list))
-        name_file = name_file_list[name_num]
-    if not name_file.endswith('txt'):
-        name_file += '.txt'
-    name_file = name_file.strip()
+    name_file_list = os.listdir(name_file_dir)
+
+    sub_file_list = []
+    for search_string in file_sub_strings:
+        for n in name_file_list:
+            if search_string == 'male':
+                if '_male' in n:
+                    sub_file_list.append(n)
+            elif search_string in n:
+                sub_file_list.append(n)
+
+    if len(sub_file_list):
+        name_file = np.random.choice(sub_file_list)
+    else:
+        if len(name_file_list):
+            name_file = np.random.choice(name_file_list)
+        else:
+            return ['Jon']
 
     with open(name_file_dir + name_file, mode='r') as infile:
-        name_list = [line.strip() for line in infile]
+        name_list = [line.strip() for line in infile if len(line)]
+    name_list = name_list[:max_count]
 
     np.random.shuffle(name_list)
 
-    if use_prefix and prefix:
+    if prefix_chance and prefixes:
         for i in range(len(name_list)):
-            if not name_list[i].startswith(prefix):
-                if np.random.random() < 0.02:
+            if np.random.random() < prefix_chance:
+                prefix = np.random.choice(prefixes)
+                if not name_list[i].startswith(prefix):
                     name_list[i] = prefix + " " + name_list[i]
-                elif np.random.random() < 0.02:
-                    name_list[i] = prefix2 + " " + name_list[i]
 
     return name_list
 
