@@ -117,6 +117,7 @@ def generator_dna(request):
         #A button was pushed with the name 'regenerate'
         rand_seed = ''
 
+    metrics = []
     try:
         override = json.loads(override_json) if override_json else {}
 
@@ -126,6 +127,8 @@ def generator_dna(request):
 
         qualities, attribute_mods = qualities_from_dna(dna)
 
+        metrics = metrics_of_attributes()
+
     except ValueError, e:
         item_name = dna or "GATTACA"
         note = json.dumps(dict(error=500, message='Exception', details=traceback.format_exc(), exception=str(e)))
@@ -134,7 +137,7 @@ def generator_dna(request):
         note = json.dumps(dict(error=500, message='Exception', details=traceback.format_exc(), exception=str(e)))
 
     if format_type == "json":
-        data = json.dumps({"type": item_name, "dna": dna, "attributes": attribute_mods})
+        data = json.dumps({"type": item_name, "dna": dna, "attributes": attribute_mods, "qualities": qualities})
         output = HttpResponse(data, mimetype="application/json")
 
     elif format_type == "string":
@@ -147,8 +150,8 @@ def generator_dna(request):
             "override_json": override_json
         }
         output = render_to_response('generator_dna.html',
-                                    {"type": item_name, "dna": dna, "qualities": qualities,
-                                     "attribute_mods": attribute_mods, "inputs": inputs, "note": note, "generator": "dna"},
+                                    {"type": item_name, "dna": dna, "qualities": qualities, "note": note, "metrics": metrics,
+                                     "attribute_mods": attribute_mods, "inputs": inputs, "generator": "dna"},
                                     RequestContext(request))
     return output
 

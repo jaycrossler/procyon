@@ -1,45 +1,169 @@
 from procyon.starsystemmaker.math_helpers import *
 import numpy as np
 
+# TODO: Move this to a model, allow extra DNA junk space that can be filled in by anthology-specific values. Or have some hash-mapper to add more
 QUALITY_ARRAY = [
     {"name": "Skin Pigment",
-     "values": "Translucent:Cha--:Health---,Albino:Cha-,Alabaster,Pale White,Light,White,Fair,Medium,Tanned:Cha+,Light Brown,Olive,Moderate Brown,Brown,Brown,Dark Brown,Very Dark Brown,Black,Midnight"},
+     "values": "Translucent:Charisma--:Health---,Albino:Charisma-,Alabaster,Pale White,Light,White,Fair,Medium,Tanned:Charisma+,Light Brown,Olive,Moderate Brown,Brown,Brown,Dark Brown,Very Dark Brown,Black,Midnight"},
     {"name": "Skin Toughness",
-     "values": "Scaley:Armor++:Cha--,Leathery:Armor+:Cha-,Thick:Cha-:Con+,Normal,Normal,Creamy,Silky:Cha+,Velvet:Cha+,Marble:Cha++:Armor+",
+     "values": "Scaley:Armor++:Charisma--,Leathery:Armor+:Charisma-,Thick:Charisma-:Constitution+,Normal,Normal,Creamy,Silky:Charisma+,Velvet:Charisma+,Marble:Charisma++:Armor+",
      "maternal": True},
     {"name": "Bone Length",
-     "values": "Tiny:Health-:Height---,Stunted:Height--,Small:Height-,Normal,Normal,Normal,Normal,Normal,Large:Height+,Big:Height++,Long:Height+++"},
+     "values": "Tiny:Health-:Height---,Stunted:Height--,Small:Height-,Normal,Normal,Normal,Normal,Normal,Large:Height+,Big:Height++,Very Long:Height+++"},
     {"name": "Eye Color",
-     "values": "Hazel:Cha+,Amber,Green,Blue,Gray,Brown,Brown,Dark Brown,Black,Black,Black,Red:Cha-,Violet:Cha+"},
+     "values": "Hazel:Charisma+,Amber,Green,Blue,Gray,Brown,Brown,Dark Brown,Black,Black,Black,Red:Charisma-:Manipulation+,Violet:Charisma+:Manipulation+"},
     {"name": "Eye Shape",
-     "values": "Almond,Round,Upturned,Downturned,Monolid,Hooded"},
+     "values": "Almond,Round,Upturned,Downturned,Monolid:Charisma-,Hooded"},
     {"name": "Eye Sight",
-     "values": "Cross Eyed,Lazy Eye,Near Sighted,Far Sighted,Color Blind,Normal,Normal,Normal,Normal,Normal,Perfect Sight,Eagle Eyes"},
+     "values": "Cross Eyed:Charisma-,Lazy Eye,Near Sighted,Far Sighted,Color Blind,Normal,Normal,Normal,Normal,Normal,Perfect Sight:Perception+,Eagle Eyes:Perception++"},
+    {"name": "Eye Spectrum",
+     "values": "Infrared:Infravision+,Normal,Normal,Normal,Normal,Normal,Normal,Normal,Normal,Vibrant Colors:Perception+,Ultraviolet:Perception+"},
     {"name": "Hair Texture",
      "values": "Wavy,Curly,Straight,Smooth,Coily,Frizy"},
     {"name": "Head Size",
-     "values": "Small,Oblong,Round,Oval,Square,Heart-shaped,Triangular,Diamond,Large,Giant Forehead,Bulbous"},
+     "values": "Small:Manipulation-,Oblong,Round,Oval,Square,Heart-shaped,Triangular,Diamond,Large,Giant Forehead:Manipulation+,Bulbous:Intelligence+"},
     {"name": "Finger Length",
-     "values": "Stubby,Short,Normal,Long,Talons"},
+     "values": "Stubby:Dexterity-,Short,Normal,Normal,Normal,Long:Dexterity+,Talons:Dexterity-:Unarmed Attack+"},
     {"name": "Hairiness",
-     "values": "Bald,Thin Hair,Thick Hair,Hairy,Fuzzy,Covered in Hair,Fury"},
+     "values": "Bald,Thin Hair,Thick Hair,Hairy,Fuzzy,Bearded:Appearance-,Covered in Hair:Warm+,Fury:Charisma-:Warm+:Terror+"},
     {"name": "Posture",
-     "values": "Sway Back,Forward Head,Scoliosis,Flat Backed,Good Posture,Good Posture,Good Posture,Humpbacked"},
+     "values": "Forward Head:Charisma-:Manipulation+,Scoliosis,Flat Backed,Good Posture,Good Posture,Good Posture,Humpbacked:Charisma-,Sway Back:Charisma-"},
+
+    {"name": "Toe length",
+     "values": "Big Toe longest,Second toe longest,"},
+    {"name": "Feet shapes",
+     "values": "Flat footed,High arch"},
+    {"name": "Toe length",
+     "values": "Big Toe longest,Second toe longest"},
+    {"name": "Leg Shape",
+     "values": "Bow-legged,Straight Legs,Straight Legs,Knees knocked in,Floating kneecap,Massive Thighs"},
+    {"name": "Torso Shape",
+     "values": "Long:Constitution++:Height+,Barrel Chested:Constitution+:Strength+,Apple shaped,Pear shaped,Thin,Short,Extremely Thin:Constitution-:Strength-"},
+    {"name": "Neck Size",
+     "values": "Thick:Strength+,Thin,Normal,Normal,Long:Strength-,Short:Appearance-"},
+    {"name": "Nose Shape",
+     "values": "Empty Cavity:Terror+:Appearance-,Flat,Wide,Thin,Turned up/perky,Hooked down,Bulbous:Appearance-:Terror-"},
+
     {"name": "Nerve Response",
-     "values": ""},
+     "values": "Very Fast Reflexes:Dexterity++:Lifespan-,Fast Reflexes:Dexterity+,Normal,Normal,Normal,Normal,Normal,Normal,Normal,Slow Reflexes:Dexterity-:Constitution+"},
     {"name": "Skin Texture",
      "values": ""},
     {"name": "Teeth Shape",
-     "values": ""},
+     "values": "Sharp and Pointed:Manipulation++,Large Teeth with Two Rows:Manipulation+:Terror+,Large Canines:Manipulation+,Normal,Normal,Normal,Well Spaced Teeth,Perfect Teeth:Appearance+"},
     {"name": "Lung Capacity",
-     "values": ""},
+     "values": "Huge:Dexterity+:Constitution+:Strength+:Lifespan+,Large:Constitution++:Strength+,Normal,Normal,Stitled:Constitution-,Small:Constitution-,Withered:Constitution-:Strength--:Lifespan-"},
     {"name": "Heart Size",
-     "values": ""},
+     "values": "Thin and Fast:Dexterity++:Lifespan-,Small:Lifespan-:Dexterity-,Strong:Lifespan+:Temprament+:Disease Resistant+,Normal,Normal,Big:Lifespan+:Disease Resistant+:Constitution+,Large:Lifespan-:Strength+,Very Large:Constitution++:Strength+:Lifespan--"},
     {"name": "Cell Longevity",
      "values": ""},
     {"name": "Gestation Rate",
-     "values": "",
-     "maternal": True}
+     "values": "6 Months:Lifespan-:Health-,9 Months,10 Months,10 Months,11 Months,12 Months:Lifespan+,14 Months:Lifespan+,16 Months:Lifespan+,20 Months:Lifespan+,24 Months:Lifespan++",
+     "maternal": True},
+
+    {"name": "Nerve Mapping",
+     "values": ""},
+
+    {"name": "Stomach Composition",
+     "values": ""},
+
+    {"name": "Skull Thickness",
+     "values": ""},
+
+    {"name": "Arterial Size",
+     "values": ""},
+
+    {"name": "Realistic Thinking",
+     "values": ""},
+
+    {"name": "Investigative Thinking",
+     "values": ""},
+
+    {"name": "Artistic Expression",
+     "values": ""},
+
+    {"name": "Social Awareness",
+     "values": ""},
+
+    {"name": "Enterprising Thought",
+     "values": ""},
+
+    {"name": "Conventionality",
+     "values": ""},
+
+    {"name": "Conservatism",
+     "values": ""},
+
+    {"name": "Authoritarianism",
+     "values": ""},
+
+    {"name": "Religiousness",
+     "values": ""},
+
+    {"name": "Extraversion",
+     "values": ""},
+
+    {"name": "Agreeableness",
+     "values": ""},
+
+    {"name": "Conscienciousness",
+     "values": ""},
+
+    {"name": "Neuroticism",
+     "values": ""},
+
+    {"name": "Openness",
+     "values": ""},
+
+    {"name": "Constraint",
+     "values": ""},
+
+    {"name": "Positive Emotionality",
+     "values": "Normal,Normal,Happy,Excited,Loving,Big Hearted"},
+
+    {"name": "Negative Emotionality",
+     "values": "Depressive,Angry:Terror+,Sad,Tired,Grumpy,Normal,Normal,Normal,Normal,Peaceful:Manipulation-"},
+
+    {"name": "Chi",
+     "values": "Empty:Magic Resistant+++,Null:Magic Resistant++,Blank:Magic Resistant+,Normal,Normal,Normal,Normal,Normal,Normal,In Tune:Magic Resistant-:Magic Power+,Powerful:Magic Power++:Magic Resistant--"},
+
+    {"name": "Gnosis",
+     "values": "Rooted:Magic Resistant++,Normal,Normal,Normal,Normal,Normal,Normal,Focused:Magic Resistant+:Magic Power+,Alar:Magic Resistant++:Magic Power++,Awakened:Magic Resistant+:Magic Power+++"}
+
+]
+
+RACE_ARRAY = [
+    {"name": "Human",
+     "values": "Bone Length:Normal,Gestation Rate:10 Months,Skin Toughness:Normal,Eye Spectrum:Normal,Teeth Shape:Normal"},
+
+    {"name": "Elf",
+     "values": "Positive Emotionality:Happy,Bone Length:Big,Gestation Rate:24 Months,Nerve Response:Fast Reflexes,Eye Shape:Hooded,Eye Spectrum:Infrared"},
+
+    {"name": "Dwarf",
+     "values": "Negative Emotionality:Grumpy,Neck Size:Thick,Bone Length:Stunted,Skin Toughness:Thick,Hairiness:Bearded,Torso Shape:Barrell Chested,Heart Size:Large"},
+
+    {"name": "Ork",
+     "values": "Negative Emotionality:Angry,Skin Toughness:Leathery,Gestation Rate:6 Months,Neck Size:Thick,Torso Shape:Long"},
+
+    {"name": "Halfling",
+     "values": ""},
+
+    {"name": "Dragonborn",
+     "values": ""},
+
+    {"name": "Gnome",
+     "values": ""},
+
+    {"name": "Tiefling",
+     "values": ""},
+
+
+]
+
+ASPECT_ARRAY = [
+    {"name": "Giant", "requirements": "Height>16"},
+    {"name": "Little Person", "requirements": "Height<6"},
+    {"name": "Striking Looks", "requirements": "Cha>15"},
+    {"name": "See in the Dark", "requirements": "Eye Spectrum=Infrared,Eye Spectrum = Ultraviolet"},
 ]
 
 
@@ -49,12 +173,15 @@ def init_quality_arrays():
         values = values.split(",")
         quality["values"] = expand_array_to_16(values)
 
+    for quality in RACE_ARRAY:
+        values = quality.get("values", "Normal")
+        quality["values"] = values.split(",")
 
-ASPECT_ARRAY = [
-    {"name": "Giant", "requirements": "Height>16"},
-    {"name": "Little Person", "requirements": "Height<6"},
-    {"name": "Striking Looks", "requirements": "Cha>15"}
-]
+    for quality in ASPECT_ARRAY:
+        values = quality.get("requirements", "None")
+        quality["requirements"] = values.split(",")
+
+
 
 DNA_16_lOOKUPS = 'AA,AC,AG,AT,CA,CC,CG,CT,GA,GC,GG,GT,TA,TC,TG,TT'.split(',')  # Later, can switch this for obfuscation
 
@@ -126,25 +253,30 @@ def generate_dna(rand_seed='', race='human', overrides={}):
         rand_seed = np.random.random()
     rand_seed = set_rand_seed(rand_seed)
 
+    race_overrides = overrides_from_race(race=race, overrides=overrides)
+
     dna_values = []
     for quality in QUALITY_ARRAY:
-        gene_num = np.random.randint(1, 16) - 1  #Should this be randint(1,8)+randint(0,8) ?
+        gene_num = np.random.randint(0, 15)  #Should this be randint(1,8)+randint(0,8) ?
 
         name = quality.get("name", "Quality")
 
-        if name in overrides:
-            override_value = overrides[name]
+        if name in race_overrides or name.lower() in race_overrides:
+            override_value = race_overrides[name]
             if isinstance(override_value, basestring):
                 # Search through value strings
 
                 quality_values = quality.get("values", None)
                 if quality_values:
+                    value_indexes = []
                     for idx, quality_value in enumerate(quality_values):
-                        value_data = override_value.split(":")
+                        value_data = quality_value.split(":")
                         val_name = value_data[0]
-                        if val_name.lower() == override_value.lower():  #TODO: Finds first, not middle
-                            gene_num = idx
-                            break
+                        if val_name.lower() == override_value.lower():
+                            value_indexes.append(idx)
+                    if value_indexes:
+                        gene_num = np.random.choice(value_indexes)
+
             else:
                 #Int provided
                 override_value = clamp(override_value, 0, 15)
@@ -155,3 +287,95 @@ def generate_dna(rand_seed='', race='human', overrides={}):
     dna = dna_string_from_array(dna_values)
 
     return dna, rand_seed
+
+
+def metrics_of_attributes():
+    used = {}
+    average = {}
+    highest = {}
+    lowest = {}
+
+    for qual in QUALITY_ARRAY:
+        values = qual.get("values", [])
+
+        for value_data in values:
+            value_data = value_data.split(":")
+            if len(value_data) > 1:
+                # name = value_data[0]
+                modifiers = value_data[1:]
+                for mod in modifiers:
+
+                    mod_num = mod.count('+') - mod.count('-')
+                    mod_name = mod.replace('+', '').replace('-', '')
+                    if mod_name:
+                        if mod_name in used:
+                            used[mod_name] += 1
+                        else:
+                            used[mod_name] = 1
+
+                        if mod_name in average:
+                            average[mod_name] += mod_num
+                        else:
+                            average[mod_name] = mod_num
+
+                        if mod_num < 0:
+                            if mod_name in lowest:
+                                lowest[mod_name] += mod_num
+                            else:
+                                lowest[mod_name] = mod_num
+
+                        if mod_num > 0:
+                            if mod_name in highest:
+                                highest[mod_name] += mod_num
+                            else:
+                                highest[mod_name] = mod_num
+
+    totals = []
+    for key, val in used.iteritems():
+        data = (key+":").ljust(30) + ("Used: " + str(val)).ljust(10)
+        data += ("Avg: " + str(average.get(key, 0))).ljust(10)
+        data += ("Low: " + str(lowest.get(key, 0))).ljust(10)
+        data += ("High: " + str(highest.get(key, 0))).ljust(10)
+        totals.append(data)
+
+    return totals
+
+
+def get_quality_values_array_named(quality, array=QUALITY_ARRAY):
+    values = []
+    for val in array:
+        name = val.get("name", "name")
+        value_list = val.get("values", [])
+        if name.lower() == quality.lower():
+            values = value_list
+            break
+    return values
+
+
+def does_quality_value_exist(quality, value):
+    exists = False
+    values_arr = get_quality_values_array_named(quality)
+    for val in values_arr:
+        val_arr = val.split(":")
+        val_name = val_arr[0]
+        if val_name.lower() == value.lower():
+            exists = True
+            break
+    return exists
+
+
+def overrides_from_race(race='Human', overrides={}):
+    new_overrides = overrides.copy()
+    race_values = get_quality_values_array_named(race, array=RACE_ARRAY)
+
+    if race_values:
+        for idx, race_val in enumerate(race_values):
+            race_val_arr = race_val.split(":")
+            if len(race_val_arr) > 1:
+                race_val_name = race_val_arr[0]
+                race_att_name = race_val_arr[1]
+
+                if does_quality_value_exist(race_val_name, race_att_name):
+                    new_overrides[race_val_name] = race_att_name
+
+    return new_overrides

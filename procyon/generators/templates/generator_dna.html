@@ -3,7 +3,7 @@
 {% load i18n bootstrap_pagination %}
 {% load url from future %}
 
-{% block head_title_base %}Generator :: {{ generator|title }}{% endblock %}
+{% block head_title_base %}Generator :: DNA{% endblock %}
 
 {% block head_title %}{% trans "Welcome" %}{% endblock %}
 
@@ -19,6 +19,30 @@
         input[type=text] {
             width: 430px;
         }
+        p {
+            word-wrap: break-word;
+        }
+
+        .attribute {
+            width: 130px;
+            height: 20px;
+            font-size: 10px;
+            border: 1px solid black;
+            border-radius: 4px;
+            display: inline-block;
+            margin: 3px;
+            padding: 3px;
+            vertical-align: middle;
+            line-height: 10px;
+        }
+        .positive {
+            background-color: lightgreen;
+        }
+    textarea.metrics {
+        font-family: consolas, Courier, monospace;
+        font-size: 10px;
+        line-height: 10px;
+    }
     </style>
 {% endblock %}
 
@@ -52,7 +76,8 @@
             window.open(base_link+query_string, "_blank")
         }
         $(document).ready(function(){
-           $('.btn_string').on('click',function(){
+
+            $('.btn_string').on('click',function(){
                 var $btn = $(this);
                 buildLink('string', $btn)
             });
@@ -61,6 +86,7 @@
                 var $btn = $(this);
                 buildLink('json', $btn)
             });
+
         });
     </script>
 {% endblock %}
@@ -71,12 +97,20 @@
         {% csrf_token %}
         {% if note %}<i>{{ note }}</i>{% endif %}
 
-        <b>"{{ type }}"</b>: {{ dna }}
-        <ul>
-        {% for attribute in qualities %}
-            <li>{{ attribute.name }}: {{ attribute.value }}</li>
+        <p><b>{{ type|title }}</b>: {{ dna }}</p>
+
+        {% for quality in qualities %}
+            <span class="attribute">{{ quality.name }}: <b>{{ quality.value }}</b></span>
         {% endfor %}
-        </ul>
+
+        {% if attribute_mods %}
+            <hr/>
+
+            <b>Attributes:</b>
+            {% for attribute, value in attribute_mods.items %}
+                <span class="attribute {% if value > 0 %}positive{% endif %}"><b>{{ attribute }}</b>: {% if value > 0 %}+{% endif %}{{ value }}</span>
+            {% endfor %}
+        {% endif %}
 
         <hr/>
 
@@ -90,9 +124,8 @@
                   placeholder='Optional - Number to use to design the object. Same numbers and inputs will generate same objects'/>
 
         <label>Use This DNA instead:</label>
-        <input type="text" name="dna" value="{{ dna }}"
-                  placeholder='Optional'/>
-
+        <input type="text" name="dna" value=""
+                  placeholder='Optional - Overwrite DNA'/>
 
         {% if inputs.race or inputs.race == '' %}
             <label>Race:</label>
@@ -111,6 +144,14 @@
                   placeholder='Optional - JSON that the object must use: {"Skin Pigment":"Tanned"}.'
                 >{{ inputs.override_json }}</textarea>
         <br/>
+
+        <label>Metrics:</label>
+        <textarea class="metrics">
+{%  for m in metrics %}{{ m }}
+{% endfor %}
+        </textarea>
+        <br/>
+
 
     </form>
 
