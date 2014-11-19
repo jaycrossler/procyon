@@ -191,6 +191,11 @@ def counts_to_probabilities(counts, padding=.3):
 
     total = 0
     probs = []
+    try:
+        padding = float(padding)
+    except ValueError:
+        return probs
+
     for count in counts:
         total += (count + padding)
     for count in counts:

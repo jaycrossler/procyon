@@ -3,71 +3,76 @@ import numpy as np
 
 # TODO: Move this to a model, allow extra DNA junk space that can be filled in by anthology-specific values. Or have some hash-mapper to add more
 QUALITY_ARRAY = [
+    {"name": "Sex",
+     "values": "Male,Female"},
     {"name": "Skin Pigment",
      "values": "Translucent:Charisma--:Health---,Albino:Charisma-,Alabaster,Pale White,Light,White,Fair,Medium,Tanned:Charisma+,Light Brown,Olive,Moderate Brown,Brown,Brown,Dark Brown,Very Dark Brown,Black,Midnight"},
     {"name": "Skin Toughness",
-     "values": "Scaley:Armor++:Charisma--,Leathery:Armor+:Charisma-,Thick:Charisma-:Constitution+,Normal,Normal,Creamy,Silky:Charisma+,Velvet:Charisma+,Marble:Charisma++:Armor+",
+     "values": "Scaley:Armor++:Charisma--,Leathery:Armor+:Appearance-,Thick:Charisma-:Constitution+,Normal,Normal,Creamy,Silky:Charisma+,Velvet:Charisma+,Marble:Charisma++:Armor+",
      "maternal": True},
     {"name": "Bone Length",
-     "values": "Tiny:Health-:Height---,Stunted:Height--,Small:Height-,Normal,Normal,Normal,Normal,Normal,Large:Height+,Big:Height++,Very Long:Height+++"},
+     "values": "Tiny:Health-:Height---:Speed+:Dexterity++,Stunted:Height--:Dexterity+,Small:Height-,Normal,Normal,Normal,Normal,Normal,Large:Height+,Big:Height++:Speed-,Very Long:Height+++:Speed-:Dexterity-"},
     {"name": "Eye Color",
-     "values": "Hazel:Charisma+,Amber,Green,Blue,Gray,Brown,Brown,Dark Brown,Black,Black,Black,Red:Charisma-:Manipulation+,Violet:Charisma+:Manipulation+"},
+     "values": "Hazel:Appearance+,Amber,Green,Blue,Gray,Brown,Brown,Dark Brown,Black,Black,Black,Red:Charisma-:Manipulation+,Violet:Charisma+:Manipulation+"},
     {"name": "Eye Shape",
-     "values": "Almond,Round,Upturned,Downturned,Monolid:Charisma-,Hooded"},
+     "values": "Almond,Round,Upturned,Downturned,Monolid:Appearance-,Hooded"},
     {"name": "Eye Sight",
-     "values": "Cross Eyed:Charisma-,Lazy Eye,Near Sighted,Far Sighted,Color Blind,Normal,Normal,Normal,Normal,Normal,Perfect Sight:Perception+,Eagle Eyes:Perception++"},
+     "values": "Cross Eyed:Charisma-,Lazy Eye,Near Sighted,Far Sighted,Color Blind,Normal,Normal,Normal,Normal,Normal,Perfect Sight:Perception+,Eagle Eyes:Perception++:Terror+"},
     {"name": "Eye Spectrum",
      "values": "Infrared:Infravision+,Normal,Normal,Normal,Normal,Normal,Normal,Normal,Normal,Vibrant Colors:Perception+,Ultraviolet:Perception+"},
     {"name": "Hair Texture",
-     "values": "Wavy,Curly,Straight,Smooth,Coily,Frizy"},
+     "values": "Wavy,Curly,Straight,Smooth:Appearance+,Coily,Frizy"},
     {"name": "Head Size",
      "values": "Small:Manipulation-,Oblong,Round,Oval,Square,Heart-shaped,Triangular,Diamond,Large,Giant Forehead:Manipulation+,Bulbous:Intelligence+"},
     {"name": "Finger Length",
      "values": "Stubby:Dexterity-,Short,Normal,Normal,Normal,Long:Dexterity+,Talons:Dexterity-:Unarmed Attack+"},
-    {"name": "Hairiness",
-     "values": "Bald,Thin Hair,Thick Hair,Hairy,Fuzzy,Bearded:Appearance-,Covered in Hair:Warm+,Fury:Charisma-:Warm+:Terror+"},
+    {"name": "Hand Shape",
+     "values": "Heavily Webbed:Dexterity--:Swimming++,Webbed:Dexterity-:Swimming+,Normal,Normal,Normal,Strong Joints:Strength+,Fist of Stone:Dexterity-:Unarmed Attack+:Strength+"},
+    {"name": "Male Hairiness",
+     "values": "Bald,Thin Hair,Thick Hair,Hairy,Fuzzy,Bearded:Appearance-,Covered in Hair:Warm+,Fury:Charisma+:Appearance-:Warm+:Terror+"},
+    {"name": "Female Hairiness",
+     "values": "Bald:Appearance-,Thin Hair,Thick Hair,Thick Hair,Thick Hair,Thick Hair,Thick Hair,Hairy,Fuzzy,Bearded:Appearance-,Covered in Hair:Warm+:Charisma-,Fury:Appearance--:Charisma+:Warm+:Terror+"},
     {"name": "Posture",
      "values": "Forward Head:Charisma-:Manipulation+,Scoliosis,Flat Backed,Good Posture,Good Posture,Good Posture,Humpbacked:Charisma-,Sway Back:Charisma-"},
-
     {"name": "Toe length",
-     "values": "Big Toe longest,Second toe longest,"},
+     "values": "Big Toe longest,Second toe longest,Stubby Toes:Dexterity-"},
     {"name": "Feet shapes",
-     "values": "Flat footed,High arch"},
-    {"name": "Toe length",
-     "values": "Big Toe longest,Second toe longest"},
+     "values": "Flat footed,Normal,Normal,High arch,Runner Feet:Speed+"},
     {"name": "Leg Shape",
-     "values": "Bow-legged,Straight Legs,Straight Legs,Knees knocked in,Floating kneecap,Massive Thighs"},
+     "values": "Bow-legged:Dexterity-,Straight Legs,Straight Legs,Knees knocked in,Floating kneecap,Massive Thighs:Constitution+"},
     {"name": "Torso Shape",
-     "values": "Long:Constitution++:Height+,Barrel Chested:Constitution+:Strength+,Apple shaped,Pear shaped,Thin,Short,Extremely Thin:Constitution-:Strength-"},
+     "values": "Long:Constitution++:Height+:Appearance-,Barrel Chested:Constitution+:Strength+,Apple shaped,Pear shaped,Thin,Short,Extremely Thin:Constitution-:Strength-"},
     {"name": "Neck Size",
-     "values": "Thick:Strength+,Thin,Normal,Normal,Long:Strength-,Short:Appearance-"},
+     "values": "Thick:Strength+:Appearance-,Thin,Normal,Normal,Long:Strength-,Short:Appearance-"},
     {"name": "Nose Shape",
-     "values": "Empty Cavity:Terror+:Appearance-,Flat,Wide,Thin,Turned up/perky,Hooked down,Bulbous:Appearance-:Terror-"},
+     "values": "Empty Cavity:Terror+:Appearance-,Flat,Wide,Thin,Turned up/perky:Appearance+,Hooked down,Bulbous:Appearance-:Terror-"},
 
     {"name": "Nerve Response",
      "values": "Very Fast Reflexes:Dexterity++:Lifespan-,Fast Reflexes:Dexterity+,Normal,Normal,Normal,Normal,Normal,Normal,Normal,Slow Reflexes:Dexterity-:Constitution+"},
     {"name": "Skin Texture",
-     "values": ""},
+     "values": "Bad Acne:Appearance--,Acne:Appearance-,Birth Mark:Appearance-,Smooth,Normal,Normal,Normal,Soft,Rough,Barky:Charisma-:Lifespan+,Textured with Runes:Magic Power+:Magic Resistance+:Charisma-:Terror+"},
     {"name": "Teeth Shape",
-     "values": "Sharp and Pointed:Manipulation++,Large Teeth with Two Rows:Manipulation+:Terror+,Large Canines:Manipulation+,Normal,Normal,Normal,Well Spaced Teeth,Perfect Teeth:Appearance+"},
+     "values": "Sharp and Pointed:Manipulation++,Large with Two Rows:Manipulation+:Terror+,Large Canines:Manipulation+,Normal,Normal,Normal,Well Spaced Teeth,Perfect Teeth:Appearance+"},
     {"name": "Lung Capacity",
-     "values": "Huge:Dexterity+:Constitution+:Strength+:Lifespan+,Large:Constitution++:Strength+,Normal,Normal,Stitled:Constitution-,Small:Constitution-,Withered:Constitution-:Strength--:Lifespan-"},
+     "values": "Huge:Dexterity+:Constitution+:Strength+:Lifespan-:Swimming+,Large:Constitution++:Strength+:Swimming+,Normal,Normal,Stitled:Constitution-,Small:Constitution-,Withered:Constitution-:Strength--:Lifespan-:Swimming++"},
     {"name": "Heart Size",
      "values": "Thin and Fast:Dexterity++:Lifespan-,Small:Lifespan-:Dexterity-,Strong:Lifespan+:Temprament+:Disease Resistant+,Normal,Normal,Big:Lifespan+:Disease Resistant+:Constitution+,Large:Lifespan-:Strength+,Very Large:Constitution++:Strength+:Lifespan--"},
     {"name": "Cell Longevity",
      "values": ""},
     {"name": "Gestation Rate",
-     "values": "6 Months:Lifespan-:Health-,9 Months,10 Months,10 Months,11 Months,12 Months:Lifespan+,14 Months:Lifespan+,16 Months:Lifespan+,20 Months:Lifespan+,24 Months:Lifespan++",
+     "values": "6 Months:Lifespan-:Health-,9 Months,9.5 Months,10 Months,11 Months,12 Months:Lifespan+,14 Months:Lifespan+,16 Months:Lifespan++,20 Months:Lifespan+++,24 Months:Lifespan++++",
      "maternal": True},
+    {"name": "Multiple Children",
+     "values": "Single,Single,Single,Single,Single,Single,Single,Single,Single,Single,Single,Single,Single,Twins,Twins,Multiple"},
 
     {"name": "Nerve Mapping",
      "values": ""},
 
     {"name": "Stomach Composition",
-     "values": ""},
+     "values": "Broken Stomach:Immune System--:Hunger-:Disease Resistant-:Weight-:Lifespan-,Weak Abdomen:Strength-:Immune System-,Hernias:Lifespan-:Strength-,Gastric Acid:Disease Resistant+:Weight-:Happiness-,Normal,Normal,Normal,Normal,Lead Belly:Radiation Resistance+:Disease Resistant+:Hunger+,Ravishing Appetite:Hunger++:Constitution+:Disease Resistant+:Immune System+Weight+"},
 
     {"name": "Skull Thickness",
-     "values": ""},
+     "values": "Thin Bones:Constitution--:Lifespan-:Weight:-,Soft Spot:Constitution-,Normal,Normal,Normal,Normal,Thick Skull:Constitution+,Solid Skull:Constitution++,Intelligence-"},
 
     {"name": "Arterial Size",
      "values": ""},
@@ -133,22 +138,22 @@ QUALITY_ARRAY = [
 
 RACE_ARRAY = [
     {"name": "Human",
-     "values": "Bone Length:Normal,Gestation Rate:10 Months,Skin Toughness:Normal,Eye Spectrum:Normal,Teeth Shape:Normal"},
+     "values": "Bone Length:Normal,Gestation Rate:10 Months,Skin Toughness:Normal,Eye Spectrum:Normal,Teeth Shape:Normal,Gnosis:Normal"},
 
     {"name": "Elf",
-     "values": "Positive Emotionality:Happy,Bone Length:Big,Gestation Rate:24 Months,Nerve Response:Fast Reflexes,Eye Shape:Hooded,Eye Spectrum:Infrared"},
+     "values": "Positive Emotionality:Happy,Bone Length:Big,Gestation Rate:24 Months,Nerve Response:Fast Reflexes,Eye Shape:Hooded,Eye Spectrum:Infrared,Chi:in Tune,Lung Capacity:Stilted"},
 
     {"name": "Dwarf",
-     "values": "Negative Emotionality:Grumpy,Neck Size:Thick,Bone Length:Stunted,Skin Toughness:Thick,Hairiness:Bearded,Torso Shape:Barrell Chested,Heart Size:Large"},
+     "values": "Negative Emotionality:Grumpy,Neck Size:Thick,Bone Length:Stunted,Skin Toughness:Thick,Hairiness:Bearded,Female Hairiness:Bearded,Torso Shape:Barrell Chested,Heart Size:Large,Chi:Blank"},
 
     {"name": "Ork",
-     "values": "Negative Emotionality:Angry,Skin Toughness:Leathery,Gestation Rate:6 Months,Neck Size:Thick,Torso Shape:Long"},
+     "values": "Negative Emotionality:Angry,Skin Toughness:Leathery,Gestation Rate:6 Months,Neck Size:Thick,Torso Shape:Long,Stomach Composition:Ravishing Appetite,Teeth Shape:Large Canines,Multiple Children:Twins,Hand Shape:Strong Joints"},
 
     {"name": "Halfling",
      "values": ""},
 
     {"name": "Dragonborn",
-     "values": ""},
+     "values": "Skin Toughness:Scaley,Gestation Rate:12 Months,Eye Color:Red,Neck Size:Thick,Head Size:Diamond,Torso Shape:Barrel Chested,Stomach Composition:Ravishing Appetite,Teeth Shape:Large Canines,Eye Spectrum:Infrared,Hand Shape:Webbed,Nose Shape:Empty Cavity,Posture:Forward Head,Male Hairiness:Bald,Finger Length:Talons"},
 
     {"name": "Gnome",
      "values": ""},
@@ -298,10 +303,11 @@ def metrics_of_attributes():
     for qual in QUALITY_ARRAY:
         values = qual.get("values", [])
 
+        lowests = {}
+        highests = {}
         for value_data in values:
             value_data = value_data.split(":")
             if len(value_data) > 1:
-                # name = value_data[0]
                 modifiers = value_data[1:]
                 for mod in modifiers:
 
@@ -319,23 +325,39 @@ def metrics_of_attributes():
                             average[mod_name] = mod_num
 
                         if mod_num < 0:
-                            if mod_name in lowest:
-                                lowest[mod_name] += mod_num
+                            if mod_name in lowests:
+                                low = lowests[mod_name]
+                                if low > mod_num:
+                                    lowests[mod_name] = mod_num
                             else:
-                                lowest[mod_name] = mod_num
+                                lowests[mod_name] = mod_num
 
                         if mod_num > 0:
-                            if mod_name in highest:
-                                highest[mod_name] += mod_num
+                            if mod_name in highests:
+                                high = highests[mod_name]
+                                if high < mod_num:
+                                    highests[mod_name] = mod_num
                             else:
-                                highest[mod_name] = mod_num
+                                highests[mod_name] = mod_num
+        for key in lowests:
+            val = lowests[key]
+            if key in lowest:
+                lowest[key] += val
+            else:
+                lowest[key] = val
+        for key in highests:
+            val = highests[key]
+            if key in highest:
+                highest[key] += val
+            else:
+                highest[key] = val
 
     totals = []
     for key, val in used.iteritems():
         data = (key+":").ljust(30) + ("Used: " + str(val)).ljust(10)
         data += ("Avg: " + str(average.get(key, 0))).ljust(10)
-        data += ("Low: " + str(lowest.get(key, 0))).ljust(10)
-        data += ("High: " + str(highest.get(key, 0))).ljust(10)
+        range_data = (str(lowest.get(key, 0))).rjust(3) + " - " + str(highest.get(key, 0))
+        data += ("Range: " + range_data)
         totals.append(data)
 
     return totals

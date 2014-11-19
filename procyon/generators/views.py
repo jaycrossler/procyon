@@ -162,9 +162,6 @@ def generator_trap(request):
 
 
 def generator_name(request):
-    #TODO: Have names of different regions
-    #TODO: Have different namefiles of male or female
-
     format_type = request.REQUEST.get('format') or 'html'
 
     world_json = request.REQUEST.get('world_json') or ''
