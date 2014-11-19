@@ -1,5 +1,5 @@
 Hannes
-Alfvén
+Alfven
 Felix
 Bloch
 Louis
@@ -9,7 +9,7 @@ Nelson
 Elliott
 Michael
 Faraday
-František
+Frantisek
 Josef
 Gerstner
 Lord Kelvin

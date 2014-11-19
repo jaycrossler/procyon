@@ -43,7 +43,7 @@ Lotka-Volterras
 Killing
 Darcy-Weisbach
 Davey-Stewartson
-Debye-Hückel
+Debye-Huckel
 Degasperis-Procesi
 Dehn-Sommervilles
 Dopplers
@@ -119,7 +119,7 @@ Laplace
 Legendre
 Leonard-Merritt
 Levy-Misess
-Liénard
+Lienard
 Lighthill
 Lindblad
 Lin-Tsien
@@ -143,7 +143,7 @@ Maxwells
 Maxwell
 Mayo-Lewis
 Michaelis-Menten
-Monge-Ampère
+Monge-Ampere
 Morison
 Nahms
 Navier-Stokess
@@ -152,7 +152,7 @@ Neugebauers
 Newton-Eulers
 Schrodinger
 Ornstein-Zernike
-Painlevés
+Painleves
 Orr-Sommerfeld
 Osipkov-Merritt
 Papapetrou-Dixons
@@ -163,7 +163,7 @@ Penman-Monteith
 Picard-Fuchs
 Poisson
 Poisson-de Rham
-Pople—Nesbets
+Pople-Nesbets
 Prandtl-Glauert
 Price
 Prony

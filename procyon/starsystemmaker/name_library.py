@@ -4,10 +4,10 @@ import os
 import numpy as np
 import fuzzy
 from string import maketrans
+import unicodedata
 
 
 def list_of_names(file_sub_strings=list(), prefix_chance=0, prefixes=list(), max_count=50):
-    #TODO: Should this be list() not [] ?
     # Can limit names like file_sub_strings=['korean','male'] or ['avian'] or ['male','1980']
 
     name_file_dir = 'procyon/fixtures/names/'
@@ -34,7 +34,13 @@ def list_of_names(file_sub_strings=list(), prefix_chance=0, prefixes=list(), max
         name_list = [line.strip() for line in infile if len(line)]
     name_list = name_list[:max_count]
 
-    np.random.shuffle(name_list)
+    for idx, nam in enumerate(name_list):
+        name_list[idx] = nam.decode('utf-8').encode('ascii', 'ignore')
+
+    if name_list:
+        np.random.shuffle(name_list)
+    else:
+        name_list = list_of_names(max_count=max_count)
 
     if prefix_chance and prefixes:
         for i in range(len(name_list)):

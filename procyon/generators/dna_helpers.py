@@ -2,7 +2,7 @@ from procyon.starsystemmaker.math_helpers import *
 import numpy as np
 
 # TODO: Move this to a model, allow extra DNA junk space that can be filled in by anthology-specific values. Or have some hash-mapper to add more
-QUALITY_ARRAY = [
+GENE_ARRAY = [
     {"name": "Sex",
      "values": "Male,Female"},
     {"name": "Skin Pigment",
@@ -173,7 +173,7 @@ ASPECT_ARRAY = [
 
 
 def init_quality_arrays():
-    for quality in QUALITY_ARRAY:
+    for quality in GENE_ARRAY:
         values = quality.get("values", "Normal")
         values = values.split(",")
         quality["values"] = expand_array_to_16(values)
@@ -227,7 +227,7 @@ def qualities_from_dna(dna):
     qualities = []
     attribute_mods = {}
     for idx, q in enumerate(dna_arr):
-        quality = QUALITY_ARRAY[idx]
+        quality = GENE_ARRAY[idx]
         name = quality.get("name", "Quality")
         values = quality.get("values", None)
         if values:
@@ -261,7 +261,7 @@ def generate_dna(rand_seed='', race='human', overrides={}):
     race_overrides = overrides_from_race(race=race, overrides=overrides)
 
     dna_values = []
-    for quality in QUALITY_ARRAY:
+    for quality in GENE_ARRAY:
         gene_num = np.random.randint(0, 15)  #Should this be randint(1,8)+randint(0,8) ?
 
         name = quality.get("name", "Quality")
@@ -300,7 +300,7 @@ def metrics_of_attributes():
     highest = {}
     lowest = {}
 
-    for qual in QUALITY_ARRAY:
+    for qual in GENE_ARRAY:
         values = qual.get("values", [])
 
         lowests = {}
@@ -363,7 +363,7 @@ def metrics_of_attributes():
     return totals
 
 
-def get_quality_values_array_named(quality, array=QUALITY_ARRAY):
+def get_quality_values_array_named(quality, array=GENE_ARRAY):
     values = []
     for val in array:
         name = val.get("name", "name")
@@ -401,3 +401,74 @@ def overrides_from_race(race='Human', overrides={}):
                     new_overrides[race_val_name] = race_att_name
 
     return new_overrides
+
+
+def gene_merge(m, f, is_maternal, is_paternal):
+    if is_maternal:
+        return m
+    if is_paternal:
+        return f
+
+    out = ""
+    roll = np.random.randint(0, 3)
+    if roll == 0:
+        out = m[0] + f[0]
+    if roll == 1:
+        out = m[0] + f[1]
+    if roll == 2:
+        out = m[1] + f[0]
+    if roll == 3:
+        out = m[1] + f[1]
+
+    return out
+
+
+def combine_dna(mother="", father="", rand_seed=''):
+    len_genes = len(GENE_ARRAY) * 2
+    if len(father) < len_genes or len(mother) < len_genes:
+        return "GAG" #Invalid input DNA
+
+    try:
+        rand_seed = float(rand_seed)
+    except ValueError:
+        rand_seed = np.random.random()
+    rand_seed = set_rand_seed(rand_seed)
+
+    new_dna = ""
+
+    for idx, gene in enumerate(GENE_ARRAY):
+        first = idx * 2
+        last = first + 2
+        snippet_m = mother[first:last]
+        snippet_f = father[first:last]
+        snippet = gene_merge(snippet_m, snippet_f, gene.get('maternal', False), gene.get('paternal', False))
+        new_dna += snippet
+
+    return new_dna, rand_seed
+
+
+def mutate_dna(dna="", mutation_factor=0.003):
+    out = ""
+
+    len_alleles = len(dna) / 2
+    rolls = np.random.random_sample(len_alleles,)
+
+    for i in range(len_alleles):
+        roll = rolls[i]
+        first = dna[i * 2]
+        second = dna[1 + i * 2]
+
+        if roll <= 0.2:
+            out += second + first
+        elif roll <= 0.4:
+            out = first + first
+        elif roll <= 0.6:
+            out = second + second
+        elif roll <= 0.8:
+            out = first + second  #TODO: Merge?
+        else:
+            out = first + second  #TODO: Something?
+
+        return out
+
+    return dna
