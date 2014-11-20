@@ -249,7 +249,11 @@ def create_random_item(world={}, person={}, override={}, set_random_key=True, pa
                     option = numpy.random.choice(components, 1, p=component_tag_probabilities)
                     component = option[0]
 
-                text = component.name
+                if not isinstance(component, dict):
+                    component = {"name": ctype}
+
+                text = component.get("name", "")
+
                 if parse_dice:
                     text = parse_dice_text(text)
 
@@ -257,12 +261,14 @@ def create_random_item(world={}, person={}, override={}, set_random_key=True, pa
                 item_names.append(text)
                 item_generators.append(ctype)
 
-                if component.properties and isinstance(component.properties, dict):
-                    properties = component.properties
+                component_props = component.get("properties", None)
+                if component_props and isinstance(component_props, dict):
+                    properties = component_props
                     item_data = dict(item_data.items() + properties.items())
 
-                if component.effects and isinstance(component.effects, list) and len(component.effects):
-                    effect = component.effects
+                component_effects = component.get("effects", None)
+                if component_effects and isinstance(component_effects, list) and len(component_effects):
+                    effect = component_effects
                     effects_data += effect
 
     item_name = generate_item_name(item_prefixes, item_names)

@@ -69,7 +69,7 @@ GENE_ARRAY = [
      "values": ""},
 
     {"name": "Stomach Composition",
-     "values": "Broken Stomach:Immune System--:Hunger-:Disease Resistant-:Weight-:Lifespan-,Weak Abdomen:Strength-:Immune System-,Hernias:Lifespan-:Strength-,Gastric Acid:Disease Resistant+:Weight-:Happiness-,Normal,Normal,Normal,Normal,Lead Belly:Radiation Resistance+:Disease Resistant+:Hunger+,Ravishing Appetite:Hunger++:Constitution+:Disease Resistant+:Immune System+Weight+"},
+     "values": "Broken Stomach:Immune System--:Hunger-:Disease Resistant-:Weight-:Lifespan-,Weak Abdomen:Strength-:Immune System-,Hernias:Lifespan-:Strength-,Gastric Acid:Disease Resistant+:Weight-:Happiness-,Normal,Normal,Normal,Normal,Lead Belly:Radiation Resistance+:Disease Resistant+:Hunger+,Ravishing Appetite:Hunger++:Constitution+:Disease Resistant+:Immune System+:Weight+"},
 
     {"name": "Skull Thickness",
      "values": "Thin Bones:Constitution--:Lifespan-:Weight:-,Soft Spot:Constitution-,Normal,Normal,Normal,Normal,Thick Skull:Constitution+,Solid Skull:Constitution++,Intelligence-"},
@@ -132,7 +132,7 @@ GENE_ARRAY = [
      "values": "Empty:Magic Resistant+++,Null:Magic Resistant++,Blank:Magic Resistant+,Normal,Normal,Normal,Normal,Normal,Normal,In Tune:Magic Resistant-:Magic Power+,Powerful:Magic Power++:Magic Resistant--"},
 
     {"name": "Gnosis",
-     "values": "Rooted:Magic Resistant++,Normal,Normal,Normal,Normal,Normal,Normal,Focused:Magic Resistant+:Magic Power+,Alar:Magic Resistant++:Magic Power++,Awakened:Magic Resistant+:Magic Power+++"}
+     "values": "Rooted:Magic Resistant++,Normal,Normal,Normal,Normal,Normal,Normal,Powerful:Magic Resistant+:Magic Power+,Alar:Magic Resistant++:Magic Power++,Awakened:Magic Resistant+:Magic Power+++"}
 
 ]
 

@@ -24,17 +24,17 @@
         If you have improvements, please contribute!  You can also use <a href="https://github.com/jaycrossler/procyon-chef-repo" target="_blank">vagrant and chef to completely build and host</a> your own Procyon server.
         {% endblocktrans %}
     </p>
-    
+
     <h2>Things you can do</h2>
     <p>
         <ul>
             <li><a href="{% url 'star-list' %}">{% trans "Search Known Stars"%}</a></li>
-            <li><a href="{% url 'maker-star-system-builder' %}">{% trans "Star System Builder"%}</a></li>
+            <li><a href="{% url 'generators' %}">{% trans "Content Generators"%}</a></li>
             <li><a href="{% url 'maker-star-info' 27919 %}">{% trans "JSON of a star (with simulated details and nearest locs)"%}</a></li>
             <li><a href="{% url 'maker-star-viewer' 27919 %}">{% trans "HTML5 Nearby star viewer"%}</a></li>
         </ul>
     </p>
-    
+
     {% if user.is_authenticated %}
             Authenticated users can also <a href="admin/starcatalog/planet">{% trans "Search Known Planets" %}</a></li>
     {% else %}

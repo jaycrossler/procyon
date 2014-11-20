@@ -151,7 +151,8 @@ def generator_dna(request):
         }
         output = render_to_response('generator_dna.html',
                                     {"type": item_name, "dna": dna, "qualities": qualities, "note": note, "metrics": metrics,
-                                     "attribute_mods": attribute_mods, "inputs": inputs, "generator": "dna"},
+                                     "attribute_mods": attribute_mods, "inputs": inputs, "generator": "dna",
+                                     "RACE_ARRAY": RACE_ARRAY},
                                     RequestContext(request))
     return output
 

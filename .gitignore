@@ -6,3 +6,4 @@ CACHE/*
 *.pyc
 procyon/local_settings.py
 
+test.py

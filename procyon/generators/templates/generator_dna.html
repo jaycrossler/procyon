@@ -106,7 +106,7 @@
         {% if attribute_mods %}
             <hr/>
 
-            <b>Attributes:</b>
+            <b>Attribute Mods when Born:</b>
             {% for attribute, value in attribute_mods.items %}
                 <span class="attribute {% if value > 0 %}positive{% endif %}"><b>{{ attribute }}</b>: {% if value > 0 %}+{% endif %}{{ value }}</span>
             {% endfor %}
@@ -131,11 +131,9 @@
             <label>Race:</label>
             <select name="race">
                 <option value="" {% if inputs.race == '' %}selected="selected"{% endif %}>Doesn't Matter</option>
-                <option value="human" {% if inputs.race == 'human' %}selected="selected"{% endif %}>Human</option>
-                <option value="elf" {% if inputs.race == 'elf' %}selected="selected"{% endif %}>Elf</option>
-                <option value="dwarf" {% if inputs.race == 'dwarf' %}selected="selected"{% endif %}>Dwarf</option>
-                <option value="ork" {% if inputs.race == 'ork' %}selected="selected"{% endif %}>Ork</option>
-                <option value="halfling" {% if inputs.race == 'halfling' %}selected="selected"{% endif %}>Halfling</option>
+            {% for race in RACE_ARRAY %}
+                <option value="{{ race.name }}" {% if inputs.race == race.name %}selected="selected"{% endif %}>{{ race.name }}</option>
+            {% endfor %}
             </select>
         {% endif %}
 

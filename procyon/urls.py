@@ -14,7 +14,7 @@ urlpatterns = patterns("",
     url(r'^stories/', include('procyon.stories.urls')),
     url(r'^maker/', include('procyon.starsystemmaker.urls')),
     url(r"^account/", include("account.urls")),
-    url(r'^generators/', include('procyon.generators.urls')),
+    url(r'^generators/', include('procyon.generators.urls'), name="generators"),
 )
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
