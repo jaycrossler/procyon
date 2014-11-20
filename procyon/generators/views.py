@@ -20,7 +20,6 @@ def generator_default(request, generator_type="item", parse_dice=False,
     format_type = request.REQUEST.get('format') or 'html'
 
     world_json = request.REQUEST.get('world_json') or ''
-    person_json = request.REQUEST.get('person_json') or ''
     override_json = request.REQUEST.get('override_json') or ''
 
     pattern = request.REQUEST.get('pattern') or default_pattern
@@ -41,13 +40,12 @@ def generator_default(request, generator_type="item", parse_dice=False,
     items = []
 
     try:
-        world = json.loads(world_json) if world_json else {}
-        person = json.loads(person_json) if person_json else {}
+        world_data = json.loads(world_json) if world_json else {}
         override = json.loads(override_json) if override_json else {}
 
         for i in range(0, count):
             rand = rand_seed if i == 0 else ''
-            item = story_helpers.create_random_item(world=world, person=person, override=override,
+            item = story_helpers.create_random_item(world_data=world_data, override=override,
                                                     pattern=pattern, tags=tags, rand_seed=rand,
                                                     tag_weight=tag_weight, parse_dice=parse_dice)
             if i == 0:
@@ -81,7 +79,6 @@ def generator_default(request, generator_type="item", parse_dice=False,
             "rand_seed": rand_seed,
             "count": count,
             "world_json": world_json,
-            "person_json": person_json,
             "override_json": override_json
         }
         output = render_to_response('generator_generic.html',
@@ -166,7 +163,6 @@ def generator_name(request):
     format_type = request.REQUEST.get('format') or 'html'
 
     world_json = request.REQUEST.get('world_json') or ''
-    person_json = request.REQUEST.get('person_json') or ''
     override_json = request.REQUEST.get('override_json') or ''
 
     pattern = request.REQUEST.get('pattern') or ''
@@ -186,9 +182,7 @@ def generator_name(request):
     first_item = {}
     items = []
     try:
-        note = gender
-        world = json.loads(world_json) if world_json else {}
-        person = json.loads(person_json) if person_json else {}
+        world_data = json.loads(world_json) if world_json else {}
         override = json.loads(override_json) if override_json else {}
         count = int(count)
         modifications = int(modifications)
@@ -199,7 +193,7 @@ def generator_name(request):
 
         for i in range(0, count):
             rand = rand_seed if i == 0 else ''
-            item = story_helpers.create_random_name(world=world, person=person, override=override, pattern=pattern,
+            item = story_helpers.create_random_name(world_data=world_data, override=override, pattern=pattern,
                                                     tags=tags, rand_seed=rand, modifications=modifications,
                                                     tag_weight=tag_weight, gender=gender)
             if i == 0:
@@ -235,7 +229,6 @@ def generator_name(request):
             "count": count,
             "tag_weight": tag_weight,
             "world_json": world_json,
-            "person_json": person_json,
             "override_json": override_json
         }
         output = render_to_response('generator_generic.html',

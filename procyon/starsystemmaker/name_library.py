@@ -4,7 +4,6 @@ import os
 import numpy as np
 import fuzzy
 from string import maketrans
-import unicodedata
 
 
 def list_of_names(file_sub_strings=list(), prefix_chance=0, prefixes=list(), max_count=50):
@@ -34,8 +33,11 @@ def list_of_names(file_sub_strings=list(), prefix_chance=0, prefixes=list(), max
         name_list = [line.strip() for line in infile if len(line)]
     name_list = name_list[:max_count]
 
-    for idx, nam in enumerate(name_list):
-        name_list[idx] = nam.decode('utf-8').encode('ascii', 'ignore')
+    for idx, name_text in enumerate(name_list):
+        try:
+            name_list[idx] = name_text.decode('utf-8').encode('ascii', 'ignore')
+        except UnicodeDecodeError:
+            name_list[idx] = name_text.decode('ascii', 'ignore')
 
     if name_list:
         np.random.shuffle(name_list)

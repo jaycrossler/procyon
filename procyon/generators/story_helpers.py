@@ -6,7 +6,7 @@ import json
 from procyon.starsystemmaker.math_helpers import *
 from procyon.starsystemmaker.name_library import *
 from django.core.cache import cache
-
+from django.forms.models import model_to_dict
 
 def turn_pattern_to_hash(pattern, override={}):
     pattern_parts = pattern.split(",")
@@ -76,7 +76,7 @@ def value_of_variable(var):
     return val
 
 
-def check_requirements(requirements, world, person):
+def check_requirements(requirements, world_data):
     checks = []
     if isinstance(requirements, list):
         for req in requirements:
@@ -89,13 +89,13 @@ def check_requirements(requirements, world, person):
             if concept and name:
 
                 if concept == 'city':
-                    source = get(world, 'city', {})
+                    source = get(world_data, 'city', {})
                 elif concept == 'family':
-                    source = get(world, 'family', {})
+                    source = get(world_data, 'family', {})
                 elif concept == 'character' or concept == 'person':
-                    source = person
+                    source = get(world_data, 'person', {})
                 else:
-                    source = world
+                    source = world_data
 
                 to_check = get(source, name, '')
 
@@ -130,14 +130,22 @@ def check_requirements(requirements, world, person):
     return is_valid
 
 
-def tags_to_find(tags, world, person):
+def tags_to_find(tags, world_data):
     tags_list = tags.split(",")
-    if world and 'tags' in world:
-        world_tags = world.get('tags')
+    if world_data and 'tags' in world_data:
+        world_tags = world_data.get('tags', '')
         tags_list = tags_list + world_tags.split(",")
-    if person and 'tags' in person:
-        person_tags = person.get('tags')
-        tags_list = tags_list + person_tags.split(",")
+    if 'person' in world_data:
+        person = world_data.get('person', {})
+        if person and 'tags' in person:
+            person_tags = person.get('tags' ,'')
+            tags_list = tags_list + person_tags.split(",")
+    if 'family' in world_data:
+        family = world_data.get('family', {})
+        if family and 'tags' in family:
+            family_tags = family.get('tags', '')
+            tags_list = tags_list + family_tags.split(",")
+
     for idx, tag in enumerate(tags_list):
         tags_list[idx] = tag.strip().lower()
 
@@ -157,7 +165,7 @@ def count_tag_matches(component_tags, search_tags, base_num=0):
     return matches
 
 
-def breakout_component_types(world, person, tags, pattern_list):
+def breakout_component_types(world_data, tags, pattern_list):
     component_types = {}
     component_tag_counts = {}
 
@@ -171,8 +179,8 @@ def breakout_component_types(world, person, tags, pattern_list):
         ctype = ctype.lower().strip()
 
         if ctype in pattern_list:
-            is_match = check_requirements(component.requirements, world, person)
-            tags_searching = tags_to_find(tags, world, person)
+            is_match = check_requirements(component.requirements, world_data)
+            tags_searching = tags_to_find(tags, world_data)
             tag_match = count_tag_matches(component.tags, tags_searching)
 
             if is_match:
@@ -205,7 +213,7 @@ def counts_to_probabilities(counts, padding=.3):
     return probs
 
 
-def create_random_item(world={}, person={}, override={}, set_random_key=True, parse_dice=False,
+def create_random_item(world_data={}, override={}, set_random_key=True, parse_dice=False,
                        pattern='adjective:.7,origin:.7,item:1,power:1:that,quirk:.9:and', tags="", rand_seed=None,
                        tag_weight=.3):
     # Build the random number seed
@@ -219,7 +227,7 @@ def create_random_item(world={}, person={}, override={}, set_random_key=True, pa
 
     pattern_list, pattern_probability, pattern_prefixes = turn_pattern_to_hash(pattern, override)
 
-    component_types, component_tag_counts = breakout_component_types(world, person, tags, pattern_list)
+    component_types, component_tag_counts = breakout_component_types(world_data, tags, pattern_list)
 
     item_data = {}
     effects_data = []
@@ -249,10 +257,11 @@ def create_random_item(world={}, person={}, override={}, set_random_key=True, pa
                     option = numpy.random.choice(components, 1, p=component_tag_probabilities)
                     component = option[0]
 
-                if not isinstance(component, dict):
-                    component = {"name": ctype}
-
-                text = component.get("name", "")
+                try:
+                    text = component.get("name", "")
+                except AttributeError:
+                    component = model_to_dict(component)
+                    text = component.get("name", "")
 
                 if parse_dice:
                     text = parse_dice_text(text)
@@ -261,12 +270,12 @@ def create_random_item(world={}, person={}, override={}, set_random_key=True, pa
                 item_names.append(text)
                 item_generators.append(ctype)
 
-                component_props = component.get("properties", None)
+                component_props = component.get("properties", {})
                 if component_props and isinstance(component_props, dict):
                     properties = component_props
                     item_data = dict(item_data.items() + properties.items())
 
-                component_effects = component.get("effects", None)
+                component_effects = component.get("effects", [])
                 if component_effects and isinstance(component_effects, list) and len(component_effects):
                     effect = component_effects
                     effects_data += effect
@@ -290,7 +299,7 @@ def generate_item_name(item_prefixes, item_names, titleize=False):
     return name
 
 
-def create_random_name(world={}, person={}, override={}, pattern="", tags="", rand_seed=None,
+def create_random_name(world_data={}, override={}, pattern="", tags="", rand_seed=None,
                        modifications=0, set_random_key=True, tag_weight=.3, gender=""):
     # Build a pattern if it doesn't exist, based on time and asian/other influences - TODO: Expand these rules
     # Can do {"namefile":"european"} to force country
@@ -312,19 +321,20 @@ def create_random_name(world={}, person={}, override={}, pattern="", tags="", ra
     if not pattern:
         pattern = name_patterns[np.random.choice(name_patterns.keys(), 1)[0]]
 
-        if 'year' in world:
-            year = int(world.get('year'))
-            if year < 1400:
-                if numpy.random.random() < .5:
-                    pattern = name_patterns['king_jon_snow_the_pierced']
+        if 'year' in world_data:
+            year = int(world_data.get('year', None))
+            if year:
+                if year < 1400:
+                    if numpy.random.random() < .5:
+                        pattern = name_patterns['king_jon_snow_the_pierced']
+                    else:
+                        pattern = name_patterns['king_jon_tyrion_snow_of_winterfell']
+                elif year > 1900:
+                    pattern = name_patterns['jon_snow']
                 else:
-                    pattern = name_patterns['king_jon_tyrion_snow_of_winterfell']
-            elif year > 1900:
-                pattern = name_patterns['jon_snow']
-            else:
-                pattern = name_patterns['jon_tyrion_snow']
+                    pattern = name_patterns['jon_tyrion_snow']
 
-    generated_item = create_random_item(world=world, person=person, override=override, pattern=pattern, tags=tags,
+    generated_item = create_random_item(world_data=world_data, override=override, pattern=pattern, tags=tags,
                                         rand_seed=rand_seed, set_random_key=set_random_key, tag_weight=tag_weight)
 
     for idx, generator in enumerate(generated_item.get('generators')):
