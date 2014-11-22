@@ -45,87 +45,201 @@ def get(holder, variable, default):
 
 
 def value_of_variable(var):
-    val = 0
+    val = var
     if isinstance(var, basestring):
         var = var.lower().strip()
-    else:
-        var = 0
 
-    if var == 'epic':
-        val = 512
-    elif var == 'fantastic':
-        val = 256
-    elif var == 'superb':
-        val = 128
-    elif var == 'great':
-        val = 64
-    elif var == 'good':
-        val = 32
-    elif var == 'fair':
-        val = 16
-    elif var == 'average':
-        val = 8
-    elif var == 'mediocre':
-        val = 4
-    elif var == 'poor':
-        val = 2
-    elif var == 'terrible':
-        val = 1
-    elif var == 'none':
-        val = 0
+        lookups = {'epic': 512.0, 'fantastic': 256.0, 'superb': 128.0, 'great': 64.0, 'good': 32.0, 'high': 32.0,
+                   'fair': 16.0, 'average': 8.0, 'mediocre': 4.0, 'low': 4.0, 'poor': 2.0, 'terrible': 1.0, 'none': 0.0}
+        if var in lookups:
+            val = lookups[var]
+    else:
+        try:
+            val = float(var)
+        except ValueError:
+            pass
+        except TypeError:
+            pass
+
     return val
 
 
+def convert_string_to_req_object(requirements):
+    reqs = requirements.split(",")
+    reqs = [req.strip() for req in reqs]
+
+    output = []
+    for req in reqs:
+        if " >= " in req:
+            req_part = req.split(" >= ")
+            if len(req_part) == 2:
+                output.append({"requirement": req_part[0].strip(), "exceeds": req_part[1].strip()})
+
+        elif " <= " in req:
+            req_part = req.split(" <= ")
+            if len(req_part) == 2:
+                output.append({"requirement": req_part[0].strip(), "below": req_part[1].strip()})
+
+        elif " > " in req:
+            req_part = req.split(" > ")
+            if len(req_part) == 2:
+                output.append({"requirement": req_part[0].strip(), ">": req_part[1].strip()})
+
+        elif " < " in req:
+            req_part = req.split(" < ")
+            if len(req_part) == 2:
+                output.append({"requirement": req_part[0].strip(), "<": req_part[1].strip()})
+
+        elif " has " in req:  # Check that it's not in quotes
+            req_part = req.split(" has ")
+            if len(req_part) == 2:
+                output.append({"requirement": req_part[0].strip(), "has": req_part[1].strip()})
+
+        elif " = " in req:
+            req_part = req.split(" = ")
+            if len(req_part) == 2:
+                output.append({"requirement": req_part[0].strip(), "is": req_part[1].strip()})
+
+        elif " == " in req:
+            req_part = req.split(" == ")
+            if len(req_part) == 2:
+                output.append({"requirement": req_part[0].strip(), "is": req_part[1].strip()})
+
+        elif " is " in req:  #TODO: Check that it's not in quotes
+            req_part = req.split(" is ")
+            if len(req_part) == 2:
+                output.append({"requirement": req_part[0].strip(), "is": req_part[1].strip()})
+
+        elif req.endswith(" none"):
+            req_part = req.split(" none")
+            output.append({"requirement": req_part[0].strip(), "empty": req_part[0].strip()})
+
+        elif req.endswith(" empty"):
+            req_part = req.split(" empty")
+            output.append({"requirement": req_part[0].strip(), "empty": req_part[0].strip()})
+
+        elif req.endswith(" doesn't exist"):
+            req_part = req.split(" doesn't exist")
+            output.append({"requirement": req_part[0].strip(), "empty": req_part[0].strip()})
+
+        elif req.endswith(" exists"):
+            req_part = req.split(" exists")
+            output.append({"requirement": req_part[0].strip(), "exists": req_part[0].strip()})
+
+        elif req.endswith(" exist"):
+            req_part = req.split(" exist")
+            output.append({"requirement": req_part[0].strip(), "exists": req_part[0].strip()})
+
+        else:  # Assume that it's an exists check
+            output.append({"requirement": req.strip(), "exists": req.strip()})
+
+    return output
+
+
+def get_info_from_name_array(req_array, data_array, return_closest_match=False):
+    pointer = data_array
+    for req in req_array:
+        if req.lower() == 'count' and isinstance(pointer, list):
+            pointer = len(pointer)
+        elif req.lower() == 'length' and isinstance(pointer, list):
+            pointer = len(pointer)
+        elif req in pointer:
+            pointer = pointer.get(req)
+        else:
+            if return_closest_match:
+                pass
+            else:
+                return False
+    # TODO, Handle if arrays and * is passed in
+    return pointer
+
+
 def check_requirements(requirements, world_data):
+    # Allow: [{concept:person,name:age,exceeds:20},{concept:world,name:magic,below:poor}]
+    # Allow: 'magic > low, building has Church'
+    # Allow: 'person.age > 20, world.magic < poor, person.business exists, person.siblings empty'
+
+    if not requirements:
+        return True
+
     checks = []
+    if isinstance(requirements, basestring):
+        requirements = convert_string_to_req_object(requirements)
+
     if isinstance(requirements, list):
         for req in requirements:
-            concept = get(req, 'concept', 'world')
+            concept = get(req, 'concept', '')
             name = get(req, 'name', '')
+            requirement = get(req, 'requirement', '')
+            req_array = []
+            if requirement and isinstance(requirement, list):
+                req_array = requirement
+            elif requirement and isinstance(requirement, basestring):
+                req_array = requirement.split(".")
+            elif concept and name:
+                req_array = [concept, name]
+            elif name:
+                req_array = [name]
+
+            r_is = get(req, 'is', '')
+            r_exists = get(req, 'exists', '')
             r_has = get(req, 'has', '')
             r_exceeds = get(req, 'exceeds', '')
+            r_empty = get(req, 'empty', '')
             r_below = get(req, 'below', '')
-            r_is = get(req, 'is', '')
-            if concept and name:
+            r_gt = get(req, '>', '')
+            r_lt = get(req, '<', '')
 
-                if concept == 'city':
-                    source = get(world_data, 'city', {})
-                elif concept == 'family':
-                    source = get(world_data, 'family', {})
-                elif concept == 'character' or concept == 'person':
-                    source = get(world_data, 'person', {})
+            if req_array:
+                to_check = get_info_from_name_array(req_array, world_data)
+
+                if not to_check:
+                    if r_empty:
+                        checks.append(True)
+                    else:
+                        checks.append(False)
                 else:
-                    source = world_data
-
-                to_check = get(source, name, '')
-
-                if to_check:
                     if r_has and isinstance(to_check, list):
-                        checks.append(r_has in to_check)
+                        checks.append(r_has in to_check)  # TODO: Check for lower case and plural
 
-                    elif r_exceeds or r_below or r_is:
+                    elif r_exceeds or r_below or r_is or r_gt or r_lt or r_exists or r_empty:
                         try:
                             to_check = value_of_variable(to_check)
-                            to_check = float(to_check)
                             if r_exceeds:
                                 r_exceeds = value_of_variable(r_exceeds)
-                                r_exceeds = float(r_exceeds)
                                 checks.append(r_exceeds <= to_check)
+                            if r_gt:
+                                r_gt = value_of_variable(r_gt)
+                                checks.append(r_gt < to_check)
+                            if r_lt:
+                                r_lt = value_of_variable(r_lt)
+                                checks.append(r_lt > to_check)
                             if r_below:
                                 r_below = value_of_variable(r_below)
                                 r_below = float(r_below)
                                 checks.append(r_below >= to_check)
                             if r_is:
-                                r_is = value_of_variable(r_is)
-                                #TODO: Also check if strings and matches
-                                r_is = float(r_is)
-                                checks.append(r_is == to_check)
+                                try:
+                                    temp = value_of_variable(r_is)
+                                    r_is = float(temp)
+                                    checks.append(r_is == to_check)
+                                except ValueError:
+                                    if isinstance(r_is, basestring) and isinstance(to_check, basestring):
+                                        checks.append(r_is.lower() == to_check.lower())
+                                    else:
+                                        checks.append(r_is == to_check)
+
+                            if r_exists:
+                                checks.append(not to_check == False)
+
                         except Exception:
                             checks.append(False)
-    is_valid = True
-    for check in checks:
-        if not check:
-            is_valid = False
+    else:
+        return False
+
+    is_valid = False
+    if checks:
+        is_valid = all(item for item in checks)
 
     return is_valid
 

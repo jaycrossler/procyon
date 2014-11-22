@@ -60,16 +60,17 @@ def name_part_fuzzer(name_parts, modifications=4):
     if modifications:
         part_count = len(name_parts)
         function_names = ["name_nysiis", "name_vowel_switch", "name_chars_replace", "name_add_vowels"]
-        for i in range(0, int(modifications)):
-            idx_part = np.random.randint(part_count)
-            name_part = name_parts[idx_part]
+        if part_count:
+            for i in range(0, int(modifications)):
+                idx_part = np.random.randint(part_count)
+                name_part = name_parts[idx_part]
 
-            func = np.random.choice(function_names, 1)[0]
-            method_to_call = globals()[func]
-            result = method_to_call(name_part)
+                func = np.random.choice(function_names, 1)[0]
+                method_to_call = globals()[func]
+                result = method_to_call(name_part)
 
-            if len(name_part) > 3:
-                name_parts[idx_part] = result
+                if len(name_part) > 3:
+                    name_parts[idx_part] = result
 
     return name_parts
 
