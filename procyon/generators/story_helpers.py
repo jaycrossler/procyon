@@ -8,6 +8,7 @@ from procyon.starsystemmaker.name_library import *
 from django.core.cache import cache
 from django.forms.models import model_to_dict
 
+
 def turn_pattern_to_hash(pattern, override={}):
     pattern_parts = pattern.split(",")
     pattern_probability = []
@@ -53,6 +54,11 @@ def value_of_variable(var):
                    'fair': 16.0, 'average': 8.0, 'mediocre': 4.0, 'low': 4.0, 'poor': 2.0, 'terrible': 1.0, 'none': 0.0}
         if var in lookups:
             val = lookups[var]
+        try:
+            val = float(var)
+        except ValueError:
+            pass
+
     else:
         try:
             val = float(var)
@@ -105,7 +111,7 @@ def convert_string_to_req_object(requirements):
             if len(req_part) == 2:
                 output.append({"requirement": req_part[0].strip(), "is": req_part[1].strip()})
 
-        elif " is " in req:  #TODO: Check that it's not in quotes
+        elif " is " in req:  # TODO: Check that it's not in quotes
             req_part = req.split(" is ")
             if len(req_part) == 2:
                 output.append({"requirement": req_part[0].strip(), "is": req_part[1].strip()})
@@ -252,7 +258,7 @@ def tags_to_find(tags, world_data):
     if 'person' in world_data:
         person = world_data.get('person', {})
         if person and 'tags' in person:
-            person_tags = person.get('tags' ,'')
+            person_tags = person.get('tags', '')
             tags_list = tags_list + person_tags.split(",")
     if 'family' in world_data:
         family = world_data.get('family', {})
@@ -285,17 +291,24 @@ def breakout_component_types(world_data, tags, pattern_list):
 
     active_components = cache.get('active_components', None)
     if not active_components:
-        active_components = Component.objects.filter(active=True)
+        all_components = Component.objects.filter(active=True)
+
+        active_components = []
+        for component in all_components:
+            component = model_to_dict(component)
+            active_components.append(component)
+
+        #TODO: Convert this to an array of objects first
         cache.set('active_components', active_components)
 
     for component in active_components:
-        ctype = str(component.type) or "None"
+        ctype = str(component.get("type", "None"))
         ctype = ctype.lower().strip()
 
         if ctype in pattern_list:
-            is_match = check_requirements(component.requirements, world_data)
+            is_match = check_requirements(component.get("requirements", ""), world_data)
             tags_searching = tags_to_find(tags, world_data)
-            tag_match = count_tag_matches(component.tags, tags_searching)
+            tag_match = count_tag_matches(component.get("tags", ""), tags_searching)
 
             if is_match:
                 if not ctype in component_types:
@@ -308,8 +321,7 @@ def breakout_component_types(world_data, tags, pattern_list):
 
 
 def counts_to_probabilities(counts, padding=.3):
-
-#TODO: Change weighting to 1/n
+    # TODO: Change weighting to 1/n
 
     total = 0
     probs = []
