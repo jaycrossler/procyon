@@ -17,14 +17,20 @@ class StoryImageInline(admin.TabularInline):
     extra = 2
 
 
-class StoryAdmin(admin.ModelAdmin):
+class StoryResource(resources.ModelResource):
+
+    class Meta:
+        model = Story
+
+
+class StoryAdmin(ImportExportModelAdmin):
     model = Story
-    list_display = ['name', 'id', 'active', 'anthology', 'tags', 'type', 'year_min', 'year_max', ]
-    fields = [('active', 'anthology', 'tags', 'type'), 'name', 'description',
-              ('year_min', 'year_max', 'times_used', 'force_usage'), ('requirements', 'story',), ('choices', 'variables',),
-              ('following_stories', 'not_if_previous_stories',), ]
-    search_fields = ['id', 'name', 'anthology', 'tags', 'type', 'description']
+    list_display = ['name', 'id', 'active', 'anthology', 'tags', 'type', 'year_min', 'year_max']
+    fields = [('active', 'anthology', 'tags', 'type'), 'name',
+              ('year_min', 'year_max', 'times_used'), ('variables', 'story',), 'requirements', 'uuid']
+    search_fields = ['id', 'name', 'anthology', 'tags', 'type']
     list_filter = ('anthology', 'type',)
+    resource_class = StoryResource
 
     # actions = ['refresh']
     inlines = [CommentInline, StoryImageInline]

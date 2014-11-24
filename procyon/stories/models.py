@@ -6,6 +6,8 @@ from django.db import models
 from jsonfield import JSONField
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from procyon.generators.story_helpers import check_requirements
+import uuid
 
 
 class SnippetBase(models.Model):
@@ -13,16 +15,23 @@ class SnippetBase(models.Model):
     An object builder based on constraints
     """
 
-    active = models.BooleanField(default=True, help_text='If checked, this object will be listed in the active list', db_index=True)
+    active = models.BooleanField(default=True, help_text='If checked, this object will be listed in the active list',
+                                 db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     anthology = models.CharField(max_length=200, blank=True, default="",
                                  help_text='Grouping of objects - could be the world or location. Only items matching this will be returned')
-    name = models.CharField(max_length=200, default="Text", blank=True, help_text='Name of the object for display and search')
+    name = models.CharField(max_length=200, default="Text", blank=True,
+                            help_text='Name of the object for display and search')
     tags = models.CharField(max_length=200, default="", null=True, blank=True, help_text='Tags to describe this object')
 
-    requirements = JSONField(help_text="List of all requirements that must be met before this object is an option", blank=True)
+    requirements = models.TextField(
+        help_text="List of all requirements that must be met before this object is an option, eg: year>1400",
+        blank=True, null=True)
+
+    def filter_by_requirements(self, world_data):
+        return check_requirements(self.requirements, world_data)
 
     def __unicode__(self):
         anthology = ""
@@ -36,31 +45,25 @@ class Story(SnippetBase):
     A story object based on constraints
     """
 
-    # TODO: Add GUID for long-term pointers between systems
-    description = models.TextField(blank=True, default="",
-                                   help_text='Details of this story not to be displayed in the story itself')
     type = models.CharField(db_index=True, max_length=200, default="Quest",
                             help_text='Type of story (e.g. Quest, Tale, Location, Conversation)')
 
+    uuid = models.CharField(db_index=True, max_length=100, default=uuid.uuid4, null=True, blank=True)
+
     year_min = models.IntegerField(db_index=True, default=1000,
-                                   help_text="Minimum Year Number that this story can occur in (e.g. 1776)")
+                                   help_text="Minimum Earth Year Number that this story can occur in (e.g. 1776)")
     year_max = models.IntegerField(db_index=True, default=2100,
-                                   help_text="Maximum Year Number that this story can occur in (e.g. 1801)")
+                                   help_text="Maximum Earth Year Number that this story can occur in (e.g. 1801)")
 
     times_used = models.IntegerField(default=0,
-                                     help_text="Pointers to stories that can occur afterwards (with likelihood)")
-    force_usage = models.IntegerField(default=0,
-                                      help_text="For testing, how many times should this story be shown immediately if someone passes in that developer=true?")
-    max_times_usable = models.IntegerField(default=1, help_text="How many times can this story be given to a user?")
+                                     help_text="How often this story has been reported to be used")
 
-    story = JSONField(help_text="Story and details")
-    choices = JSONField(help_text="Choices user can make after story is shown to them")
+    story = JSONField(help_text="Story with images, details, choices, sub-stories, and effects")
     variables = JSONField(help_text="Objects, People, Names within the story that can be overridden")
+    # TODO: Allow variables to be referenced by other stories
 
-    following_stories = JSONField(default=[],
-                                  help_text="Pointers to stories that can occur afterwards (with likelihood)")
-    not_if_previous_stories = JSONField(default=[],
-                                        help_text="Pointers to stories that prevent this story from being a possible response")
+    metadata = JSONField(default={"max_times_usable": 1, "force_usage": 0},
+                         help_text="Additional details, ex: Pointers to stories that can occur afterwards (with likelihood)")
 
     @property
     def comments(self):
@@ -73,6 +76,8 @@ class Story(SnippetBase):
     def to_json(self):
         return json.dumps({
                               "id": str(self.id),
+                              "uuid": str(self.uuid),
+
                               "name": self.name,
                               "active": self.active,
                               "anthology": self.anthology,
@@ -80,15 +85,11 @@ class Story(SnippetBase):
                               "type": self.type,
                               "year_min": str(self.year_min),
                               "year_max": str(self.year_max),
-                              "description": self.description,
-                              "times_used": str(self.times_used),
-                              "force_usage": str(self.force_usage),
-                              "max_times_usable": str(self.max_times_usable),
 
                               "requirements": self.requirements,
                               "story": self.story,
                               "variables": self.variables,
-                              "choices": self.choices,
+                              "metadata": self.metadata,
 
                               "images": [
                                   {"url": str(i.image), "width": int(i.image.width), "height": int(i.image.height)} for
@@ -153,7 +154,11 @@ class StoryImage(models.Model):
 
 class Component(SnippetBase):
     effects = JSONField(null=True, blank=True, help_text="Effects upon user when applied", default="[]")
-    properties = JSONField(null=True, blank=True, help_text="Metadata to use when this component is applied", default="{}")
+    properties = JSONField(null=True, blank=True, help_text="Metadata to use when this component is applied",
+                           default="{}")
+    weighting = models.IntegerField(default=10,
+                                    help_text="How likely is it that this should be picked? 1 = very unlikey, 10 = normal, 100 = likely")
+
     type = models.CharField(db_index=True, max_length=200, default="Power", blank=True,
                             help_text='Type of item verbal grouping (e.g. Power, Adjective, Quirk, First Name, etc)')
 
@@ -165,6 +170,7 @@ class Component(SnippetBase):
                               "anthology": self.anthology,
                               "tags": self.tags,
                               "type": self.type,
+                              "weighting": self.weighting,
 
                               "requirements": self.requirements,
                               "properties": self.properties,

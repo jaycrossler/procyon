@@ -1,12 +1,15 @@
 __author__ = 'jcrossler'
 
-from procyon.stories.models import Component
 import numpy
 import json
 from procyon.starsystemmaker.math_helpers import *
 from procyon.starsystemmaker.name_library import *
-from django.core.cache import cache
-from django.forms.models import model_to_dict
+try:
+    from django.core.cache import cache
+    from django.forms.models import model_to_dict
+except ImportError:
+    # Probably Django not loaded, include for testing
+    pass
 
 
 def turn_pattern_to_hash(pattern, override={}):
@@ -71,7 +74,12 @@ def value_of_variable(var):
 
 
 def convert_string_to_req_object(requirements):
-    reqs = requirements.split(",")
+    reqs = str(requirements)
+
+    if len(reqs) < 3:
+        return []
+
+    reqs = reqs.split(",")
     reqs = [req.strip() for req in reqs]
 
     output = []
@@ -170,7 +178,10 @@ def check_requirements(requirements, world_data):
 
     checks = []
     if isinstance(requirements, basestring):
-        requirements = convert_string_to_req_object(requirements)
+        if len(requirements) < 4:
+            return True
+        else:
+            requirements = convert_string_to_req_object(requirements)
 
     if isinstance(requirements, list):
         for req in requirements:
@@ -272,15 +283,24 @@ def tags_to_find(tags, world_data):
     return tags_list
 
 
-def count_tag_matches(component_tags, search_tags, base_num=0):
-    matches = base_num
+def count_tag_matches(component_tags=list(), weighting=10.0, search_tags=list(), base_num=0.0):
+
+    matches = float(base_num) + float(weighting)/10
+
     if isinstance(component_tags, basestring):
-        tags = component_tags.split(",")
-        for idx, tag in enumerate(tags):
-            tags[idx] = tag.strip().lower()
-        for tag in tags:
-            if tag in search_tags:
-                matches += 1
+        if len(component_tags) < 1:
+            return matches
+        component_tags = component_tags.split(",")
+
+    seen = set()
+    for n in search_tags:
+        if n not in seen:
+            seen.add(n)
+
+    for n in component_tags:
+        n = n.strip().lower()
+        if n in seen:
+            matches += 1
 
     return matches
 
@@ -288,18 +308,45 @@ def count_tag_matches(component_tags, search_tags, base_num=0):
 def breakout_component_types(world_data, tags, pattern_list):
     component_types = {}
     component_tag_counts = {}
+    active_components = []
 
-    active_components = cache.get('active_components', None)
-    if not active_components:
-        all_components = Component.objects.filter(active=True)
+    try:
+        from procyon.stories.models import Component
 
-        active_components = []
-        for component in all_components:
-            component = model_to_dict(component)
-            active_components.append(component)
+        active_components = cache.get('active_components', None)
+        if not active_components:
+            all_components = Component.objects.filter(active=True)
 
-        #TODO: Convert this to an array of objects first
-        cache.set('active_components', active_components)
+            active_components = []
+            for component in all_components:
+                new_component = model_to_dict(component)
+
+                r = component.requirements
+                if ((r.startswith("{") and r.endswith("}")) or (r.startswith("[") and r.endswith("]"))) and len(r) > 4:
+                    try:
+                        r = json.dumps(r)
+                    except ValueError:
+                        r = ''
+                elif len(r) > 3 and isinstance(r, basestring):
+                    r = convert_string_to_req_object(r)
+
+                new_component['requirements'] = r
+
+                active_components.append(new_component)
+
+            cache.set('active_components', active_components)
+
+    except ImportError:
+        #Django not loaded, use local file cache instead - best for testing
+
+        with open('procyon/fixtures/components_cache.txt', mode='r') as infile:
+            c_text = str(infile.read())
+        try:
+            comps = json.loads(c_text)
+            for c in comps:
+                active_components.append(c)
+        except ValueError:
+            pass
 
     for component in active_components:
         ctype = str(component.get("type", "None"))
@@ -307,10 +354,11 @@ def breakout_component_types(world_data, tags, pattern_list):
 
         if ctype in pattern_list:
             is_match = check_requirements(component.get("requirements", ""), world_data)
-            tags_searching = tags_to_find(tags, world_data)
-            tag_match = count_tag_matches(component.get("tags", ""), tags_searching)
 
             if is_match:
+                tags_searching = tags_to_find(tags, world_data)
+                tag_match = count_tag_matches(component.get("tags", ""), component.get("weighting", ""), tags_searching)
+
                 if not ctype in component_types:
                     component_types[ctype] = []
                     component_tag_counts[ctype] = []
@@ -328,7 +376,7 @@ def counts_to_probabilities(counts, padding=.3):
     try:
         padding = float(padding)
     except ValueError:
-        return probs
+        padding = .3
 
     for count in counts:
         total += (count + padding)
