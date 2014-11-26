@@ -1,0 +1,254 @@
+{% extends "banner_base.html" %}
+
+{% load i18n bootstrap_pagination %}
+{% load url from future %}
+
+{% block head_title_base %}Generator :: Person :: Quick{% endblock %}
+
+{% block head_title %}{% trans "Welcome" %}{% endblock %}
+
+{% block body_class %}home{% endblock %}
+
+{% block extra_style %}
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/front_page.css">
+    <style>
+        p {
+            word-wrap: break-word;
+        }
+        input {
+            width: 80px;
+        }
+        select {
+            width: inherit;
+        }
+        .mother {
+            background-color: pink;
+        }
+        .father {
+            background-color: lightblue;
+        }
+        .parent {
+            vertical-align: middle;
+            border-radius: 8px;
+            padding: 2px;
+        }
+
+        .attribute {
+            width: 130px;
+            height: 20px;
+            font-size: 10px;
+            border: 1px solid black;
+            border-radius: 4px;
+            display: inline-block;
+            margin: 3px;
+            padding: 3px;
+            vertical-align: middle;
+            line-height: 10px;
+        }
+        .positive {
+            background-color: lightgreen;
+        }
+
+        #event_list {
+            display: inline-block;
+            width: 500px;
+        }
+        #character_data {
+            display: inline-block;
+            word-break: break-all;
+            float: right;
+            width: 300px;
+            border: 2px solid #000000;
+            font-size: 12px;
+            line-height: 14px;
+        }
+        #events_table {
+            border: 2px solid #000000;
+            border-spacing: 4px;
+            border-collapse: separate;
+            width: 100%;
+            font-size: 12px;
+            line-height: 14px;
+        }
+        #events_table td {
+            border: 1px solid #000000;
+        }
+        .smaller {
+            font-size: .6em;
+        }
+        #generator {
+            margin: 0 0 30px 0;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        #generator input {
+            font-size: 11px;
+            margin: 0;
+        }
+        #generator select {
+            font-size: 11px;
+            margin: 0;
+        }
+        .world_json {
+            margin: 0;
+            width: 505px;
+            height: 20px;
+            font-size: 9px;
+        }
+
+    </style>
+{% endblock %}
+
+{% block extra_script %}
+    <script type="text/javascript" src="{{ STATIC_URL }}js/underscore-min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/underscore.string.min.js"></script>
+    <script type="text/javascript">
+         var base_link="{{ generator|lower }}";
+         function buildLink(type, $btn){
+             var rand = $btn.attr('id');
+             if (rand) {
+                 rand = rand.split("_")[1];
+                 rand = parseInt(rand);
+             }
+             var $form = $("#generator");
+             var arr = $form.serializeArray();
+
+             var query_string = "?";
+             _.each(arr,function(input){
+                 var val = input.value;
+                 var name = input.name;
+                 if (name != "csrfmiddlewaretoken" && val && name != "count" && !(name == "pattern" && val == "{{ pattern_default }}")) {
+                     if (name == "rand_seed") {
+                         val = rand;
+                     }
+                     query_string += name + "=" + val + "&";
+                 }
+             });
+             query_string+="format="+type;
+
+             window.open(base_link+query_string, "_blank")
+         }
+         $(document).ready(function(){
+            $('.btn_string').on('click',function(){
+                 var $btn = $(this);
+                 buildLink('string', $btn)
+             });
+
+             $('.btn_json').on('click',function(){
+                 var $btn = $(this);
+                 buildLink('json', $btn)
+             });
+         });
+     </script>
+{% endblock %}
+
+{% block banner %}
+    <h2><a href="./">Generators</a> :: {{ generator|title }}</h2>
+    <form action="" method="post" id="generator">
+        {% csrf_token %}
+        {% if note %}<i>{{ note }}</i>{% endif %}
+
+        <div class="father parent">
+            Father:&nbsp; <input type="text" name="father_dna" placeholder="Optional - DNA" value="{{ inputs.father.dna }}">
+            <input type="text" name="father_profession" placeholder="Profession" value="{{ inputs.father.profession }}">
+            Race: <select name="father_race">
+                {% for race in RACE_ARRAY %}
+                <option value="{{ race.name }}" {% if inputs.father.race == race.name %}selected="selected"{% endif %}>{{ race.name }}</option>
+                {% endfor %}
+            </select>
+            Education: <select name="father_education">
+                <option value="" {% if inputs.father.education == '' %}selected="selected"{% endif %}>random</option>
+                {% for attribute in VALUE_ARRAY %}
+                    <option value="{{ attribute }}" {% if inputs.father.education == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
+                {% endfor %}
+            </select>
+            Economic: <select name="father_economic">
+                <option value="" {% if inputs.father.economic == '' %}selected="selected"{% endif %}>random</option>
+                {% for attribute in VALUE_ARRAY %}
+                    <option value="{{ attribute }}" {% if inputs.father.economic == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
+                {% endfor %}
+            </select>
+            Conflict: <select name="father_conflict">
+                <option value="" {% if inputs.father.conflict == '' %}selected="selected"{% endif %}>random</option>
+                {% for attribute in VALUE_ARRAY %}
+                    <option value="{{ attribute }}" {% if inputs.father.conflict == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mother parent">
+            Mother: <input type="text" name="mother_dna" placeholder="Optional - DNA" value="{{ inputs.mother.dna }}">
+            <input type="text" name="mother_profession" placeholder="Profession" value="{{ inputs.mother.profession }}">
+            Race: <select name="mother_race">
+                {% for race in RACE_ARRAY %}
+                <option value="{{ race.name }}" {% if inputs.mother.race == race.name %}selected="selected"{% endif %}>{{ race.name }}</option>
+                {% endfor %}
+            </select>
+            Education: <select name="mother_education">
+                <option value="" {% if inputs.mother.education == '' %}selected="selected"{% endif %}>random</option>
+                {% for attribute in VALUE_ARRAY %}
+                    <option value="{{ attribute }}" {% if inputs.mother.education == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
+                {% endfor %}
+            </select>
+            Economic: <select name="mother_economic">
+                <option value="" {% if inputs.mother.economic == '' %}selected="selected"{% endif %}>random</option>
+                {% for attribute in VALUE_ARRAY %}
+                    <option value="{{ attribute }}" {% if inputs.mother.economic == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
+                {% endfor %}
+            </select>
+            Conflict: <select name="mother_conflict">
+                <option value="" {% if inputs.mother.conflict == '' %}selected="selected"{% endif %}>random</option>
+                {% for attribute in VALUE_ARRAY %}
+                    <option value="{{ attribute }}" {% if inputs.mother.conflict == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        Force Child's Gender: <select name="gender">
+            <option value="" {% if inputs.gender == '' %}selected="selected"{% endif %}>from DNA</option>
+            <option value="male" {% if inputs.gender == 'male' %}selected="selected"{% endif %}>Male</option>
+            <option value="female" {% if inputs.gender == 'female' %}selected="selected"{% endif %}>Female</option>
+        </select>
+        World JSON: <textarea id="world_json" name="world_json" placeholder='Optional - JSON data about the world/person/family. Something like: {"magic":"medium", "technology":"low", "year":1492}'
+                        class="world_json">{{ inputs.world_json }}</textarea><br/>
+
+        <input type="submit" value="Regenerate with this Random Seed"/>
+        <input name="regenerate" type="submit" value="Generate with different Seed"/> Random Seed: <input type="text" name="rand_seed" value="{{ inputs.rand_seed }}" style="margin: 0px"
+                          placeholder='Optional - Number to use to design the object. Same numbers and inputs will generate same objects'/>
+
+        <input class="btn_json" type="button" id="json_{{ inputs.rand_seed }}" value="JSON"/>
+        <input class="btn_string" type="button" id="string_{{ inputs.rand_seed }}" value="Text" />
+    </form>
+
+    <div id="person_data">
+        <span id="event_list">
+        <table id="events_table">
+            <tr><th>Age</th><th>What happened?</th></tr>
+        {% for event in person_data.events %}
+            <tr><td>{{ event.age }} <span class="smaller">(Year {{ event.year }})</span></td><td>{{ event.message }}</td></tr>
+        {% endfor %}
+        </table>
+        </span>
+
+        <span id="character_data">
+            <b>DNA:</b> {{ person_data.dna }}<br/>
+            <b>Description:</b> {{ person_data.description }}<br/>
+            <b>Attributes:</b><br/>
+            Skills<br/>
+            Details<br/>
+        </span>
+
+    </div>
+
+
+{% endblock %}
+
+{% block column-1 %}
+{% endblock %}
+
+{% block column-2 %}
+{% endblock %}
+
+{% block column-3 %}
+{% endblock %}
+

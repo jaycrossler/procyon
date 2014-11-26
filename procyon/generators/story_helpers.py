@@ -4,6 +4,8 @@ import numpy
 import json
 from procyon.starsystemmaker.math_helpers import *
 from procyon.starsystemmaker.name_library import *
+import dna_helpers
+
 try:
     from django.core.cache import cache
     from django.forms.models import model_to_dict
@@ -53,8 +55,9 @@ def value_of_variable(var):
     if isinstance(var, basestring):
         var = var.lower().strip()
 
-        lookups = {'epic': 512.0, 'fantastic': 256.0, 'superb': 128.0, 'great': 64.0, 'good': 32.0, 'high': 32.0,
-                   'fair': 16.0, 'average': 8.0, 'mediocre': 4.0, 'low': 4.0, 'poor': 2.0, 'terrible': 1.0, 'none': 0.0}
+        lookups = {'epic': 144.0, 'fantastic': 89.0, 'superb': 55.0, 'great': 34.0, 'good': 21.0, 'high': 13.0,
+                   'fair': 8.0, 'average': 5.0, 'medium': 5.0, 'moderate': 5.0, 'mediocre': 3.0,
+                   'low': 3.0, 'poor': 2.0, 'terrible': 1.0, 'tiny': 0.1, 'none': 0.0}
         if var in lookups:
             val = lookups[var]
         try:
@@ -529,3 +532,81 @@ def create_random_name(world_data={}, override={}, pattern="", tags="", rand_see
     generated_item['pattern'] = pattern
 
     return generated_item
+
+
+def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", rand_seed="", gender=""):
+    try:
+        rand_seed = float(rand_seed)
+    except Exception:
+        rand_seed = numpy.random.random()
+    rand_seed = set_rand_seed(rand_seed)
+
+    seed_mother_dna = str(rand_seed)+"1"
+    seed_father_dna = str(rand_seed)+"2"
+    seed_child_dna = str(rand_seed)+"3"
+    seed_name = str(rand_seed)+"42"
+
+    person_data = {}
+    person_data["note"] = "Created"
+    person_data["rand_seed"] = rand_seed
+
+    year = world_data.get("year", "1100")
+    year = int(year)
+
+    father_dna = father.get("dna", "")
+    mother_dna = mother.get("dna", "")
+    if not father_dna:
+        father_dna, temp = dna_helpers.generate_dna(rand_seed=seed_father_dna, race=father.get("race", "human"))
+    if not mother_dna:
+        mother_dna, temp = dna_helpers.generate_dna(rand_seed=seed_mother_dna, race=father.get("race", "human"))
+    dna, temp = dna_helpers.combine_dna(mother_dna, father_dna, seed_child_dna)
+    if gender:
+        dna = dna_helpers.set_dna_gender(dna, gender)
+
+    set_rand_seed(rand_seed)
+    # dna = dna_helpers.mutate_dna(dna)
+
+    race = dna_helpers.race_from_dna(dna)
+    # race = father.get("race", "human") #TODO: Temporary
+
+    gender = dna_helpers.gender_from_dna(dna)
+    name_data = create_random_name(world_data=world_data, tags=tags, rand_seed=seed_name, gender=gender)
+    name = name_data["name"]
+
+    qualities = dna_helpers.qualities_from_dna(dna)
+    aspects = dna_helpers.aspects_from_dna(dna)
+
+
+    events = []
+    events.append({"age": 0, "year": year, "message": name + " was born"})
+    events.append({"age": 1, "year": year+1, "message": "Had an uneventful 1st birthday"})
+    events.append({"age": 2, "year": year+2, "message": "Had an uneventful 2nd birthday"})
+    note = name + " born!"
+
+
+    person_data["dna"] = dna
+    person_data["events"] = events
+    person_data["note"] = note
+    person_data["race"] = race
+    person_data["name"] = name
+    person_data["gender"] = gender
+    person_data["qualities"] = qualities
+    person_data["aspects"] = aspects
+    person_data["description"] = person_description(person_data)
+
+    return person_data
+
+
+def person_description(person_data):
+    description = ""
+
+    if person_data.get("age", None):
+        description += str(person_data["age"]) + " year old"
+    if person_data.get("gender", None):
+        description += " " + person_data["gender"].title()
+    if person_data.get("race", None):
+        description += " " + person_data["race"].title()
+    if person_data.get("profession", None):
+        description += " " + person_data["profession"].title()
+
+    return description

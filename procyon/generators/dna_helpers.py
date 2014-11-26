@@ -160,8 +160,6 @@ RACE_ARRAY = [
 
     {"name": "Tiefling",
      "values": ""},
-
-
 ]
 
 ASPECT_ARRAY = [
@@ -170,6 +168,8 @@ ASPECT_ARRAY = [
     {"name": "Striking Looks", "requirements": "Cha>15"},
     {"name": "See in the Dark", "requirements": "Eye Spectrum=Infrared,Eye Spectrum = Ultraviolet"},
 ]
+
+VALUE_ARRAY = 'none tiny terrible poor mediocre average fair good great superb fantastic epic'.split(" ")
 
 
 def init_quality_arrays():
@@ -216,6 +216,19 @@ def dna_array_from_string(dna):
             val = 0
         dna_values.append(val)
     return dna_values
+
+
+def aspects_from_dna(dna):
+    if isinstance(dna, basestring):
+        dna_arr = dna_array_from_string(dna)
+    else:
+        dna_arr = dna
+
+    aspects = []
+    qualities = qualities_from_dna(dna) #TODO: Cache this?
+
+    #TODO: Build this out
+    return aspects
 
 
 def qualities_from_dna(dna):
@@ -421,6 +434,34 @@ def gene_merge(m, f, is_maternal, is_paternal):
         out = m[1] + f[1]
 
     return out
+
+
+def race_from_dna(dna):
+    race = "Human"
+    #TODO: Identify race
+
+    return race
+
+
+def gender_from_dna(dna):
+    snippet = dna[0:2]
+    gender_gene = GENE_ARRAY[0].get('values')
+    val = DNA_16_lOOKUPS.index(snippet) + 1
+    gender = gender_gene[val].title()
+    return gender
+
+
+def set_dna_gender(dna, gender):
+    gender_gene = GENE_ARRAY[0].get('values')
+    gender_vals = []
+    for idx, gene_val in enumerate(gender_gene):
+        if gene_val.lower() == gender.lower():
+            gender_vals.append(idx)
+    new_dna_num = np.random.choice(gender_vals)
+    snippet = DNA_16_lOOKUPS[new_dna_num]
+    dna = snippet + dna[2:]
+
+    return dna
 
 
 def combine_dna(mother="", father="", rand_seed=''):

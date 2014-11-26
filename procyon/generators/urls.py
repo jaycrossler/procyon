@@ -15,6 +15,6 @@ urlpatterns = patterns('',
 
                        url(r'solarsystem/?$', generator_solarsystem, name='solarsystem-generator'),
                        url(r'planet/?$', generator_item, name='plan-generator'),
-                       url(r'person/?$', generator_item, name='person-generator'),
+                       url(r'person/?$', generator_person, name='person-generator'),
                        url(r'city/?$', generator_item, name='city-generator'),
                        )

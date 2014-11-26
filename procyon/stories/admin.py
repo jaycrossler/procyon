@@ -46,6 +46,7 @@ class ComponentResource(resources.ModelResource):
 
 class ComponentAdmin(ImportExportModelAdmin):
     model = Component
+    save_as = True
     list_display = ['name', 'anthology', 'type', 'tags']
     search_fields = ['name', 'anthology', 'type']
     list_filter = ('anthology', 'type',)

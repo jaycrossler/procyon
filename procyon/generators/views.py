@@ -238,17 +238,86 @@ def generator_name(request):
     return output
 
 
-def generator_city(request):
-    return render_to_response('generators_city.html', {}, RequestContext(request))
-
-
 def generator_person(request):
-    return render_to_response('generators_person.html', {}, RequestContext(request))
+    format_type = request.REQUEST.get('format') or 'html'
+
+    world_json = request.REQUEST.get('world_json') or ''
+
+    tags = request.REQUEST.get('tags') or ''
+    rand_seed = request.REQUEST.get('rand_seed') or ''
+
+    mother_dna = request.REQUEST.get('mother_dna') or ''
+    mother_race = request.REQUEST.get('mother_race') or 'Human'
+    mother_profession = request.REQUEST.get('mother_profession') or ''
+    mother_education = request.REQUEST.get('mother_education') or ''
+    mother_economic = request.REQUEST.get('mother_economic') or ''
+    mother_conflict = request.REQUEST.get('mother_conflict') or ''
+    mother = {"dna": mother_dna, "race": mother_race,  "profession": mother_profession, "education": mother_education, "economic": mother_economic, "conflict": mother_conflict}
+
+    father_dna = request.REQUEST.get('father_dna') or ''
+    father_race = request.REQUEST.get('father_race') or 'Human'
+    father_profession = request.REQUEST.get('father_profession') or ''
+    father_education = request.REQUEST.get('father_education') or ''
+    father_economic = request.REQUEST.get('father_economic') or ''
+    father_conflict = request.REQUEST.get('father_conflict') or ''
+    father = {"dna": father_dna, "race": father_race,  "profession": father_profession, "education": father_education, "economic": father_economic, "conflict": father_conflict}
+
+    gender = request.REQUEST.get('gender') or ''
+    child_dna = request.REQUEST.get('child_dna') or ''
+
+    regenerate = request.REQUEST.get('regenerate') or ''
+    if regenerate:
+        #A button was pushed with the name 'regenerate'
+        rand_seed = ''
+
+    try:
+        world_data = json.loads(world_json) if world_json else {}
+
+        person_data = story_helpers.create_person(world_data=world_data, father=father, mother=mother, child_dna=child_dna,
+                                                  tags=tags, rand_seed=rand_seed, gender=gender)
+
+        note = person_data.get('note')
+        rand_seed = person_data.get('rand_seed')
+
+    except ValueError, e:
+        person_data = {"name": "Jon Snow", "description": "Male Human Ranger"}
+        note = json.dumps(dict(error=500, message='Exception', details=traceback.format_exc(), exception=str(e)))
+    except Exception, e:
+        person_data = {"name": "Jon Snow", "description": "Male Human Ranger"}
+        note = json.dumps(dict(error=500, message='Exception', details=traceback.format_exc(), exception=str(e)))
+
+    if format_type == "json":
+        data = json.dumps(person_data)
+        output = HttpResponse(data, mimetype="application/json")
+
+    elif format_type == "string":
+        summary = person_data["name"] + " : " + person_data["description"]
+        output = HttpResponse(summary, mimetype="text/html")
+
+    else:
+        inputs = {
+            "tags": tags,
+            "rand_seed": rand_seed,
+            "gender": gender,
+            "father": father,
+            "mother": mother,
+            "child_dna": child_dna,
+            "world_json": world_json
+        }
+        output = render_to_response('generator_person_quick.html',
+                                    {"person_data": person_data, "inputs": inputs, "note": note, "generator": "person",
+                                     "RACE_ARRAY": RACE_ARRAY, "VALUE_ARRAY": VALUE_ARRAY},
+                                    RequestContext(request))
+    return output
+
+
+def generator_city(request):
+    return render_to_response('generator_city.html', {}, RequestContext(request))
 
 
 def generator_solarsystem(request):
-    return render_to_response('generators_list.html', {}, RequestContext(request))
+    return render_to_response('generator_list.html', {}, RequestContext(request))
 
 
 def generator_planet(request):
-    return render_to_response('generators_list.html', {}, RequestContext(request))
+    return render_to_response('generator_list.html', {}, RequestContext(request))
