@@ -54,7 +54,7 @@ GENE_ARRAY = [
     {"name": "Teeth Shape",
      "values": "Sharp and Pointed:Manipulation++,Large with Two Rows:Manipulation+:Terror+,Large Canines:Manipulation+,Normal,Normal,Normal,Well Spaced Teeth,Perfect Teeth:Appearance+"},
     {"name": "Lung Capacity",
-     "values": "Huge:Dexterity+:Constitution+:Strength+:Lifespan-:Swimming+,Large:Constitution++:Strength+:Swimming+,Normal,Normal,Stitled:Constitution-,Small:Constitution-,Withered:Constitution-:Strength--:Lifespan-:Swimming++"},
+     "values": "Huge:Dexterity+:Constitution+:Strength+:Lifespan-:Swimming+,Large:Constitution++:Strength+:Swimming+,Normal,Normal,Stilted:Constitution-,Small:Constitution-,Withered:Constitution-:Strength--:Lifespan-:Swimming++"},
     {"name": "Heart Size",
      "values": "Thin and Fast:Dexterity++:Lifespan-,Small:Lifespan-:Dexterity-,Strong:Lifespan+:Temprament+:Disease Resistant+,Normal,Normal,Big:Lifespan+:Disease Resistant+:Constitution+,Large:Lifespan-:Strength+,Very Large:Constitution++:Strength+:Lifespan--"},
     {"name": "Cell Longevity",
@@ -141,10 +141,10 @@ RACE_ARRAY = [
      "values": "Bone Length:Normal,Gestation Rate:10 Months,Skin Toughness:Normal,Eye Spectrum:Normal,Teeth Shape:Normal,Gnosis:Normal"},
 
     {"name": "Elf",
-     "values": "Positive Emotionality:Happy,Bone Length:Big,Gestation Rate:24 Months,Nerve Response:Fast Reflexes,Eye Shape:Hooded,Eye Spectrum:Infrared,Chi:in Tune,Lung Capacity:Stilted"},
+     "values": "Positive Emotionality:Happy,Bone Length:Big,Gestation Rate:24 Months,Nerve Response:Fast Reflexes,Eye Shape:Hooded,Eye Spectrum:Infrared,Chi:In Tune,Lung Capacity:Stilted"},
 
     {"name": "Dwarf",
-     "values": "Negative Emotionality:Grumpy,Neck Size:Thick,Bone Length:Stunted,Skin Toughness:Thick,Hairiness:Bearded,Female Hairiness:Bearded,Torso Shape:Barrell Chested,Heart Size:Large,Chi:Blank"},
+     "values": "Negative Emotionality:Grumpy,Neck Size:Thick,Bone Length:Stunted,Skin Toughness:Thick,Hairiness:Bearded,Female Hairiness:Bearded,Torso Shape:Barrel Chested,Heart Size:Large,Chi:Blank"},
 
     {"name": "Ork",
      "values": "Negative Emotionality:Angry,Skin Toughness:Leathery,Gestation Rate:6 Months,Neck Size:Thick,Torso Shape:Long,Stomach Composition:Ravishing Appetite,Teeth Shape:Large Canines,Multiple Children:Twins,Hand Shape:Strong Joints"},
@@ -170,6 +170,7 @@ ASPECT_ARRAY = [
 ]
 
 VALUE_ARRAY = 'none tiny terrible poor mediocre average fair good great superb fantastic epic'.split(" ")
+DNA_16_lOOKUPS = 'AA,AC,AG,AT,CA,CC,CG,CT,GA,GC,GG,GT,TA,TC,TG,TT'.split(',')  # Later, can switch this for obfuscation
 
 
 def init_quality_arrays():
@@ -186,9 +187,6 @@ def init_quality_arrays():
         values = quality.get("requirements", "None")
         quality["requirements"] = values.split(",")
 
-
-
-DNA_16_lOOKUPS = 'AA,AC,AG,AT,CA,CC,CG,CT,GA,GC,GG,GT,TA,TC,TG,TT'.split(',')  # Later, can switch this for obfuscation
 
 # ----------------------
 init_quality_arrays()
@@ -264,7 +262,7 @@ def qualities_from_dna(dna):
     return qualities, attribute_mods
 
 
-def generate_dna(rand_seed='', race='human', overrides={}):
+def generate_dna(rand_seed='', race='Human', overrides={}):
     try:
         rand_seed = float(rand_seed)
     except ValueError:
@@ -416,7 +414,7 @@ def overrides_from_race(race='Human', overrides={}):
     return new_overrides
 
 
-def gene_merge(m, f, is_maternal, is_paternal):
+def gene_single_merge(m, f, is_maternal, is_paternal):
     if is_maternal:
         return m
     if is_paternal:
@@ -437,16 +435,79 @@ def gene_merge(m, f, is_maternal, is_paternal):
 
 
 def race_from_dna(dna):
-    race = "Human"
-    #TODO: Identify race
+    race_variations = {}
 
-    return race
+    for race in RACE_ARRAY:
+        race_name = race.get("name", "race")
+        race_val_count = len(race.get("values", []))
+        if race_val_count > 3:
+            race_variations[race_name] = 0
+
+    for gene_index, val in enumerate(GENE_ARRAY):
+        gene_name = val.get("name", "name").lower()
+        gene_values = val.get("values", [])
+        start = gene_index * 2
+        end = gene_index * 2 + 2
+        snippet = dna[start:end]
+        current_gene_val = DNA_16_lOOKUPS.index(snippet)
+
+        for race in RACE_ARRAY:
+            race_values = race.get("values", [])
+            if len(race_values) > 3:
+                race_offest = 0
+                race_name = race.get("name", "race")
+                for race_val in race_values:
+                    race_val_arr = race_val.split(":")
+                    if len(race_val_arr) > 1:
+                        race_value_name = race_val_arr[0].lower()
+
+                        if race_value_name == gene_name:
+                            race_attribute_name = race_val_arr[1].lower()
+
+                            #Get the gene ids that match and DNA value for this gene, and find distance to target
+                            shortest_dist = 15
+                            for idx_gene_vals, gene_val in enumerate(gene_values):
+                                compared_gene_val_name = gene_val.split(":")[0].lower()
+                                if compared_gene_val_name == race_attribute_name:
+                                    abs_distance = abs(idx_gene_vals - current_gene_val)
+                                    if abs_distance < shortest_dist:
+                                        shortest_dist = abs_distance
+
+                            race_offest += shortest_dist
+
+                if race_offest:
+                    increase = float(race_offest) / float(len(race_values))
+                    race_variations[race_name] += increase
+
+    race_rank = []
+    for w in sorted(race_variations, key=race_variations.get):
+        race_rank.append(w)
+    closest_race = race_rank[0]
+    closest_race_second = race_rank[1]
+    closest_race_third = race_rank[2]
+
+    if closest_race == 'Human' and not closest_race_second == 'Human':
+        amt_human = race_variations.get(closest_race)
+        amt_second = race_variations.get(closest_race_second)
+        amt_third = race_variations.get(closest_race_third)
+        if amt_second-amt_human < 2.5 and amt_third-amt_second > 1.1:
+            closest_race = "Half-"+closest_race_second
+
+    if closest_race_second == 'Human' and not closest_race == 'Human':
+        amt_second = race_variations.get(closest_race)
+        amt_human = race_variations.get(closest_race_second)
+        amt_third = race_variations.get(closest_race_third)
+
+        if amt_human-amt_second < 2.5 and amt_third-amt_second > 1.1:
+            closest_race = "Half-"+closest_race
+
+    return closest_race
 
 
 def gender_from_dna(dna):
     snippet = dna[0:2]
     gender_gene = GENE_ARRAY[0].get('values')
-    val = DNA_16_lOOKUPS.index(snippet) + 1
+    val = DNA_16_lOOKUPS.index(snippet)
     gender = gender_gene[val].title()
     return gender
 
@@ -482,7 +543,7 @@ def combine_dna(mother="", father="", rand_seed=''):
         last = first + 2
         snippet_m = mother[first:last]
         snippet_f = father[first:last]
-        snippet = gene_merge(snippet_m, snippet_f, gene.get('maternal', False), gene.get('paternal', False))
+        snippet = gene_single_merge(snippet_m, snippet_f, gene.get('maternal', False), gene.get('paternal', False))
         new_dna += snippet
 
     return new_dna, rand_seed
@@ -492,24 +553,24 @@ def mutate_dna(dna="", mutation_factor=0.003):
     out = ""
 
     len_alleles = len(dna) / 2
-    rolls = np.random.random_sample(len_alleles,)
+    rolls = np.random.random_sample(len_alleles)
 
     for i in range(len_alleles):
         roll = rolls[i]
         first = dna[i * 2]
-        second = dna[1 + i * 2]
+        second = dna[i * 2 + 1]
 
-        if roll <= 0.2:
+        quarter = mutation_factor/4.0
+
+        if roll >= 1-quarter:
             out += second + first
-        elif roll <= 0.4:
-            out = first + first
-        elif roll <= 0.6:
-            out = second + second
-        elif roll <= 0.8:
-            out = first + second  #TODO: Merge?
+        elif roll >= 1-(2*quarter):
+            out += first + first
+        elif roll >= 1-(3*quarter):
+            out += second + second
+        elif roll >= 1-(4*quarter):
+            out += DNA_16_lOOKUPS[np.random.randint(16)-1]
         else:
-            out = first + second  #TODO: Something?
+            out += first + second
 
-        return out
-
-    return dna
+    return out

@@ -564,10 +564,9 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
         dna = dna_helpers.set_dna_gender(dna, gender)
 
     set_rand_seed(rand_seed)
-    # dna = dna_helpers.mutate_dna(dna)
+    dna = dna_helpers.mutate_dna(dna)
 
     race = dna_helpers.race_from_dna(dna)
-    # race = father.get("race", "human") #TODO: Temporary
 
     gender = dna_helpers.gender_from_dna(dna)
     name_data = create_random_name(world_data=world_data, tags=tags, rand_seed=seed_name, gender=gender)
