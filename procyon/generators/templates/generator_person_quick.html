@@ -3,7 +3,7 @@
 {% load i18n bootstrap_pagination %}
 {% load url from future %}
 
-{% block head_title_base %}Generator :: Person :: Quick{% endblock %}
+{% block head_title_base %}Generator :: Person :: {{ person_data.name }}{% endblock %}
 
 {% block head_title %}{% trans "Welcome" %}{% endblock %}
 
@@ -48,6 +48,9 @@
         .positive {
             background-color: lightgreen;
         }
+        #person_data {
+            display: inline-block;
+        }
 
         #event_list {
             display: inline-block;
@@ -91,7 +94,7 @@
         }
         .world_json {
             margin: 0;
-            width: 505px;
+            width: 500px;
             height: 20px;
             font-size: 9px;
         }
@@ -143,10 +146,10 @@
 {% endblock %}
 
 {% block banner %}
-    <h2><a href="./">Generators</a> :: {{ generator|title }}</h2>
+    <h2><a href="./">Generators</a> :: {{ generator|title }} :: {{ person_data.name }}</h2>
     <form action="" method="post" id="generator">
         {% csrf_token %}
-        {% if note %}<i>{{ note }}</i>{% endif %}
+        {% if note %}<i>{% autoescape off %}{{ note }}{% endautoescape %}</i>{% endif %}
 
         <div class="father parent">
             Father:&nbsp; <input type="text" name="father_dna" placeholder="Optional - DNA" value="{{ inputs.father.dna }}">
@@ -224,18 +227,36 @@
         <span id="event_list">
         <table id="events_table">
             <tr><th>Age</th><th>What happened?</th></tr>
+        {% autoescape off %}
         {% for event in person_data.events %}
             <tr><td>{{ event.age }} <span class="smaller">(Year {{ event.year }})</span></td><td>{{ event.message }}</td></tr>
         {% endfor %}
+        {%  endautoescape %}
         </table>
         </span>
 
         <span id="character_data">
             <b>DNA:</b> {{ person_data.dna }}<br/>
+
             <b>Description:</b> {{ person_data.description }}<br/>
+
             <b>Attributes:</b><br/>
-            Skills<br/>
-            Details<br/>
+            {% for attribute, value in person_data.attribute_mods.items %}
+                <li class="attribute {% if value > 0 %}positive{% endif %}"><b>{{ attribute }}</b>: {% if value > 0 %}+{% endif %}{{ value }}</li>
+            {% endfor %}
+
+            <hr/>
+            <b>Items:</b><br/>
+            {% for item in person_data.item_list %}
+                <li>{{ item.type }} - {{ item.name }}</li>
+            {% endfor %}
+
+            <b>Tags:</b><br/>
+            {{ person_data.tags }}
+
+            <b>Skills</b><br/>
+            <b>Details</b><br/>
+
         </span>
 
     </div>

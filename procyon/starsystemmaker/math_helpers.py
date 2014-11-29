@@ -199,6 +199,8 @@ def parse_dice_text(text):
 
 
 def roll_dice(text):
+    if not text or not isinstance(text, basestring):
+        return text
     output = text
     d_spot = text.find('d')
     if d_spot > -1:

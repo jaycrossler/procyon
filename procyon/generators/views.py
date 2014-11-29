@@ -304,6 +304,7 @@ def generator_person(request):
             "child_dna": child_dna,
             "world_json": world_json
         }
+        note = str(note).replace('\n', '<br />')
         output = render_to_response('generator_person_quick.html',
                                     {"person_data": person_data, "inputs": inputs, "note": note, "generator": "person",
                                      "RACE_ARRAY": RACE_ARRAY, "VALUE_ARRAY": VALUE_ARRAY},

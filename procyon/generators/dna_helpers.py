@@ -466,14 +466,16 @@ def race_from_dna(dna):
 
                             #Get the gene ids that match and DNA value for this gene, and find distance to target
                             shortest_dist = 15
+                            shorter_dist_found = False
                             for idx_gene_vals, gene_val in enumerate(gene_values):
                                 compared_gene_val_name = gene_val.split(":")[0].lower()
                                 if compared_gene_val_name == race_attribute_name:
                                     abs_distance = abs(idx_gene_vals - current_gene_val)
                                     if abs_distance < shortest_dist:
                                         shortest_dist = abs_distance
-
-                            race_offest += shortest_dist
+                                        shorter_dist_found = True
+                            if shorter_dist_found:
+                                race_offest += shortest_dist
 
                 if race_offest:
                     increase = float(race_offest) / float(len(race_values))

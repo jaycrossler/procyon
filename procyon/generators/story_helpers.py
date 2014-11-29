@@ -2,6 +2,7 @@ __author__ = 'jcrossler'
 
 import numpy
 import json
+import re
 from procyon.starsystemmaker.math_helpers import *
 from procyon.starsystemmaker.name_library import *
 import dna_helpers
@@ -54,16 +55,27 @@ def value_of_variable(var):
     val = var
     if isinstance(var, basestring):
         var = var.lower().strip()
+        negative = False
+
+        if var[0] == "-":
+            negative = True
+            var = var[1:]
 
         lookups = {'epic': 144.0, 'fantastic': 89.0, 'superb': 55.0, 'great': 34.0, 'good': 21.0, 'high': 13.0,
                    'fair': 8.0, 'average': 5.0, 'medium': 5.0, 'moderate': 5.0, 'mediocre': 3.0,
                    'low': 3.0, 'poor': 2.0, 'terrible': 1.0, 'tiny': 0.1, 'none': 0.0}
         if var in lookups:
             val = lookups[var]
+        else:
+            val = var
+
         try:
-            val = float(var)
+            val = float(val)
         except ValueError:
             pass
+
+        if negative and isinstance(val, float):
+            val = -val
 
     else:
         try:
@@ -74,6 +86,53 @@ def value_of_variable(var):
             pass
 
     return val
+
+
+def convert_string_to_properties_object(props):
+    # lifespan +2, cost = poor, mother.profession = teacher, father.leaves, blessings
+    properties = {}
+    props = str(props)
+
+    if len(props) < 3:
+        return {}
+
+    props_split = props.split(",")
+    props_split = [req.strip() for req in props_split]
+
+    for p in props_split:
+        key = ""
+        val = ""
+        if "=" in p:
+            p_parts = p.split("=")
+            if len(p_parts) > 1:
+                key = p_parts[0].strip()
+                val = p_parts[1].strip()
+        elif " " in p:
+            # check for ending in number
+            p_parts = p.rsplit(' ', 1)
+            if len(p_parts) > 1:
+                key = p_parts[0].strip()
+                val = p_parts[1].strip()
+        else:
+            key = p
+            val = 'exists'
+
+        if key and val:
+            try:
+                val = float(val)
+            except ValueError:
+                pass
+            key = key.lower()
+            val = value_of_variable(val)
+            if key in properties:
+                old_val = properties[key]
+                if isinstance(old_val, float) and isinstance(val, float):
+                    val += old_val
+                else:
+                    val = str(old_val) + ", "+str(val)
+            properties[key] = val
+
+    return properties
 
 
 def convert_string_to_req_object(requirements):
@@ -175,6 +234,7 @@ def check_requirements(requirements, world_data):
     # Allow: [{concept:person,name:age,exceeds:20},{concept:world,name:magic,below:poor}]
     # Allow: 'magic > low, building has Church'
     # Allow: 'person.age > 20, world.magic < poor, person.business exists, person.siblings empty'
+    #TODO: Work with 'family.*.profession sailor'
 
     if not requirements:
         return True
@@ -392,7 +452,7 @@ def counts_to_probabilities(counts, padding=.3):
 
 def create_random_item(world_data={}, override={}, set_random_key=True, parse_dice=False,
                        pattern='adjective:.7,origin:.7,item:1,power:1:that,quirk:.9:and', tags="", rand_seed=None,
-                       tag_weight=.3):
+                       tag_weight=.3, name_length=200):
     # Build the random number seed
     if set_random_key:
         try:
@@ -411,6 +471,7 @@ def create_random_item(world_data={}, override={}, set_random_key=True, parse_di
     item_generators = []
     item_prefixes = []
     item_names = []
+    properties = {}
 
     for idx, ctype in enumerate(pattern_list):
         if numpy.random.random() <= pattern_probability[idx]:
@@ -457,14 +518,14 @@ def create_random_item(world_data={}, override={}, set_random_key=True, parse_di
                     effect = component_effects
                     effects_data += effect
 
-    item_name = generate_item_name(item_prefixes, item_names)
+    item_name = generate_item_name(item_prefixes, item_names, try_for_max_length=name_length)
 
     item_return = dict(name=item_name, data=item_data, effects=effects_data, note=note, rand_seed=rand_seed,
-                       prefixes=item_prefixes, name_parts=item_names, generators=item_generators)
+                       prefixes=item_prefixes, name_parts=item_names, generators=item_generators, properties=properties)
     return item_return
 
 
-def generate_item_name(item_prefixes, item_names, titleize=False):
+def generate_item_name(item_prefixes, item_names, titleize=False, try_for_max_length=22):
     name = ""
     for idx, item in enumerate(item_names):
         name += item_prefixes[idx] + item_names[idx]
@@ -472,6 +533,21 @@ def generate_item_name(item_prefixes, item_names, titleize=False):
     name = name.strip().capitalize()
     if titleize:
         name = name.title()
+
+    if len(name) > try_for_max_length:
+        name_final_pieces = name.split(" ")
+        name = name_final_pieces[0] + " " + name_final_pieces[-1]
+
+    if len(name) > try_for_max_length:
+        name_final_pieces = name.split(" ")
+        first = name_final_pieces[0]
+        last = name_final_pieces[-1]
+        len_last = len(last)
+        len_first = try_for_max_length - len_last
+
+        if len_first > 5:
+            first = first[0:len_first]
+        name = first + " " + last
 
     return name
 
@@ -512,7 +588,7 @@ def create_random_name(world_data={}, override={}, pattern="", tags="", rand_see
                     pattern = name_patterns['jon_tyrion_snow']
 
     generated_item = create_random_item(world_data=world_data, override=override, pattern=pattern, tags=tags,
-                                        rand_seed=rand_seed, set_random_key=set_random_key, tag_weight=tag_weight)
+                                        rand_seed=rand_seed, set_random_key=set_random_key, tag_weight=tag_weight, name_length=22)
 
     for idx, generator in enumerate(generated_item.get('generators')):
         if generator == "namefile" or generator == "placefile":
@@ -547,7 +623,7 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
     seed_name = str(rand_seed)+"42"
 
     person_data = {}
-    person_data["note"] = "Created"
+    person_data["note"] = ""
     person_data["rand_seed"] = rand_seed
 
     year = world_data.get("year", "1100")
@@ -572,26 +648,28 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
     name_data = create_random_name(world_data=world_data, tags=tags, rand_seed=seed_name, gender=gender)
     name = name_data["name"]
 
-    qualities = dna_helpers.qualities_from_dna(dna)
-    aspects = dna_helpers.aspects_from_dna(dna)
+    birth_place = create_random_item(world_data=world_data, set_random_key=False, pattern='birthplace', name_length=300)
 
-
-    events = []
-    events.append({"age": 0, "year": year, "message": name + " was born"})
-    events.append({"age": 1, "year": year+1, "message": "Had an uneventful 1st birthday"})
-    events.append({"age": 2, "year": year+2, "message": "Had an uneventful 2nd birthday"})
-    note = name + " born!"
-
+    qualities, attribute_mods = dna_helpers.qualities_from_dna(dna)
 
     person_data["dna"] = dna
-    person_data["events"] = events
-    person_data["note"] = note
+    person_data["events"] = []
     person_data["race"] = race
     person_data["name"] = name
+    person_data["tags"] = add_tags(5, father.get("tags", None), mother.get("tags", None))
     person_data["gender"] = gender
     person_data["qualities"] = qualities
-    person_data["aspects"] = aspects
+    person_data["attribute_mods"] = attribute_mods
+    person_data["aspects"] = dna_helpers.aspects_from_dna(dna)
+    person_data["skills"] = []
+    person_data["item_list"] = []
     person_data["description"] = person_description(person_data)
+
+    person_data, world_data = apply_event_effects(person_data=person_data, world_data=world_data, age=0,
+                                                  event_data=birth_place, event_type='birthplace', year=year)
+
+    person_data["events"].append({"age": 1, "year": year+1, "message": "Had an uneventful 1st birthday"})
+    person_data["events"].append({"age": 2, "year": year+2, "message": "Had an uneventful 2nd birthday"})
 
     return person_data
 
@@ -599,7 +677,7 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
 def person_description(person_data):
     description = ""
 
-    if person_data.get("age", None):
+    if not person_data.get("age", "undefined") == "undefined":
         description += str(person_data["age"]) + " year old"
     if person_data.get("gender", None):
         description += " " + person_data["gender"].title()
@@ -609,3 +687,340 @@ def person_description(person_data):
         description += " " + person_data["profession"].title()
 
     return description
+
+
+def add_tags(num_from_each=5, *tag_list):
+    tags = []
+    for tag_words in tag_list:
+        tag_array = []
+        if isinstance(tag_words, basestring):
+            tag_array = tag_words.split(",")
+        elif isinstance(tag_words, dict):
+            for tag in tag_words.items():
+                tag_array.append(tag[0])
+
+        if len(tag_array):
+            tags += np.random.choice(tag_array, num_from_each)
+    tags = [tag.strip() for tag in tags]
+
+    return ",".join(tags)
+
+
+def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type='birthplace', year=None, age='undefined'):
+    message = ""
+
+    if not year:
+        if "year" in world_data:
+            year = world_data["year"]
+        else:
+            year = 1100
+    world_data["year"] = year
+    if age == 'undefined':
+        if "age" in person_data:
+            age = person_data["age"]
+        else:
+            age = 16 + numpy.random.randint(20)
+    person_data["age"] = age
+
+    name = event_data.get("name", "in a barn")
+    properties = event_data.get("properties", {})
+
+    if isinstance(properties, basestring):
+        properties = convert_string_to_properties_object(properties)
+
+    tags = event_data.get("tags", None)
+    if tags:
+        person_data["tags"] = add_tags(6, person_data.get("tags", None), tags) #TODO: Make a tag manager
+
+    generated_items = []
+    addional_messages = []
+    effects = event_data.get("effects", [])
+    for effect in effects:
+
+        # Roll the dice, if the chance occurs then parse the rest
+        chance = effect.get("chance", 100)
+        try:
+            chance = value_of_variable(chance) / 10 #TODO: Temporary from 100
+            if not numpy.random.random() < chance:
+                continue
+        except ValueError:
+            continue
+
+        # Check the requirements
+        requirement = effect.get("requirement", None)  # family.economics < fair, family.enemy has Elves, "family.*.profession sailor", family.*.profession has doctor
+        if requirement:
+            passes = check_requirements(requirement, world_data)
+            if not passes:
+                continue
+
+        #Update the message
+        ef_message = effect.get("message", None)  # "An innkeeper named [barmaid.name] assists, You were born the day your father was killed in battle. His [weapon.type] and [armor.type] are passed to you.
+        if ef_message:
+            addional_messages.append(ef_message)
+
+        #Generators can create objects/items for use in the story
+        generator_data = {"generator": effect.get("generator", None),
+                          "roll": effect.get("role", None),
+                          "years": effect.get("years", None),
+                          "override": effect.get("override", None),
+                          "power": effect.get("refresh", None) or effect.get("power", None)
+                          }
+        #Run methods for everything in effects
+        effect_data = effect.get("effect", None)  # pay = good, father.leave, disease = infection
+        effect_data = convert_string_to_properties_object(effect_data)
+        effect_data = dict_update_add(effect_data, generator_data)
+        generated_items_new = apply_effects(person_data, world_data, effect_data)
+        generated_items = generated_items + generated_items_new
+
+        #Properties are always applied to the person after all effects are run
+        ef_properties = effect.get("properties", None)  # JSON or str, "mother.profession = prostitute, lifespan +2
+        if ef_properties:
+            if isinstance(ef_properties, basestring):
+                ef_properties = convert_string_to_properties_object(ef_properties)
+
+            properties = dict_update_add(properties, ef_properties)
+
+    if event_type == 'birthplace':
+        name_lower = name[0].lower() + name[1:]
+        message += "<b>" + person_data.get("name") + " was born " + name_lower + "</b>"
+        addional_messages = [message] + addional_messages
+
+    if properties:
+        message_new = apply_properties(person_data, world_data, properties, generated_items)
+        if message_new:
+            addional_messages.append(message_new)
+
+    if generated_items:
+        person_data["item_list"] += generated_items
+
+    message = "<br/>".join(addional_messages)
+
+    person_data["events"].append({"age": age, "year": year, "message": message})
+
+    return person_data, world_data
+
+
+#TODO: Add version that modifies existing object instead of making clone
+def dict_update_add(dict1, dict2):
+    d = {}
+    for k, v in dict1.items():
+        try:
+            d[k] = float(v)
+        except ValueError:
+            d[k] = v
+
+    for k, v in dict2.items():
+        if k in d or k.lower() in d:
+            try:
+                v1 = float(d[k])
+                v2 = float(v)
+                d[k] = v1 + v2
+            except ValueError:
+                d[k] = str(d[k]) + "," + str(v)
+        else:
+            d[k] = v
+    return d
+
+
+def dict_add(d, key, val):
+    if isinstance(d, tuple):
+        raise Exception("Tuple Exception inside of 'dict_add' method: " + str(d))
+
+    if isinstance(d, list):
+        found = False
+        for d_item in d:
+            if d_item.get("name", "") == key and d_item.get("value"):
+                existing_val = d_item.get("value")
+                try:
+                    v1 = float(existing_val)
+                    v2 = float(val)
+                    d_item["name"] = v1 + v2
+                except ValueError:
+                    d_item["name"] = str(existing_val) + "," + str(val)
+            found = True
+        if not found:
+            try:
+                val = float(val)
+            except ValueError:
+                pass
+            d.append({"name": key, "value": val})
+    else:
+        if key in d or key.lower() in d:
+            try:
+                v1 = float(d[key])
+                v2 = float(val)
+                d[key] = v1 + v2
+            except ValueError:
+                d[key] = str(d[key]) + "," + str(val)
+        else:
+            if isinstance(key, basestring):
+                d[key] = val
+            else:
+                #TODO: Fix this - what's trying to add complex items?
+                pass
+
+    return d
+
+
+def apply_properties(person_data={}, world_data={}, properties_data={}, generated_items=list()):
+    # Sample properties:
+    # "lifespan": "1d6-3",
+    #   "reroll": "true",
+    #   "message": "Born while traveling to [country]"
+    # }
+    message = ""
+    for key, val in properties_data.items():
+        if key == "message":
+            message = val
+            #TODO: Build func to parse out names and subnames
+            for item in generated_items:
+                name = item.get("name", "")
+                nickname = item.get("nickname", "item")
+                if name:
+                    message = message.replace("["+nickname+"]", name)
+
+            #TODO: parse in text from generated_items
+        elif key.startswith("world."):
+            #TODO: have this work for multiple-level settings
+            key = key[6:]
+            dict_add(world_data, key, val)
+        else:
+            dict_add(person_data, key, val)
+            message += "<br/>" + key + " was set to " + str(val)
+
+    return message
+
+
+def apply_effects(person_data={}, world_data={}, effect_data={}):
+    # Sample events:
+    # pay = good, father.leave, disease = infection, pay = low-fair, blessing, family.blessing,
+    #  cost = poor, disease = mutation, "gain [weapon], gain [armor]"
+
+    # Sample Generators:
+    #     generator =   # barmaid, country, wizard, sailor, horse, creature, scholar, royalty, "weapon, armor"
+    #     power/refresh =  # 2
+    #     years =  # 1d6
+    #     role =   # caretaker, mount, pet, familiar
+
+    tags = person_data.get("tags", "")
+    items = person_data.get("children", [])
+    qualities = person_data["qualities"]
+
+    generated_items = []
+    if "generator" in effect_data:
+        generator_list = effect_data.get("generator", "")
+        if generator_list:
+            power = effect_data.get("refresh", None) or effect_data.get("power", 1)
+            role = effect_data.get("role", None)
+            override = effect_data.get("override", "")
+            override = convert_string_to_properties_object(override)
+            effect_data.pop("generator")
+            effect_data.pop("refresh", None)
+            effect_data.pop("power", None)
+            effect_data.pop("role", None)
+            effect_data.pop("override", None)
+            effect_data.pop("generator", None)
+
+            generators = generator_list.split(",")
+            generators = [g.strip() for g in generators]
+            for generator in generators:
+                created = create_random_item(world_data=world_data, override=override, pattern=generator, tags=tags)
+                generated = generate_object(generator=generator, world_data=world_data, item_template=created, power=power, tags=tags)
+
+                data = generated.get("data", {})
+                data["role"] = role
+                years = effect_data.get("years", 1)
+                years = roll_dice(years)
+                data["years"] = years
+
+                generated_items.append(generated)
+
+                if role:
+                    finished_year = int(world_data.get("year", 1100)) + int(years)
+                    items.append({"type": role, "finished": finished_year, "active": True, "data": generated})
+
+    for effect, variable in effect_data.items():
+        # pay = good, father.leave, disease = infection, pay = low-fair, blessing, family.blessing,
+        #  cost = poor, disease = mutation, "gain [weapon], gain [armor]"
+
+        #TODO: All other non-generators, run functions
+        if effect == "pay":
+            if not variable:
+                #TODO: Dynamically calculate difficulty
+                variable = 5.0
+            elif variable == 'exists':
+                variable = 5.0
+            if isinstance(variable, basestring):
+                variable = 5.0
+            dict_add(person_data, "money", variable)
+
+        elif effect == "father.leave":
+            pass
+        elif effect == "disease":
+            if not variable:
+                variable = 3.0
+            elif variable == 'exists':
+                variable = 3.0
+            if isinstance(variable, basestring):
+                variable = 3.0
+            dict_add(qualities, 'lifespan', -variable)
+            items.append({"type": "disease", "name": "rickets"})
+
+        elif effect == "pay":
+            if not variable:
+                variable = 5.0
+            elif variable == 'exists':
+                variable = 5.0
+            if isinstance(variable, basestring):
+                variable = 5.0
+            dict_add(person_data, "money", variable)
+
+        elif effect == "blessing":
+            if not variable:
+                variable = 3.0
+            elif variable == 'exists':
+                variable = 3.0
+            if isinstance(variable, basestring):
+                variable = 3.0
+            dict_add(qualities, 'lifespan', variable)
+            items.append({"type": "blessing", "name": "lucky"})
+
+        elif effect == "family.blessing":
+            if not variable:
+                variable = 3.0
+            elif variable == 'exists':
+                variable = 3.0
+            if isinstance(variable, basestring):
+                variable = 3.0
+            dict_add(qualities, 'lifespan', -variable)
+            items.append({"type": "family blessing", "name": "wealthy"})
+
+        elif effect == "cost":
+            if not variable:
+                variable = 5.0
+            elif variable == 'exists':
+                variable = 5.0
+            if isinstance(variable, basestring):
+                variable = 5.0
+            dict_add(person_data, "money", -variable)
+
+        elif effect == "gain":
+            pass
+
+    return generated_items
+
+
+def generate_object(generator='person', world_data={}, item_template={}, power=1, tags=''):
+
+    generated = {"type": generator, "power": power, "tags": tags}
+    generated["name"] = item_template.get("name", "No Name")
+
+    #TODO: Expand this
+
+    return generated
+
+#TODO: Move story generators and effects to new class
+#TODO: Have conflict variable change chance of items occuring
+#TODO: Have a world/family generator
+#TODO: Have an economics lookup engine
+#TODO: Use names from parents, only use ranks if economics and world says so
