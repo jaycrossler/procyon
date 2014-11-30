@@ -578,10 +578,10 @@ def create_random_name(world_data={}, override={}, pattern="", tags="", rand_see
         set_random_key = False
 
     name_patterns = {}
-    name_patterns['jon_snow'] = 'namefile:1,namefile:1'
-    name_patterns['king_jon_snow_the_pierced'] = 'rank:.1,namefile:1,namefile:.7,adjective:.4:the'
-    name_patterns['king_jon_tyrion_snow_of_winterfell'] = 'rank:.1,namefile:1,namefile:.7,namefile:.2,placefile:.4:of'
-    name_patterns['jon_tyrion_snow'] = 'namefile:1,namefile:1,namefile:1'
+    name_patterns['jon_snow'] = 'namefile:1,namefile|family:1'
+    name_patterns['king_jon_snow_the_pierced'] = 'rank:.1,namefile:1,namefile|family:.7,adjective:.4:the'
+    name_patterns['king_jon_tyrion_snow_of_winterfell'] = 'rank:.1,namefile:1,namefile:.2,namefile|family:.8,placefile:.4:of'
+    name_patterns['jon_tyrion_snow'] = 'namefile:1,namefile:1,namefile|family:1'
 
     if not pattern:
         pattern = name_patterns[np.random.choice(name_patterns.keys(), 1)[0]]
@@ -604,10 +604,16 @@ def create_random_name(world_data={}, override={}, pattern="", tags="", rand_see
                                         name_length=22)
 
     for idx, generator in enumerate(generated_item.get('generators')):
+        generator_parts = generator.split("|")
+        generator = generator_parts[0]
+        generator_restrictions = generator_parts[1:]
+
         if generator == "namefile" or generator == "placefile":
             filename = generated_item['name_parts'][idx]
             restrictions = [filename]
-            if gender:
+            if generator_restrictions:
+                restrictions += generator_restrictions
+            elif gender:
                 restrictions.append(gender)
             names = list_of_names(file_sub_strings=restrictions, prefix_chance=0)
 
@@ -1130,7 +1136,16 @@ def generate_object(generator='person', world_data={}, item_template={}, power=1
     end_date = world_data.get("year", 1100)
     years = roll_dice(years)
     try:
-        end_date = int(end_date) + int(years)
+        if end_date:
+            end_date = int(end_date)
+        else:
+            end_date = 1100
+
+        if years:
+            years = int(years)
+        else:
+            years = 4
+        end_date = end_date + years
     except ValueError:
         end_date = None
     generated = {"type": role, "power": power, "tags": tags, "name": generator, "end_date": end_date}
@@ -1143,3 +1158,4 @@ def generate_object(generator='person', world_data={}, item_template={}, power=1
     #TODO: Move story generators and effects to new class
     #TODO: Have an economics lookup engine
     #TODO: Use names from parents, only use ranks if economics and world says so
+    #TODO: Determine nationality, use names from those
