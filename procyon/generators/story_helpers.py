@@ -679,7 +679,7 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
     person_data["events"] = []
     person_data["race"] = race
     person_data["name"] = name
-    person_data["tags"] = add_tags(5, father.get("tags", None), mother.get("tags", None))
+    person_data["tags"] = add_tags(5, father.get("tags", ""), mother.get("tags", ""))
     person_data["gender"] = gender
     person_data["qualities"] = qualities
     person_data["attribute_mods"] = attribute_mods
@@ -693,8 +693,6 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
 
     person_data["events"].append({"age": 1, "year": year + 1, "message": "Had an uneventful 1st birthday"})
     person_data["events"].append({"age": 2, "year": year + 2, "message": "Had an uneventful 2nd birthday"})
-
-    person_data["tags"] = str(person_data["tags"])
 
     person_data["world_data"] = str(world_data)
 
@@ -758,9 +756,11 @@ def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type
     if isinstance(properties, basestring):
         properties = convert_string_to_properties_object(properties)
 
-    tags = event_data.get("tags", None)
+    tags = event_data.get("tags", [])
     if tags:
-        person_data["tags"] = add_tags(5, person_data.get("tags", None), tags)  # TODO: Make a tag manager
+        tags = person_data.get("tags", name).split(",") + tags
+        tags = [t for t in tags if t]
+        person_data["tags"] = ",".join(tags)  # TODO: Make a tag manager
 
     generated_items = []
     addional_messages = []
@@ -1107,7 +1107,7 @@ def set_world_data(father, mother, world_data):
         mother_tags += ",wealthy"
     if mother_education > value_of_variable('fair'):
         mother_tags += ",educated"
-    father["tags"] = mother_tags
+    mother["tags"] = mother_tags
 
     if "house" not in family:
         if economics >= value_of_variable('great'):
