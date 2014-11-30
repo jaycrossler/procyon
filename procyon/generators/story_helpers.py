@@ -985,6 +985,11 @@ def apply_effects(person_data={}, world_data={}, effect_data={}):
                     finished_year = int(world_data.get("year", 1100)) + int(years)
                     items.append({"type": role, "finished": finished_year, "active": True, "data": generated})
 
+    family = person_data.get("family", {})
+    father = family.get("father", {})
+    mother = family.get("mother", {})
+    year = world_data.get("year",1100)
+
     for effect, variable in effect_data.items():
         # pay = good, father.leave, disease = infection, pay = low-fair, blessing, family.blessing,
         #  cost = poor, disease = mutation, "gain [weapon], gain [armor]"
@@ -1001,6 +1006,8 @@ def apply_effects(person_data={}, world_data={}, effect_data={}):
             dict_add(person_data, "money", variable)
 
         elif effect == "father.leave":
+            father["leave"] = year
+            #TODO: reduce family income
             pass
         elif effect == "disease":
             if not variable:
@@ -1010,7 +1017,7 @@ def apply_effects(person_data={}, world_data={}, effect_data={}):
             if isinstance(variable, basestring):
                 variable = 3.0
             dict_add(qualities, 'lifespan', -variable)
-            items.append({"type": "disease", "name": "rickets"})
+            generated_items.append({"type": "disease", "name": "rickets"}) #TODO: Make a disease lookup table
 
         elif effect == "pay":
             if not variable:
@@ -1029,7 +1036,7 @@ def apply_effects(person_data={}, world_data={}, effect_data={}):
             if isinstance(variable, basestring):
                 variable = 3.0
             dict_add(qualities, 'lifespan', variable)
-            items.append({"type": "blessing", "name": "lucky"})
+            generated_items.append({"type": "blessing", "name": "lucky"})
 
         elif effect == "family.blessing":
             if not variable:
@@ -1039,7 +1046,7 @@ def apply_effects(person_data={}, world_data={}, effect_data={}):
             if isinstance(variable, basestring):
                 variable = 3.0
             dict_add(qualities, 'lifespan', -variable)
-            items.append({"type": "family blessing", "name": "wealthy"})
+            generated_items.append({"type": "family blessing", "name": "wealthy"})
 
         elif effect == "cost":
             if not variable:
