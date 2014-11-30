@@ -2,10 +2,12 @@ __author__ = 'jcrossler'
 
 import numpy
 import json
-import re
 from procyon.starsystemmaker.math_helpers import *
 from procyon.starsystemmaker.name_library import *
 import dna_helpers
+
+VALUE_ARRAY = 'none tiny terrible poor mediocre average fair good great superb fantastic epic'.split(" ")
+
 
 try:
     from django.core.cache import cache
@@ -55,6 +57,9 @@ def value_of_variable(var):
     val = var
     if isinstance(var, basestring):
         var = var.lower().strip()
+        if len(var) < 1:
+            return var
+
         negative = False
 
         if var[0] == "-":
@@ -129,7 +134,7 @@ def convert_string_to_properties_object(props):
                 if isinstance(old_val, float) and isinstance(val, float):
                     val += old_val
                 else:
-                    val = str(old_val) + ", "+str(val)
+                    val = str(old_val) + ", " + str(val)
             properties[key] = val
 
     return properties
@@ -234,7 +239,7 @@ def check_requirements(requirements, world_data):
     # Allow: [{concept:person,name:age,exceeds:20},{concept:world,name:magic,below:poor}]
     # Allow: 'magic > low, building has Church'
     # Allow: 'person.age > 20, world.magic < poor, person.business exists, person.siblings empty'
-    #TODO: Work with 'family.*.profession sailor'
+    # TODO: Work with 'family.*.profession sailor'
 
     if not requirements:
         return True
@@ -347,8 +352,7 @@ def tags_to_find(tags, world_data):
 
 
 def count_tag_matches(component_tags=list(), weighting=10.0, search_tags=list(), base_num=0.0):
-
-    matches = float(base_num) + float(weighting)/10
+    matches = float(base_num) + float(weighting) / 10
 
     if isinstance(component_tags, basestring):
         if len(component_tags) < 1:
@@ -400,7 +404,7 @@ def breakout_component_types(world_data, tags, pattern_list):
             cache.set('active_components', active_components)
 
     except ImportError:
-        #Django not loaded, use local file cache instead - best for testing
+        # Django not loaded, use local file cache instead - best for testing
 
         with open('procyon/fixtures/components_cache.txt', mode='r') as infile:
             c_text = str(infile.read())
@@ -588,7 +592,8 @@ def create_random_name(world_data={}, override={}, pattern="", tags="", rand_see
                     pattern = name_patterns['jon_tyrion_snow']
 
     generated_item = create_random_item(world_data=world_data, override=override, pattern=pattern, tags=tags,
-                                        rand_seed=rand_seed, set_random_key=set_random_key, tag_weight=tag_weight, name_length=22)
+                                        rand_seed=rand_seed, set_random_key=set_random_key, tag_weight=tag_weight,
+                                        name_length=22)
 
     for idx, generator in enumerate(generated_item.get('generators')):
         if generator == "namefile" or generator == "placefile":
@@ -617,16 +622,17 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
         rand_seed = numpy.random.random()
     rand_seed = set_rand_seed(rand_seed)
 
-    seed_mother_dna = str(rand_seed)+"1"
-    seed_father_dna = str(rand_seed)+"2"
-    seed_child_dna = str(rand_seed)+"3"
-    seed_name = str(rand_seed)+"42"
+    seed_mother_dna = str(rand_seed) + "1"
+    seed_father_dna = str(rand_seed) + "2"
+    seed_child_dna = str(rand_seed) + "3"
+    seed_name = str(rand_seed) + "42"
 
     person_data = {}
     person_data["note"] = ""
     person_data["rand_seed"] = rand_seed
 
-    year = world_data.get("year", "1100")
+    world_data = set_world_data(father, mother, world_data)
+    year = world_data.get("year")
     year = int(year)
 
     father_dna = father.get("dna", "")
@@ -635,7 +641,10 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
         father_dna, temp = dna_helpers.generate_dna(rand_seed=seed_father_dna, race=father.get("race", "human"))
     if not mother_dna:
         mother_dna, temp = dna_helpers.generate_dna(rand_seed=seed_mother_dna, race=father.get("race", "human"))
-    dna, temp = dna_helpers.combine_dna(mother_dna, father_dna, seed_child_dna)
+    if child_dna:
+        dna = child_dna
+    else:
+        dna, temp = dna_helpers.combine_dna(mother_dna, father_dna, seed_child_dna)
     if gender:
         dna = dna_helpers.set_dna_gender(dna, gender)
 
@@ -668,8 +677,12 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
     person_data, world_data = apply_event_effects(person_data=person_data, world_data=world_data, age=0,
                                                   event_data=birth_place, event_type='birthplace', year=year)
 
-    person_data["events"].append({"age": 1, "year": year+1, "message": "Had an uneventful 1st birthday"})
-    person_data["events"].append({"age": 2, "year": year+2, "message": "Had an uneventful 2nd birthday"})
+    person_data["events"].append({"age": 1, "year": year + 1, "message": "Had an uneventful 1st birthday"})
+    person_data["events"].append({"age": 2, "year": year + 2, "message": "Had an uneventful 2nd birthday"})
+
+    person_data["tags"] = str(person_data["tags"])
+
+    person_data["world_data"] = str(world_data)
 
     return person_data
 
@@ -706,7 +719,8 @@ def add_tags(num_from_each=5, *tag_list):
     return ",".join(tags)
 
 
-def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type='birthplace', year=None, age='undefined'):
+def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type='birthplace', year=None,
+                        age='undefined'):
     message = ""
 
     if not year:
@@ -730,7 +744,7 @@ def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type
 
     tags = event_data.get("tags", None)
     if tags:
-        person_data["tags"] = add_tags(6, person_data.get("tags", None), tags) #TODO: Make a tag manager
+        person_data["tags"] = add_tags(6, person_data.get("tags", None), tags)  # TODO: Make a tag manager
 
     generated_items = []
     addional_messages = []
@@ -739,22 +753,33 @@ def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type
 
         # Roll the dice, if the chance occurs then parse the rest
         chance = effect.get("chance", 100)
+        family = world_data.get("family", {})
+        chance_modifier = family.get("conflict", 1)
+
         try:
-            chance = value_of_variable(chance) / 10 #TODO: Temporary from 100
+            chance_modifier = float(chance_modifier)
+        except ValueError:
+            chance_modifier = 1
+
+        try:
+            chance = value_of_variable(chance)
+            chance += chance_modifier
+            chance /= 100
+
             if not numpy.random.random() < chance:
                 continue
         except ValueError:
             continue
 
-        # Check the requirements
-        requirement = effect.get("requirement", None)  # family.economics < fair, family.enemy has Elves, "family.*.profession sailor", family.*.profession has doctor
+        # Check the requirements # family.enemy has Elves, "family.*.profession sailor", family.*.profession has doctor
+        requirement = effect.get("requirement", None)
         if requirement:
             passes = check_requirements(requirement, world_data)
             if not passes:
                 continue
 
-        #Update the message
-        ef_message = effect.get("message", None)  # "An innkeeper named [barmaid.name] assists, You were born the day your father was killed in battle. His [weapon.type] and [armor.type] are passed to you.
+        # Update the message # "An innkeeper named [barmaid.name] assists, You were born the day your father was killed in battle. His [weapon.type] and [armor.type] are passed to you.
+        ef_message = effect.get("message", None)
         if ef_message:
             addional_messages.append(ef_message)
 
@@ -764,7 +789,7 @@ def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type
                           "years": effect.get("years", None),
                           "override": effect.get("override", None),
                           "power": effect.get("refresh", None) or effect.get("power", None)
-                          }
+        }
         #Run methods for everything in effects
         effect_data = effect.get("effect", None)  # pay = good, father.leave, disease = infection
         effect_data = convert_string_to_properties_object(effect_data)
@@ -793,6 +818,7 @@ def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type
     if generated_items:
         person_data["item_list"] += generated_items
 
+    addional_messages = [m.strip() for m in addional_messages]
     message = "<br/>".join(addional_messages)
 
     person_data["events"].append({"age": age, "year": year, "message": message})
@@ -800,7 +826,7 @@ def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type
     return person_data, world_data
 
 
-#TODO: Add version that modifies existing object instead of making clone
+# TODO: Add version that modifies existing object instead of making clone
 def dict_update_add(dict1, dict2):
     d = {}
     for k, v in dict1.items():
@@ -877,16 +903,17 @@ def apply_properties(person_data={}, world_data={}, properties_data={}, generate
                 name = item.get("name", "")
                 nickname = item.get("nickname", "item")
                 if name:
-                    message = message.replace("["+nickname+"]", name)
+                    message = message.replace("[" + nickname + "]", name)
 
-            #TODO: parse in text from generated_items
+                    #TODO: parse in text from generated_items
         elif key.startswith("world."):
             #TODO: have this work for multiple-level settings
             key = key[6:]
             dict_add(world_data, key, val)
         else:
+            val = roll_dice(val)
             dict_add(person_data, key, val)
-            message += "<br/>" + key + " was set to " + str(val)
+            message += key + " was adjusted " + str(val)
 
     return message
 
@@ -925,7 +952,8 @@ def apply_effects(person_data={}, world_data={}, effect_data={}):
             generators = [g.strip() for g in generators]
             for generator in generators:
                 created = create_random_item(world_data=world_data, override=override, pattern=generator, tags=tags)
-                generated = generate_object(generator=generator, world_data=world_data, item_template=created, power=power, tags=tags)
+                generated = generate_object(generator=generator, world_data=world_data, item_template=created,
+                                            power=power, tags=tags)
 
                 data = generated.get("data", {})
                 data["role"] = role
@@ -1010,17 +1038,78 @@ def apply_effects(person_data={}, world_data={}, effect_data={}):
     return generated_items
 
 
-def generate_object(generator='person', world_data={}, item_template={}, power=1, tags=''):
+def set_world_data(father, mother, world_data):
+    father_economics = father.get("economic") or numpy.random.choice(VALUE_ARRAY)
+    mother_economics = mother.get("economic") or numpy.random.choice(VALUE_ARRAY)
+    father_education = father.get("education") or numpy.random.choice(VALUE_ARRAY)
+    mother_education = mother.get("education") or numpy.random.choice(VALUE_ARRAY)
+    father_conflict = father.get("conflict") or "low"
+    mother_conflict = mother.get("conflict") or "low"
+    father_profession = father.get("profession") or "Farmer"
+    mother_profession = mother.get("profession") or "Farmer"
 
+    year = world_data.get("year", numpy.random.randint(1000, 2000))
+    world_data["year"] = int(year)
+    family = world_data.get("family", {})
+
+    try:
+        economics = float(value_of_variable(father_economics) + value_of_variable(mother_economics))
+        economics -= 3
+    except ValueError:
+        economics = father_economics
+    family["economics"] = family.get("economics", economics)
+
+    try:
+        conflict = float(value_of_variable(father_conflict) + value_of_variable(mother_conflict))
+        conflict -= 5
+    except ValueError:
+        conflict = father_conflict
+    family["conflict"] = family.get("conflict", conflict)
+
+    father = family.get("father", {})
+    mother = family.get("mother", {})
+
+    father["profession"] = father.get("profession", father_profession)
+    father["economics"] = father_economics
+    father["education"] = father_education
+    father["conflict"] = father_conflict
+
+    mother["profession"] = mother.get("profession", mother_profession)
+    mother["economics"] = mother_economics
+    mother["education"] = mother_education
+    mother["conflict"] = mother_conflict
+
+    if "house" not in family:
+        if economics >= value_of_variable('great'):
+            family["house"] = "large"
+        elif economics >= value_of_variable('good'):
+            family["house"] = "medium"
+        elif economics >= value_of_variable('fair'):
+            family["house"] = "small"
+
+    #TODO: Have parents leave if high conflict or low economics
+    #TODO: Grandparents?
+    #TODO: Nanny or Caretaker if ec > high
+    #TODO: What to do with education? Job?
+
+    family["father"] = father
+    family["mother"] = mother
+
+    world_data["family"] = family
+    world_data["magic"] = world_data.get("magic", numpy.random.choice(VALUE_ARRAY))
+    world_data["technology"] = world_data.get("technology", numpy.random.choice(VALUE_ARRAY))
+
+    return world_data
+
+
+def generate_object(generator='person', world_data={}, item_template={}, power=1, tags=''):
     generated = {"type": generator, "power": power, "tags": tags}
-    generated["name"] = item_template.get("name", "No Name")
+    generated["name"] = "No Name"
 
     #TODO: Expand this
 
     return generated
 
-#TODO: Move story generators and effects to new class
-#TODO: Have conflict variable change chance of items occuring
-#TODO: Have a world/family generator
-#TODO: Have an economics lookup engine
-#TODO: Use names from parents, only use ranks if economics and world says so
+    #TODO: Move story generators and effects to new class
+    #TODO: Have an economics lookup engine
+    #TODO: Use names from parents, only use ranks if economics and world says so

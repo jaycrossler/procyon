@@ -23,16 +23,19 @@
         }
         .mother {
             background-color: pink;
+            border-radius: 8px;
         }
         .father {
             background-color: lightblue;
+            border-radius: 8px;
         }
         .parent {
             vertical-align: middle;
-            border-radius: 8px;
             padding: 2px;
         }
-
+        .center {
+            text-align: center;
+        }
         .attribute {
             width: 130px;
             height: 20px;
@@ -47,6 +50,9 @@
         }
         .positive {
             background-color: lightgreen;
+        }
+        .negative {
+            background-color: lightpink;
         }
         #person_data {
             display: inline-block;
@@ -146,7 +152,8 @@
 {% endblock %}
 
 {% block banner %}
-    <h2><a href="./">Generators</a> :: {{ generator|title }} :: {{ person_data.name }}</h2>
+    <h2><a href="./">Generators</a> :: {{ generator|title }} ::
+    <span class="{% if person_data.gender == 'Male' %}father{% else %}mother{% endif %}">{{ person_data.name }}</span></h2>
     <form action="" method="post" id="generator">
         {% csrf_token %}
         {% if note %}<i>{% autoescape off %}{{ note }}{% endautoescape %}</i>{% endif %}
@@ -226,10 +233,12 @@
     <div id="person_data">
         <span id="event_list">
         <table id="events_table">
-            <tr><th>Age</th><th>What happened?</th></tr>
+            <tr><th>Age</th><th>Year</th><th>What happened?</th></tr>
         {% autoescape off %}
         {% for event in person_data.events %}
-            <tr><td>{{ event.age }} <span class="smaller">(Year {{ event.year }})</span></td><td>{{ event.message }}</td></tr>
+            <tr><td class="center">{{ event.age }}</td>
+                <td class="center">{{ event.year }}</td>
+                <td>{{ event.message }}</td></tr>
         {% endfor %}
         {%  endautoescape %}
         </table>
@@ -238,24 +247,25 @@
         <span id="character_data">
             <b>DNA:</b> {{ person_data.dna }}<br/>
 
-            <b>Description:</b> {{ person_data.description }}<br/>
+            <br /><b>Description:</b> {{ person_data.description }}<br/>
 
-            <b>Attributes:</b><br/>
+            <br /><b>Attributes:</b><br/>
             {% for attribute, value in person_data.attribute_mods.items %}
-                <li class="attribute {% if value > 0 %}positive{% endif %}"><b>{{ attribute }}</b>: {% if value > 0 %}+{% endif %}{{ value }}</li>
+                <li class="attribute {% if value > 0 %}positive{% else %}negative{% endif %}"><b>{{ attribute }}</b>: {% if value > 0 %}+{% endif %}{{ value }}</li>
             {% endfor %}
 
-            <hr/>
-            <b>Items:</b><br/>
+            <br /><b>Items:</b><br/>
             {% for item in person_data.item_list %}
-                <li>{{ item.type }} - {{ item.name }}</li>
+                <li class="attribute">{{ item.type|title }} - {{ item.name }}</li>
             {% endfor %}
 
-            <b>Tags:</b><br/>
+            <br /><b>Tags:</b><br/>
             {{ person_data.tags }}
 
-            <b>Skills</b><br/>
-            <b>Details</b><br/>
+            <br /><b>Skills</b><br/>
+
+            <br /><b>World Data:</b><br/>
+            {{ person_data.world_data }}
 
         </span>
 
