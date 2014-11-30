@@ -341,9 +341,19 @@ def tags_to_find(tags, world_data):
             tags_list = tags_list + person_tags.split(",")
     if 'family' in world_data:
         family = world_data.get('family', {})
-        if family and 'tags' in family:
-            family_tags = family.get('tags', '')
-            tags_list = tags_list + family_tags.split(",")
+        if family:
+            if 'tags' in family:
+                family_tags = family.get('tags', '')
+                tags_list = tags_list + family_tags.split(",")
+            father = family.get("father", {})
+            if 'tags' in father:
+                family_tags = father.get('tags', '')
+                tags_list = tags_list + family_tags.split(",")
+
+            mother = family.get("mother", {})
+            if 'tags' in mother:
+                family_tags = mother.get('tags', '')
+                tags_list = tags_list + family_tags.split(",")
 
     for idx, tag in enumerate(tags_list):
         tags_list[idx] = tag.strip().lower()
@@ -415,6 +425,7 @@ def breakout_component_types(world_data, tags, pattern_list):
         except ValueError:
             pass
 
+    tags_searching = tags_to_find(tags, world_data)
     for component in active_components:
         ctype = str(component.get("type", "None"))
         ctype = ctype.lower().strip()
@@ -423,7 +434,6 @@ def breakout_component_types(world_data, tags, pattern_list):
             is_match = check_requirements(component.get("requirements", ""), world_data)
 
             if is_match:
-                tags_searching = tags_to_find(tags, world_data)
                 tag_match = count_tag_matches(component.get("tags", ""), component.get("weighting", ""), tags_searching)
 
                 if not ctype in component_types:
@@ -644,8 +654,11 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
     person_data = {}
     person_data["note"] = ""
     person_data["rand_seed"] = rand_seed
+    tag_manager = {}
 
-    world_data = set_world_data(father, mother, world_data)
+    world_data = set_world_data(father, mother, world_data, tag_manager)
+    city_data = world_data.get("city", {})
+
     year = world_data.get("year")
     year = int(year)
 
@@ -668,7 +681,7 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
     race = dna_helpers.race_from_dna(dna)
 
     gender = dna_helpers.gender_from_dna(dna)
-    name_data = create_random_name(world_data=world_data, tags=tags, rand_seed=seed_name, gender=gender)
+    name_data = create_random_name(world_data=world_data, tags=flatten_tags(tag_manager), rand_seed=seed_name, gender=gender)
     name = name_data["name"]
 
     birth_place = create_random_item(world_data=world_data, set_random_key=False, pattern='birthplace', name_length=300)
@@ -679,7 +692,6 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
     person_data["events"] = []
     person_data["race"] = race
     person_data["name"] = name
-    person_data["tags"] = add_tags(5, father.get("tags", ""), mother.get("tags", ""))
     person_data["gender"] = gender
     person_data["qualities"] = qualities
     person_data["attribute_mods"] = attribute_mods
@@ -689,12 +701,14 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
     person_data["description"] = person_description(person_data)
 
     person_data, world_data = apply_event_effects(person_data=person_data, world_data=world_data, age=0,
-                                                  event_data=birth_place, event_type='birthplace', year=year)
+                                                  event_data=birth_place, event_type='birthplace', year=year,
+                                                  tag_manager=tag_manager)
 
     person_data["events"].append({"age": 1, "year": year + 1, "message": "Had an uneventful 1st birthday"})
     person_data["events"].append({"age": 2, "year": year + 2, "message": "Had an uneventful 2nd birthday"})
 
     person_data["world_data"] = str(world_data)
+    person_data["tags"] = str(flatten_tags(tag_manager))
 
     return person_data
 
@@ -714,27 +728,38 @@ def person_description(person_data):
     return description
 
 
-def add_tags(num_from_each=5, *tag_list):
-    tags = []
+def add_tags(tag_manager, category, *tag_list):
+    tag_array = []
     for tag_words in tag_list:
         if not tag_words:
             continue
-        tag_array = []
         if isinstance(tag_words, basestring):
             tag_array = tag_words.split(",")
         elif isinstance(tag_words, dict):
             for tag in tag_words.items():
                 tag_array.append(tag[0])
 
-        if len(tag_array):
-            tags += np.random.choice(tag_array, num_from_each)
-    tags = [tag.lower().strip() for tag in tags]
+    tags = [tag.lower().strip() for tag in tag_array if tag]
 
-    return ",".join(tags)
+    existing_tags = tag_manager.get(category, [])
+    tag_manager[category] = existing_tags + tags
+
+    return tag_manager
+
+
+def flatten_tags(tag_manager={}, max_tags=20):
+    flattened = []
+    for key, val in tag_manager.items():
+        flattened += val
+
+    if len(flattened) > max_tags:
+        flattened = numpy.random.choice(flattened, max_tags)
+    tags = ",".join(flattened)
+    return tags
 
 
 def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type='birthplace', year=None,
-                        age='undefined'):
+                        age='undefined', tag_manager={}):
     message = ""
 
     if not year:
@@ -756,11 +781,7 @@ def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type
     if isinstance(properties, basestring):
         properties = convert_string_to_properties_object(properties)
 
-    tags = event_data.get("tags", [])
-    if tags:
-        tags = person_data.get("tags", name).split(",") + tags
-        tags = [t for t in tags if t]
-        person_data["tags"] = ",".join(tags)  # TODO: Make a tag manager
+    add_tags(tag_manager, 'event', event_data.get("tags", []))
 
     generated_items = []
     addional_messages = []
@@ -810,7 +831,7 @@ def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type
         effect_data = effect.get("effect", None)  # pay = good, father.leave, disease = infection
         effect_data = convert_string_to_properties_object(effect_data)
         effect_data = dict_update_add(effect_data, generator_data)
-        generated_items_new = apply_effects(person_data, world_data, effect_data)
+        generated_items_new = apply_effects(person_data, world_data, effect_data, tag_manager)
         generated_items = generated_items + generated_items_new
 
         #Properties are always applied to the person after all effects are run
@@ -934,7 +955,7 @@ def apply_properties(person_data={}, world_data={}, properties_data={}, generate
     return message
 
 
-def apply_effects(person_data={}, world_data={}, effect_data={}):
+def apply_effects(person_data={}, world_data={}, effect_data={}, tag_manager={}):
     # Sample events:
     # pay = good, father.leave, disease = infection, pay = low-fair, blessing, family.blessing,
     #  cost = poor, disease = mutation, "gain [weapon], gain [armor]"
@@ -945,7 +966,7 @@ def apply_effects(person_data={}, world_data={}, effect_data={}):
     #     years =  # 1d6
     #     role =   # caretaker, mount, pet, familiar
 
-    tags = person_data.get("tags", "")
+    tags = flatten_tags(tag_manager)
     items = person_data.get("children", [])
     qualities = person_data["qualities"]
 
@@ -1063,7 +1084,7 @@ def apply_effects(person_data={}, world_data={}, effect_data={}):
     return generated_items
 
 
-def set_world_data(father, mother, world_data):
+def set_world_data(father, mother, world_data, tag_manager):
     father_economics = father.get("economic") or numpy.random.choice(VALUE_ARRAY)
     mother_economics = mother.get("economic") or numpy.random.choice(VALUE_ARRAY)
     father_education = father.get("education") or numpy.random.choice(VALUE_ARRAY)
@@ -1076,6 +1097,10 @@ def set_world_data(father, mother, world_data):
     year = world_data.get("year", numpy.random.randint(1000, 2000))
     world_data["year"] = int(year)
     family = world_data.get("family", {})
+    city_data = world_data.get("city", {})
+
+    world_tags = world_data.get("tags", "")
+    city_tags = city_data.get("tags", "")
 
     try:
         economics = float(value_of_variable(father_economics) + value_of_variable(mother_economics))
@@ -1104,6 +1129,7 @@ def set_world_data(father, mother, world_data):
     if father_education > value_of_variable('fair'):
         father_tags += ",educated"
     father["tags"] = father_tags
+    add_tags(tag_manager, 'father', father_tags)
 
     mother["profession"] = mother.get("profession", mother_profession)
     mother["economics"] = mother_economics
@@ -1115,6 +1141,7 @@ def set_world_data(father, mother, world_data):
     if mother_education > value_of_variable('fair'):
         mother_tags += ",educated"
     mother["tags"] = mother_tags
+    add_tags(tag_manager, 'mother', mother_tags)
 
     if "house" not in family:
         if economics >= value_of_variable('great'):
@@ -1128,13 +1155,22 @@ def set_world_data(father, mother, world_data):
     #TODO: Grandparents?
     #TODO: Nanny or Caretaker if ec > high
     #TODO: What to do with education? Job?
+    #TODO: Create city
+    #TODO: Ranks or royalty
 
     family["father"] = father
     family["mother"] = mother
 
     world_data["family"] = family
-    world_data["magic"] = world_data.get("magic", numpy.random.choice(VALUE_ARRAY))
+    magic_num = numpy.random.choice(VALUE_ARRAY)
+    world_data["magic"] = world_data.get("magic", magic_num)
     world_data["technology"] = world_data.get("technology", numpy.random.choice(VALUE_ARRAY))
+
+    add_tags(tag_manager, 'world', world_tags)
+    add_tags(tag_manager, 'city', city_tags)
+
+    if value_of_variable(magic_num) > 6:
+        add_tags(tag_manager, 'world', 'magic')
 
     return world_data
 
