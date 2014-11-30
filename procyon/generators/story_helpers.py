@@ -476,6 +476,7 @@ def create_random_item(world_data={}, override={}, set_random_key=True, parse_di
     item_prefixes = []
     item_names = []
     properties = {}
+    tags = []
 
     for idx, ctype in enumerate(pattern_list):
         if numpy.random.random() <= pattern_probability[idx]:
@@ -512,6 +513,12 @@ def create_random_item(world_data={}, override={}, set_random_key=True, parse_di
                 item_names.append(text)
                 item_generators.append(ctype)
 
+                component_tags = component.get("tags", '')
+                if component_tags and isinstance(component_tags, basestring):
+                    component_tags = component_tags.split(',')
+                component_tags = [c.strip().lower() for c in component_tags]
+                tags += component_tags
+
                 component_props = component.get("properties", {})
                 if component_props and isinstance(component_props, dict):
                     properties = component_props
@@ -525,7 +532,8 @@ def create_random_item(world_data={}, override={}, set_random_key=True, parse_di
     item_name = generate_item_name(item_prefixes, item_names, try_for_max_length=name_length)
 
     item_return = dict(name=item_name, data=item_data, effects=effects_data, note=note, rand_seed=rand_seed,
-                       prefixes=item_prefixes, name_parts=item_names, generators=item_generators, properties=properties)
+                       prefixes=item_prefixes, name_parts=item_names, generators=item_generators,
+                       tags=tags, properties=properties)
     return item_return
 
 
@@ -705,6 +713,8 @@ def person_description(person_data):
 def add_tags(num_from_each=5, *tag_list):
     tags = []
     for tag_words in tag_list:
+        if not tag_words:
+            continue
         tag_array = []
         if isinstance(tag_words, basestring):
             tag_array = tag_words.split(",")
@@ -714,7 +724,7 @@ def add_tags(num_from_each=5, *tag_list):
 
         if len(tag_array):
             tags += np.random.choice(tag_array, num_from_each)
-    tags = [tag.strip() for tag in tags]
+    tags = [tag.lower().strip() for tag in tags]
 
     return ",".join(tags)
 
@@ -744,7 +754,7 @@ def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type
 
     tags = event_data.get("tags", None)
     if tags:
-        person_data["tags"] = add_tags(6, person_data.get("tags", None), tags)  # TODO: Make a tag manager
+        person_data["tags"] = add_tags(5, person_data.get("tags", None), tags)  # TODO: Make a tag manager
 
     generated_items = []
     addional_messages = []
@@ -785,7 +795,7 @@ def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type
 
         #Generators can create objects/items for use in the story
         generator_data = {"generator": effect.get("generator", None),
-                          "roll": effect.get("role", None),
+                          "role": effect.get("role", None),
                           "years": effect.get("years", None),
                           "override": effect.get("override", None),
                           "power": effect.get("refresh", None) or effect.get("power", None)
@@ -938,22 +948,24 @@ def apply_effects(person_data={}, world_data={}, effect_data={}):
         generator_list = effect_data.get("generator", "")
         if generator_list:
             power = effect_data.get("refresh", None) or effect_data.get("power", 1)
-            role = effect_data.get("role", None)
+            years = effect_data.get("years", 4)
+            role = effect_data.get("role", "friend")
             override = effect_data.get("override", "")
             override = convert_string_to_properties_object(override)
-            effect_data.pop("generator")
+
+            effect_data.pop("generator", None)
             effect_data.pop("refresh", None)
             effect_data.pop("power", None)
+            effect_data.pop("years", None)
             effect_data.pop("role", None)
             effect_data.pop("override", None)
-            effect_data.pop("generator", None)
 
             generators = generator_list.split(",")
             generators = [g.strip() for g in generators]
             for generator in generators:
                 created = create_random_item(world_data=world_data, override=override, pattern=generator, tags=tags)
                 generated = generate_object(generator=generator, world_data=world_data, item_template=created,
-                                            power=power, tags=tags)
+                                            power=power, tags=tags, role=role, years=years)
 
                 data = generated.get("data", {})
                 data["role"] = role
@@ -1073,11 +1085,23 @@ def set_world_data(father, mother, world_data):
     father["economics"] = father_economics
     father["education"] = father_education
     father["conflict"] = father_conflict
+    father_tags = father.get("tags", father_profession.lower())
+    if father_economics > value_of_variable('fair'):
+        father_tags += ",wealthy"
+    if father_education > value_of_variable('fair'):
+        father_tags += ",educated"
+    father["tags"] = father_tags
 
     mother["profession"] = mother.get("profession", mother_profession)
     mother["economics"] = mother_economics
     mother["education"] = mother_education
     mother["conflict"] = mother_conflict
+    mother_tags = mother.get("tags", mother_profession.lower())
+    if mother_economics > value_of_variable('fair'):
+        mother_tags += ",wealthy"
+    if mother_education > value_of_variable('fair'):
+        mother_tags += ",educated"
+    father["tags"] = mother_tags
 
     if "house" not in family:
         if economics >= value_of_variable('great'):
@@ -1102,13 +1126,19 @@ def set_world_data(father, mother, world_data):
     return world_data
 
 
-def generate_object(generator='person', world_data={}, item_template={}, power=1, tags=''):
-    generated = {"type": generator, "power": power, "tags": tags}
-    generated["name"] = "No Name"
+def generate_object(generator='person', world_data={}, item_template={}, power=1, tags='', role='friend', years=4):
+    end_date = world_data.get("year", 1100)
+    years = roll_dice(years)
+    try:
+        end_date = int(end_date) + int(years)
+    except ValueError:
+        end_date = None
+    generated = {"type": role, "power": power, "tags": tags, "name": generator, "end_date": end_date}
 
     #TODO: Expand this
 
     return generated
+
 
     #TODO: Move story generators and effects to new class
     #TODO: Have an economics lookup engine

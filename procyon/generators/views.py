@@ -65,6 +65,15 @@ def generator_default(request, generator_type="item", parse_dice=False,
         note = json.dumps(dict(error=500, message='Exception', details=traceback.format_exc(), exception=str(e)))
 
     if format_type == "json":
+        if "prefixes" in first_item:
+            first_item.pop("prefixes")
+        if "note" in first_item:
+            first_item.pop("note")
+        if "generators" in first_item:
+            first_item.pop("generators")
+        if "name_parts" in first_item:
+            first_item.pop("name_parts")
+
         data = json.dumps(first_item)
         output = HttpResponse(data, mimetype="application/json")
 
