@@ -863,7 +863,6 @@ def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type
     return person_data, world_data
 
 
-# TODO: Add version that modifies existing object instead of making clone
 def dict_update_add(dict1, dict2):
     d = {}
     for k, v in dict1.items():
@@ -919,7 +918,6 @@ def dict_add(d, key, val):
             if isinstance(key, basestring):
                 d[key] = val
             else:
-                #TODO: Fix this - what's trying to add complex items?
                 pass
 
     return d
@@ -948,7 +946,7 @@ def apply_properties(person_data={}, world_data={}, properties_data={}, generate
             key = key[6:]
             dict_add(world_data, key, val)
         else:
-            val = roll_dice(val)
+            val = roll_dice(val, use_numpy=True)
             dict_add(person_data, key, val)
             message += key + " was adjusted " + str(val)
 
@@ -997,7 +995,7 @@ def apply_effects(person_data={}, world_data={}, effect_data={}, tag_manager={})
                 data = generated.get("data", {})
                 data["role"] = role
                 years = effect_data.get("years", 1)
-                years = roll_dice(years)
+                years = roll_dice(years, use_numpy=True)
                 data["years"] = years
 
                 generated_items.append(generated)
@@ -1009,7 +1007,7 @@ def apply_effects(person_data={}, world_data={}, effect_data={}, tag_manager={})
     family = person_data.get("family", {})
     father = family.get("father", {})
     mother = family.get("mother", {})
-    year = world_data.get("year",1100)
+    year = world_data.get("year", 1100)
 
     for effect, variable in effect_data.items():
         # pay = good, father.leave, disease = infection, pay = low-fair, blessing, family.blessing,
@@ -1030,6 +1028,11 @@ def apply_effects(person_data={}, world_data={}, effect_data={}, tag_manager={})
             father["leave"] = year
             #TODO: reduce family income
             pass
+        elif effect == "mother.leave":
+            mother["leave"] = year
+            #TODO: reduce family income
+            pass
+
         elif effect == "disease":
             if not variable:
                 variable = 3.0
@@ -1177,7 +1180,7 @@ def set_world_data(father, mother, world_data, tag_manager):
 
 def generate_object(generator='person', world_data={}, item_template={}, power=1, tags='', role='friend', years=4):
     end_date = world_data.get("year", 1100)
-    years = roll_dice(years)
+    years = roll_dice(years, use_numpy=True)
     try:
         if end_date:
             end_date = int(end_date)

@@ -198,7 +198,7 @@ def parse_dice_text(text):
     return text
 
 
-def roll_dice(text):
+def roll_dice(text='1d6', use_numpy=False):
     if not text or not isinstance(text, basestring):
         return text
     output = text
@@ -234,7 +234,11 @@ def roll_dice(text):
         rolls = []
         if num_dice > 0:
             for roll_num in range(0, num_dice):
-                rolls.append(random.randint(1, dice_type))
+                if use_numpy:
+                    roll = np.random.randint(1, dice_type)
+                else:
+                    roll = random.randint(1, dice_type)
+                rolls.append(roll)
             result += sum(rolls)
 
         if modifier_type:
