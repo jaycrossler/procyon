@@ -152,12 +152,26 @@
          });
 
         function load_event_info(){
+            var event_info = [];
+            {% autoescape off %}
             {% for event in person_data.events %}
-            $('#event_{{ event.id }}').on('mouseover',function(){
-                var event_data = "{% autoescape off %}{{ event.world_data }}{% endautoescape %}";
-                $('#world_data_holder').html(event_data);
-            });
+            event_info[{{ event.id }}] = {world: "{{ event.world_data }}"};
             {% endfor %}
+            {% endautoescape %}
+
+            $('.event_data_row').on('mouseover',function(){
+                var ev_id = $(this).attr('id');
+                var id = ev_id.split("_")[1];
+
+                var event_data = event_info[id].world;;
+                $('#world_data_holder').html(event_data);
+                $(this).css({backgroundColor: 'lightblue'});
+            }).on('mouseout',function(){
+                $(this).css({backgroundColor: ''});
+            });
+
+            var event_data = _.last(event_info).world;
+            $('#world_data_holder').html(event_data);
         };
      </script>
 {% endblock %}
@@ -247,7 +261,7 @@
             <tr><th>Age</th><th>Year</th><th>What happened?</th></tr>
         {% autoescape off %}
         {% for event in person_data.events %}
-            <tr id="event_{{ event.id }}"><td class="center">{{ event.age }}</td>
+            <tr class='event_data_row' id="event_{{ event.id }}"><td class="center">{{ event.age }}</td>
                 <td class="center">{{ event.year }}</td>
                 <td>{{ event.message }}</td></tr>
         {% endfor %}
