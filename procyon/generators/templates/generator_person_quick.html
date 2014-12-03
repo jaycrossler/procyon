@@ -143,11 +143,22 @@
                  buildLink('string', $btn)
              });
 
-             $('.btn_json').on('click',function(){
+            $('.btn_json').on('click',function(){
                  var $btn = $(this);
                  buildLink('json', $btn)
-             });
+            });
+
+            load_event_info();
          });
+
+        function load_event_info(){
+            {% for event in person_data.events %}
+            $('#event_{{ event.id }}').on('mouseover',function(){
+                var event_data = "{% autoescape off %}{{ event.world_data }}{% endautoescape %}";
+                $('#world_data_holder').html(event_data);
+            });
+            {% endfor %}
+        };
      </script>
 {% endblock %}
 
@@ -236,7 +247,7 @@
             <tr><th>Age</th><th>Year</th><th>What happened?</th></tr>
         {% autoescape off %}
         {% for event in person_data.events %}
-            <tr><td class="center">{{ event.age }}</td>
+            <tr id="event_{{ event.id }}"><td class="center">{{ event.age }}</td>
                 <td class="center">{{ event.year }}</td>
                 <td>{{ event.message }}</td></tr>
         {% endfor %}
@@ -265,7 +276,9 @@
             <br /><b>Skills</b><br/>
 
             <br /><b>World Data:</b><br/>
+            <span id="world_data_holder">
             {{ person_data.world_data }}
+            </span>
 
         </span>
 

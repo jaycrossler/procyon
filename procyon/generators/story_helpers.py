@@ -523,6 +523,7 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
     person_data["race"] = race
     person_data["name"] = name
     person_data["gender"] = gender
+
     person_data["qualities"] = qualities
     person_data["attribute_mods"] = attribute_mods
     person_data["aspects"] = dna_helpers.aspects_from_dna(dna)
@@ -530,37 +531,48 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
     person_data["item_list"] = []
     person_data["description"] = story_person_helpers.person_description(person_data)
 
+    # TODO: Pass JSON back for every event that has:
+    # person_data["birth_data"] = {
+    #     "qualities": qualities,
+    #     "attribute_mods": attribute_mods,
+    #     "aspects": dna_helpers.aspects_from_dna(dna),
+    #     "skills": [],
+    #     "item_list": [],
+    #     "description": story_person_helpers.person_description(person_data)
+    # }
+
+    #TODO: Add Family History of past 20 years
+    event_id = 0
     age = 0
-    person_data, world_data = apply_event_effects(person_data=person_data, world_data=world_data, age=age,
-                                                  event_data=birth_place, event_type='birthplace', year=year,
-                                                  tag_manager=tag_manager)
+    person_event_data = apply_event_effects(person_data=person_data, world_data=world_data, age=age,
+                                            event_data=birth_place, event_type='birthplace', year=year,
+                                            tag_manager=tag_manager, event_id=event_id)
+    person_data["events"].append(person_event_data)
 
     years_to_scan = 16 + roll_dice("2d10", use_numpy=True)
     for y in range(years_to_scan):
         age += 1
-        person_data["events"].append({"age": age, "year": year + age, "message": "Had an uneventful birthday"})
+        event_id += 1
+        world_data["year"] = year + age
+        person_event_data = {"id": event_id, "age": age, "year": year + age, "message": "Had an uneventful birthday",
+                             "world_data": str(world_data)}
+        person_data["events"].append(person_event_data)
 
-    person_data["world_data"] = str(world_data)
     person_data["tags"] = str(flatten_tags(tag_manager))
 
     return person_data
 
 
 def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type='birthplace', year=None,
-                        age='undefined', tag_manager={}):
+                        age='undefined', tag_manager={}, event_id=42):
     message = ""
 
     if not year:
-        if "year" in world_data:
-            year = world_data["year"]
-        else:
-            year = 1100
+        year = world_data.get("year", 1100)
     world_data["year"] = year
+
     if age == 'undefined':
-        if "age" in person_data:
-            age = person_data["age"]
-        else:
-            age = 16 + numpy.random.randint(20)
+        age = person_data.get("age", 16 + numpy.random.randint(20))
     person_data["age"] = age
 
     name = event_data.get("name", "in a barn")
@@ -626,14 +638,14 @@ def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type
                           "override": effect.get("override", None),
                           "power": effect.get("refresh", None) or effect.get("power", None)
         }
-        #Run methods for everything in effects
+        # Run methods for everything in effects
         effect_data = effect.get("effect", None)  # pay = good, father.leave, disease = infection
         effect_data = convert_string_to_properties_object(effect_data)
         effect_data = add_or_merge_dicts(effect_data, generator_data)
         generated_items_new = story_person_helpers.apply_effects(person_data, world_data, effect_data, tag_manager)
         generated_items = generated_items + generated_items_new
 
-        #Properties are always applied to the person after all effects are run
+        # Properties are always applied to the person after all effects are run
         ef_properties = effect.get("properties", None)  # JSON or str, "mother.profession = prostitute, lifespan +2
         if ef_properties:
             if isinstance(ef_properties, basestring):
@@ -658,6 +670,4 @@ def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type
     addional_messages = [m.strip() for m in addional_messages]
     message = "<br/>".join(addional_messages)
 
-    person_data["events"].append({"age": age, "year": year, "message": message})
-
-    return person_data, world_data
+    return {"id": event_id, "age": age, "year": year, "message": message, "world_data": str(world_data)}

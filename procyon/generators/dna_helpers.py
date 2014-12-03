@@ -65,6 +65,12 @@ GENE_ARRAY = [
     {"name": "Multiple Children",
      "values": "Single,Single,Single,Single,Single,Single,Single,Single,Single,Single,Single,Single,Single,Twins,Twins,Multiple"},
 
+    {"name": "Blood Type",
+     "values": "C:Regeneration+,A,A,A,A,A,A,B,B,AB,AB,O,O,O,O,O"},
+
+    {"name": "Blood Rh Factor",
+     "values": "Exotic::Regeneration+:Lifespan+,Plus,Plus,Plus,Plus,Plus,Plus,Plus,Plus,Plus,Plus,Plus,Plus,Negative,Negative,Negative"},
+
     {"name": "Nerve Mapping",
      "values": ""},
 
