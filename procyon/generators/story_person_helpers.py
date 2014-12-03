@@ -1,13 +1,13 @@
 import numpy
-import json
-from procyon.starsystemmaker.math_helpers import *
+from procyon.starsystemmaker import math_helpers
 import story_helpers
 
+
 def set_world_data(father, mother, world_data, tag_manager):
-    father_economics = father.get("economic") or numpy.random.choice(VALUE_ARRAY)
-    mother_economics = mother.get("economic") or numpy.random.choice(VALUE_ARRAY)
-    father_education = father.get("education") or numpy.random.choice(VALUE_ARRAY)
-    mother_education = mother.get("education") or numpy.random.choice(VALUE_ARRAY)
+    father_economics = father.get("economic") or numpy.random.choice(math_helpers.VALUE_ARRAY)
+    mother_economics = mother.get("economic") or numpy.random.choice(math_helpers.VALUE_ARRAY)
+    father_education = father.get("education") or numpy.random.choice(math_helpers.VALUE_ARRAY)
+    mother_education = mother.get("education") or numpy.random.choice(math_helpers.VALUE_ARRAY)
     father_conflict = father.get("conflict") or "low"
     mother_conflict = mother.get("conflict") or "low"
     father_profession = father.get("profession") or "Farmer"
@@ -22,14 +22,14 @@ def set_world_data(father, mother, world_data, tag_manager):
     city_tags = city_data.get("tags", "")
 
     try:
-        economics = float(value_of_variable(father_economics) + value_of_variable(mother_economics))
+        economics = float(math_helpers.value_of_variable(father_economics) + math_helpers.value_of_variable(mother_economics))
         economics -= 3
     except ValueError:
         economics = father_economics
     family["economics"] = family.get("economics", economics)
 
     try:
-        conflict = float(value_of_variable(father_conflict) + value_of_variable(mother_conflict))
+        conflict = float(math_helpers.value_of_variable(father_conflict) + math_helpers.value_of_variable(mother_conflict))
         conflict -= 5
     except ValueError:
         conflict = father_conflict
@@ -43,31 +43,31 @@ def set_world_data(father, mother, world_data, tag_manager):
     father["education"] = father_education
     father["conflict"] = father_conflict
     father_tags = father.get("tags", father_profession.lower())
-    if father_economics > value_of_variable('fair'):
+    if father_economics > math_helpers.value_of_variable('fair'):
         father_tags += ",wealthy"
-    if father_education > value_of_variable('fair'):
+    if father_education > math_helpers.value_of_variable('fair'):
         father_tags += ",educated"
     father["tags"] = father_tags
-    add_tags(tag_manager, 'father', father_tags)
+    math_helpers.add_tags(tag_manager, 'father', father_tags)
 
     mother["profession"] = mother.get("profession", mother_profession)
     mother["economics"] = mother_economics
     mother["education"] = mother_education
     mother["conflict"] = mother_conflict
     mother_tags = mother.get("tags", mother_profession.lower())
-    if mother_economics > value_of_variable('fair'):
+    if mother_economics > math_helpers.value_of_variable('fair'):
         mother_tags += ",wealthy"
-    if mother_education > value_of_variable('fair'):
+    if mother_education > math_helpers.value_of_variable('fair'):
         mother_tags += ",educated"
     mother["tags"] = mother_tags
-    add_tags(tag_manager, 'mother', mother_tags)
+    math_helpers.add_tags(tag_manager, 'mother', mother_tags)
 
     if "house" not in family:
-        if economics >= value_of_variable('great'):
+        if economics >= math_helpers.value_of_variable('great'):
             family["house"] = "large"
-        elif economics >= value_of_variable('good'):
+        elif economics >= math_helpers.value_of_variable('good'):
             family["house"] = "medium"
-        elif economics >= value_of_variable('fair'):
+        elif economics >= math_helpers.value_of_variable('fair'):
             family["house"] = "small"
 
     # TODO: Have parents leave if high conflict or low economics
@@ -83,15 +83,15 @@ def set_world_data(father, mother, world_data, tag_manager):
     family["mother"] = mother
 
     world_data["family"] = family
-    magic_num = numpy.random.choice(VALUE_ARRAY)
+    magic_num = numpy.random.choice(math_helpers.VALUE_ARRAY)
     world_data["magic"] = world_data.get("magic", magic_num)
-    world_data["technology"] = world_data.get("technology", numpy.random.choice(VALUE_ARRAY))
+    world_data["technology"] = world_data.get("technology", numpy.random.choice(math_helpers.VALUE_ARRAY))
 
-    add_tags(tag_manager, 'world', world_tags)
-    add_tags(tag_manager, 'city', city_tags)
+    math_helpers.add_tags(tag_manager, 'world', world_tags)
+    math_helpers.add_tags(tag_manager, 'city', city_tags)
 
-    if value_of_variable(magic_num) > 6:
-        add_tags(tag_manager, 'world', 'magic')
+    if math_helpers.value_of_variable(magic_num) > 6:
+        math_helpers.add_tags(tag_manager, 'world', 'magic')
 
     return world_data
 
@@ -132,10 +132,10 @@ def apply_properties(person_data={}, world_data={}, properties_data={}, generate
         elif key.startswith("world."):
             #TODO: have this work for multiple-level settings
             key = key[6:]
-            add_or_increment_dict_val(world_data, key, val)
+            math_helpers.add_or_increment_dict_val(world_data, key, val)
         else:
-            val = roll_dice(val, use_numpy=True)
-            add_or_increment_dict_val(person_data, key, val)
+            val = math_helpers.roll_dice(val, use_numpy=True)
+            math_helpers.add_or_increment_dict_val(person_data, key, val)
             message += key + " was adjusted " + str(val)
 
     return message
@@ -152,7 +152,7 @@ def apply_effects(person_data={}, world_data={}, effect_data={}, tag_manager={})
     #     years =  # 1d6
     #     role =   # caretaker, mount, pet, familiar
 
-    tags = flatten_tags(tag_manager)
+    tags = math_helpers.flatten_tags(tag_manager)
     items = person_data.get("children", [])
     qualities = person_data["qualities"]
 
@@ -164,7 +164,7 @@ def apply_effects(person_data={}, world_data={}, effect_data={}, tag_manager={})
             years = effect_data.get("years", 4)
             role = effect_data.get("role", "friend")
             override = effect_data.get("override", "")
-            override = convert_string_to_properties_object(override)
+            override = math_helpers.convert_string_to_properties_object(override)
 
             effect_data.pop("generator", None)
             effect_data.pop("refresh", None)
@@ -183,7 +183,7 @@ def apply_effects(person_data={}, world_data={}, effect_data={}, tag_manager={})
                 data = generated.get("data", {})
                 data["role"] = role
                 years = effect_data.get("years", 1)
-                years = roll_dice(years, use_numpy=True)
+                years = math_helpers.roll_dice(years, use_numpy=True)
                 data["years"] = years
 
                 generated_items.append(generated)
@@ -210,7 +210,7 @@ def apply_effects(person_data={}, world_data={}, effect_data={}, tag_manager={})
                 variable = 5.0
             if isinstance(variable, basestring):
                 variable = 5.0
-            add_or_increment_dict_val(person_data, "money", variable)
+            math_helpers.add_or_increment_dict_val(person_data, "money", variable)
 
         elif effect == "father.leave":
             father["leave"] = year
@@ -228,7 +228,7 @@ def apply_effects(person_data={}, world_data={}, effect_data={}, tag_manager={})
                 variable = 3.0
             if isinstance(variable, basestring):
                 variable = 3.0
-            add_or_increment_dict_val(qualities, 'lifespan', -variable)
+            math_helpers.add_or_increment_dict_val(qualities, 'lifespan', -variable)
             generated_items.append({"type": "disease", "name": "rickets"})  #TODO: Make a disease lookup table
 
         elif effect == "pay":
@@ -238,7 +238,7 @@ def apply_effects(person_data={}, world_data={}, effect_data={}, tag_manager={})
                 variable = 5.0
             if isinstance(variable, basestring):
                 variable = 5.0
-            add_or_increment_dict_val(person_data, "money", variable)
+            math_helpers.add_or_increment_dict_val(person_data, "money", variable)
 
         elif effect == "blessing":
             if not variable:
@@ -247,7 +247,7 @@ def apply_effects(person_data={}, world_data={}, effect_data={}, tag_manager={})
                 variable = 3.0
             if isinstance(variable, basestring):
                 variable = 3.0
-            add_or_increment_dict_val(qualities, 'lifespan', variable)
+            math_helpers.add_or_increment_dict_val(qualities, 'lifespan', variable)
             generated_items.append({"type": "blessing", "name": "lucky"})
 
         elif effect == "family.blessing":
@@ -257,7 +257,7 @@ def apply_effects(person_data={}, world_data={}, effect_data={}, tag_manager={})
                 variable = 3.0
             if isinstance(variable, basestring):
                 variable = 3.0
-            add_or_increment_dict_val(qualities, 'lifespan', -variable)
+            math_helpers.add_or_increment_dict_val(qualities, 'lifespan', -variable)
             generated_items.append({"type": "family blessing", "name": "wealthy"})
 
         elif effect == "cost":
@@ -267,7 +267,7 @@ def apply_effects(person_data={}, world_data={}, effect_data={}, tag_manager={})
                 variable = 5.0
             if isinstance(variable, basestring):
                 variable = 5.0
-            add_or_increment_dict_val(person_data, "money", -variable)
+            math_helpers.add_or_increment_dict_val(person_data, "money", -variable)
 
         elif effect == "gain":
             pass
@@ -277,7 +277,7 @@ def apply_effects(person_data={}, world_data={}, effect_data={}, tag_manager={})
 
 def generate_object(generator='person', world_data={}, item_template={}, power=1, tags='', role='friend', years=4):
     end_date = world_data.get("year", 1100)
-    years = roll_dice(years, use_numpy=True)
+    years = math_helpers.roll_dice(years, use_numpy=True)
     try:
         if end_date:
             end_date = int(end_date)
@@ -302,3 +302,9 @@ def generate_object(generator='person', world_data={}, item_template={}, power=1
     #TODO: Have an economics lookup engine
     #TODO: Use names from parents, only use ranks if economics and world says so
     #TODO: Determine nationality, use names from those
+
+
+def add_family_history(person_data={}, world_data={}, event_id=0, tag_manager={}):
+
+
+    return event_id

@@ -1,5 +1,3 @@
-from procyon.starsystemmaker.math_helpers import *
-import random
 import os
 import numpy as np
 import fuzzy
@@ -82,7 +80,7 @@ def name_nysiis(word):
             if result:
                 word = result
         except ValueError:
-            result = word
+            pass
     return word
 
 

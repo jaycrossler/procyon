@@ -2,7 +2,7 @@ __author__ = 'jcrossler'
 
 import numpy
 import json
-from procyon.starsystemmaker.math_helpers import *
+from procyon.starsystemmaker import math_helpers
 from procyon.starsystemmaker.name_library import *
 import dna_helpers
 import story_person_helpers
@@ -77,7 +77,7 @@ def check_requirements(requirements, world_data):
         if len(requirements) < 4:
             return True
         else:
-            requirements = convert_string_to_req_object(requirements)
+            requirements = math_helpers.convert_string_to_req_object(requirements)
 
     if isinstance(requirements, list):
         for req in requirements:
@@ -117,23 +117,23 @@ def check_requirements(requirements, world_data):
 
                     elif r_exceeds or r_below or r_is or r_gt or r_lt or r_exists or r_empty:
                         try:
-                            to_check = value_of_variable(to_check)
+                            to_check = math_helpers.value_of_variable(to_check)
                             if r_exceeds:
-                                r_exceeds = value_of_variable(r_exceeds)
+                                r_exceeds = math_helpers.value_of_variable(r_exceeds)
                                 checks.append(r_exceeds <= to_check)
                             if r_gt:
-                                r_gt = value_of_variable(r_gt)
+                                r_gt = math_helpers.value_of_variable(r_gt)
                                 checks.append(r_gt < to_check)
                             if r_lt:
-                                r_lt = value_of_variable(r_lt)
+                                r_lt = math_helpers.value_of_variable(r_lt)
                                 checks.append(r_lt > to_check)
                             if r_below:
-                                r_below = value_of_variable(r_below)
+                                r_below = math_helpers.value_of_variable(r_below)
                                 r_below = float(r_below)
                                 checks.append(r_below >= to_check)
                             if r_is:
                                 try:
-                                    temp = value_of_variable(r_is)
+                                    temp = math_helpers.value_of_variable(r_is)
                                     r_is = float(temp)
                                     checks.append(r_is == to_check)
                                 except ValueError:
@@ -233,7 +233,7 @@ def breakout_component_types(world_data, tags, pattern_list):
                     except ValueError:
                         r = ''
                 elif len(r) > 3 and isinstance(r, basestring):
-                    r = convert_string_to_req_object(r)
+                    r = math_helpers.convert_string_to_req_object(r)
 
                 new_component['requirements'] = r
 
@@ -301,7 +301,7 @@ def create_random_item(world_data={}, override={}, set_random_key=True, parse_di
             rand_seed = float(rand_seed)
         except Exception:
             rand_seed = numpy.random.random()
-        rand_seed = set_rand_seed(rand_seed)
+        rand_seed = math_helpers.set_rand_seed(rand_seed)
     note = ""
 
     pattern_list, pattern_probability, pattern_prefixes = turn_pattern_to_hash(pattern, override)
@@ -345,7 +345,7 @@ def create_random_item(world_data={}, override={}, set_random_key=True, parse_di
                     text = component.get("name", "")
 
                 if parse_dice:
-                    text = parse_dice_text(text)
+                    text = math_helpers.parse_dice_text(text)
 
                 item_prefixes.append(pattern_prefixes[idx])
                 item_names.append(text)
@@ -412,7 +412,7 @@ def create_random_name(world_data={}, override={}, pattern="", tags="", rand_see
             rand_seed = float(rand_seed)
         except Exception:
             rand_seed = numpy.random.random()
-        rand_seed = set_rand_seed(rand_seed)
+        rand_seed = math_helpers.set_rand_seed(rand_seed)
         set_random_key = False
 
     name_patterns = {}
@@ -473,7 +473,7 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
         rand_seed = float(rand_seed)
     except Exception:
         rand_seed = numpy.random.random()
-    rand_seed = set_rand_seed(rand_seed)
+    rand_seed = math_helpers.set_rand_seed(rand_seed)
 
     seed_mother_dna = str(rand_seed) + "1"
     seed_father_dna = str(rand_seed) + "2"
@@ -504,28 +504,22 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
     if gender:
         dna = dna_helpers.set_dna_gender(dna, gender)
 
-    set_rand_seed(rand_seed)
+    math_helpers.set_rand_seed(rand_seed)
     dna = dna_helpers.mutate_dna(dna)
-
-    race = dna_helpers.race_from_dna(dna)
-
     gender = dna_helpers.gender_from_dna(dna)
-    name_data = create_random_name(world_data=world_data, tags=flatten_tags(tag_manager), rand_seed=seed_name,
+    name_data = create_random_name(world_data=world_data, tags=math_helpers.flatten_tags(tag_manager), rand_seed=seed_name,
                                    gender=gender)
     name = name_data["name"]
 
     birth_place = create_random_item(world_data=world_data, set_random_key=False, pattern='birthplace', name_length=300)
 
-    qualities, attribute_mods = dna_helpers.qualities_from_dna(dna)
-
     person_data["dna"] = dna
     person_data["events"] = []
-    person_data["race"] = race
+    person_data["race"] = dna_helpers.race_from_dna(dna)
     person_data["name"] = name
     person_data["gender"] = gender
 
-    person_data["qualities"] = qualities
-    person_data["attribute_mods"] = attribute_mods
+    person_data["qualities"], person_data["attribute_mods"] = dna_helpers.qualities_from_dna(dna)
     person_data["aspects"] = dna_helpers.aspects_from_dna(dna)
     person_data["skills"] = []
     person_data["item_list"] = []
@@ -541,15 +535,17 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
     #     "description": story_person_helpers.person_description(person_data)
     # }
 
-    #TODO: Add Family History of past 20 years
     event_id = 0
+    event_id = story_person_helpers.add_family_history(person_data=person_data, world_data=world_data,
+                                                       event_id=event_id, tag_manager=tag_manager)
+
     age = 0
     person_event_data = apply_event_effects(person_data=person_data, world_data=world_data, age=age,
                                             event_data=birth_place, event_type='birthplace', year=year,
                                             tag_manager=tag_manager, event_id=event_id)
     person_data["events"].append(person_event_data)
 
-    years_to_scan = 16 + roll_dice("2d10", use_numpy=True)
+    years_to_scan = 16 + math_helpers.roll_dice("2d10", use_numpy=True)
     for y in range(years_to_scan):
         age += 1
         event_id += 1
@@ -558,7 +554,7 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
                              "world_data": str(world_data)}
         person_data["events"].append(person_event_data)
 
-    person_data["tags"] = str(flatten_tags(tag_manager))
+    person_data["tags"] = str(math_helpers.flatten_tags(tag_manager))
 
     return person_data
 
@@ -579,9 +575,9 @@ def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type
     properties = event_data.get("properties", {})
 
     if isinstance(properties, basestring):
-        properties = convert_string_to_properties_object(properties)
+        properties = math_helpers.convert_string_to_properties_object(properties)
 
-    add_tags(tag_manager, 'event', event_data.get("tags", []))
+    math_helpers.add_tags(tag_manager, 'event', event_data.get("tags", []))
 
     effect_was_applied = False
     generated_items = []
@@ -608,7 +604,7 @@ def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type
                 chance_modifier = 1
 
             try:
-                chance = value_of_variable(chance)
+                chance = math_helpers.value_of_variable(chance)
                 chance += chance_modifier
                 chance /= 100
 
@@ -640,8 +636,8 @@ def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type
         }
         # Run methods for everything in effects
         effect_data = effect.get("effect", None)  # pay = good, father.leave, disease = infection
-        effect_data = convert_string_to_properties_object(effect_data)
-        effect_data = add_or_merge_dicts(effect_data, generator_data)
+        effect_data = math_helpers.convert_string_to_properties_object(effect_data)
+        effect_data = math_helpers.add_or_merge_dicts(effect_data, generator_data)
         generated_items_new = story_person_helpers.apply_effects(person_data, world_data, effect_data, tag_manager)
         generated_items = generated_items + generated_items_new
 
@@ -649,9 +645,9 @@ def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type
         ef_properties = effect.get("properties", None)  # JSON or str, "mother.profession = prostitute, lifespan +2
         if ef_properties:
             if isinstance(ef_properties, basestring):
-                ef_properties = convert_string_to_properties_object(ef_properties)
+                ef_properties = math_helpers.convert_string_to_properties_object(ef_properties)
 
-            properties = add_or_merge_dicts(properties, ef_properties)
+            properties = math_helpers.add_or_merge_dicts(properties, ef_properties)
         effect_was_applied = True
 
     if event_type == 'birthplace':
