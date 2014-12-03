@@ -1,4 +1,5 @@
 import numpy as np
+
 try:
     from django.http import HttpResponse
 except:
@@ -9,12 +10,14 @@ import random
 # --- Mathy functions for planetary things ----------------
 dice_parser = re.compile('[0-9]+[dD][0-9]+[e]{0,1}\s*[+-]{0,1}\s*[0-9]*(?![dD])')
 
+VALUE_ARRAY = 'none tiny terrible poor mediocre average fair good great superb fantastic epic'.split(" ")
+
 
 def rand_range(low=0, high=1, weight=1, avg=0.5):
     if low == 0 and high == 1:
         return rand_weighted(avg, weight)
 
-    #convert numbers to 0 - 1
+    # convert numbers to 0 - 1
     num_range = high - low
     if num_range <= 0:
         num_range = 1
@@ -123,7 +126,7 @@ def clamp(value, v_min=0, v_max=1):
 def bigger_makes_smaller(start=5, start_min=0, start_max=8, end=5000, end_min=1, end_max=12000, tries_to_adjust=2):
     # Used to inversely correlate two variables within a range
     # For example, the bigger stars are usually younger (as they'd burn out quicker)
-    #   so if start is higher than average and end is higher than average, make end lower
+    # so if start is higher than average and end is higher than average, make end lower
 
     start_pct = clamp(float(start - start_min) / float(start_max - start_min), 0, 1)
     end_pct = clamp(float(end - end_min) / float(end_max - end_min), 0, 1)
@@ -178,7 +181,7 @@ def randint(low, high, normalized_weighting=1):
         return high
     return np.random.randint(low, high)
 
-    #TODO: Think about normalizing...
+    # TODO: Think about normalizing...
     # if normalized_weighting == 1 or high-low < 3:
     #     total = np.random.randint(low, high)
     # else:
@@ -205,7 +208,7 @@ def roll_dice(text='1d6', use_numpy=False):
     d_spot = text.find('d')
     if d_spot > -1:
         num_dice = text[0:d_spot]
-        dice_type = text[d_spot+1:].strip()
+        dice_type = text[d_spot + 1:].strip()
         modifier_type = ''
         modifier_extra = ''
 
@@ -218,13 +221,13 @@ def roll_dice(text='1d6', use_numpy=False):
         if '+' in dice_type:
             modifier_pos = dice_type.find('+')
             dice_front = dice_type[0:modifier_pos]
-            modifier_extra = dice_type[modifier_pos+1:].strip()
+            modifier_extra = dice_type[modifier_pos + 1:].strip()
             dice_type = dice_front
             modifier_type = "+"
         elif '-' in dice_type:
             modifier_pos = dice_type.find('-')
             dice_front = dice_type[0:modifier_pos]
-            modifier_extra = dice_type[modifier_pos+1:].strip()
+            modifier_extra = dice_type[modifier_pos + 1:].strip()
             dice_type = dice_front
             modifier_type = "-"
 
@@ -254,7 +257,7 @@ def roll_dice(text='1d6', use_numpy=False):
 
 
 def expand_array_to_16(source_array):
-    #Take in any array, and expand it to 16 spots
+    # Take in any array, and expand it to 16 spots
     in_len = len(source_array)
     if in_len > 16:
         return source_array[:16]
@@ -287,3 +290,258 @@ def expand_array_to_16(source_array):
                 out[idx] = val
 
     return out
+
+
+def add_or_merge_dicts(dict1, dict2):
+    d = {}
+    for k, v in dict1.items():
+        try:
+            d[k] = float(v)
+        except ValueError:
+            d[k] = v
+
+    for k, v in dict2.items():
+        if k in d or k.lower() in d:
+            try:
+                v1 = float(d[k])
+                v2 = float(v)
+                d[k] = v1 + v2
+            except ValueError:
+                d[k] = str(d[k]) + "," + str(v)
+        else:
+            d[k] = v
+    return d
+
+
+def add_or_increment_dict_val(d, key, val):
+    if isinstance(d, tuple):
+        raise Exception("Tuple Exception inside of 'dict_add' method: " + str(d))
+
+    if isinstance(d, list):
+        found = False
+        for d_item in d:
+            if d_item.get("name", "") == key and d_item.get("value"):
+                existing_val = d_item.get("value")
+                try:
+                    v1 = float(existing_val)
+                    v2 = float(val)
+                    d_item["name"] = v1 + v2
+                except ValueError:
+                    d_item["name"] = str(existing_val) + "," + str(val)
+            found = True
+        if not found:
+            try:
+                val = float(val)
+            except ValueError:
+                pass
+            d.append({"name": key, "value": val})
+    else:
+        if key in d or key.lower() in d:
+            try:
+                v1 = float(d[key])
+                v2 = float(val)
+                d[key] = v1 + v2
+            except ValueError:
+                d[key] = str(d[key]) + "," + str(val)
+        else:
+            if isinstance(key, basestring):
+                d[key] = val
+            else:
+                pass
+
+    return d
+
+
+def add_tags(tag_manager, category, *tag_list):
+    tag_array = []
+    for tag_words in tag_list:
+        if not tag_words:
+            continue
+        if isinstance(tag_words, basestring):
+            tag_array = tag_words.split(",")
+        elif isinstance(tag_words, dict):
+            for tag in tag_words.items():
+                tag_array.append(tag[0])
+
+    tags = [tag.lower().strip() for tag in tag_array if tag]
+
+    existing_tags = tag_manager.get(category, [])
+    tag_manager[category] = existing_tags + tags
+
+    return tag_manager
+
+
+def flatten_tags(tag_manager={}, max_tags=20):
+    flattened = []
+    for key, val in tag_manager.items():
+        flattened += val
+
+    if len(flattened) > max_tags:
+        flattened = np.random.choice(flattened, max_tags)
+    tags = ",".join(flattened)
+    return tags
+
+
+def value_of_variable(var):
+    val = var
+    if isinstance(var, basestring):
+        var = var.lower().strip()
+        if len(var) < 1:
+            return var
+
+        negative = False
+
+        if var[0] == "-":
+            negative = True
+            var = var[1:]
+
+        lookups = {'epic': 144.0, 'fantastic': 89.0, 'superb': 55.0, 'great': 34.0, 'good': 21.0, 'high': 13.0,
+                   'fair': 8.0, 'average': 5.0, 'medium': 5.0, 'moderate': 5.0, 'mediocre': 3.0,
+                   'low': 3.0, 'poor': 2.0, 'terrible': 1.0, 'tiny': 0.1, 'none': 0.0}
+        if var in lookups:
+            val = lookups[var]
+        else:
+            val = var
+
+        try:
+            val = float(val)
+        except ValueError:
+            pass
+
+        if negative and isinstance(val, float):
+            val = -val
+
+    else:
+        try:
+            val = float(var)
+        except ValueError:
+            pass
+        except TypeError:
+            pass
+
+    return val
+
+
+def convert_string_to_properties_object(props):
+    # lifespan +2, cost = poor, mother.profession = teacher, father.leaves, blessings
+    properties = {}
+    props = str(props)
+
+    if len(props) < 3:
+        return {}
+
+    props_split = props.split(",")
+    props_split = [req.strip() for req in props_split]
+
+    for p in props_split:
+        key = ""
+        val = ""
+        if "=" in p:
+            p_parts = p.split("=")
+            if len(p_parts) > 1:
+                key = p_parts[0].strip()
+                val = p_parts[1].strip()
+        elif " " in p:
+            # check for ending in number
+            p_parts = p.rsplit(' ', 1)
+            if len(p_parts) > 1:
+                key = p_parts[0].strip()
+                val = p_parts[1].strip()
+        else:
+            key = p
+            val = 'exists'
+
+        if key and val:
+            try:
+                val = float(val)
+            except ValueError:
+                pass
+            key = key.lower()
+            val = value_of_variable(val)
+            if key in properties:
+                old_val = properties[key]
+                if isinstance(old_val, float) and isinstance(val, float):
+                    val += old_val
+                else:
+                    val = str(old_val) + ", " + str(val)
+            properties[key] = val
+
+    return properties
+
+
+def convert_string_to_req_object(requirements):
+    reqs = str(requirements)
+
+    if len(reqs) < 3:
+        return []
+
+    reqs = reqs.split(",")
+    reqs = [req.strip() for req in reqs]
+
+    output = []
+    for req in reqs:
+        if " >= " in req:
+            req_part = req.split(" >= ")
+            if len(req_part) == 2:
+                output.append({"requirement": req_part[0].strip(), "exceeds": req_part[1].strip()})
+
+        elif " <= " in req:
+            req_part = req.split(" <= ")
+            if len(req_part) == 2:
+                output.append({"requirement": req_part[0].strip(), "below": req_part[1].strip()})
+
+        elif " > " in req:
+            req_part = req.split(" > ")
+            if len(req_part) == 2:
+                output.append({"requirement": req_part[0].strip(), ">": req_part[1].strip()})
+
+        elif " < " in req:
+            req_part = req.split(" < ")
+            if len(req_part) == 2:
+                output.append({"requirement": req_part[0].strip(), "<": req_part[1].strip()})
+
+        elif " has " in req:  # Check that it's not in quotes
+            req_part = req.split(" has ")
+            if len(req_part) == 2:
+                output.append({"requirement": req_part[0].strip(), "has": req_part[1].strip()})
+
+        elif " = " in req:
+            req_part = req.split(" = ")
+            if len(req_part) == 2:
+                output.append({"requirement": req_part[0].strip(), "is": req_part[1].strip()})
+
+        elif " == " in req:
+            req_part = req.split(" == ")
+            if len(req_part) == 2:
+                output.append({"requirement": req_part[0].strip(), "is": req_part[1].strip()})
+
+        elif " is " in req:  # TODO: Check that it's not in quotes
+            req_part = req.split(" is ")
+            if len(req_part) == 2:
+                output.append({"requirement": req_part[0].strip(), "is": req_part[1].strip()})
+
+        elif req.endswith(" none"):
+            req_part = req.split(" none")
+            output.append({"requirement": req_part[0].strip(), "empty": req_part[0].strip()})
+
+        elif req.endswith(" empty"):
+            req_part = req.split(" empty")
+            output.append({"requirement": req_part[0].strip(), "empty": req_part[0].strip()})
+
+        elif req.endswith(" doesn't exist"):
+            req_part = req.split(" doesn't exist")
+            output.append({"requirement": req_part[0].strip(), "empty": req_part[0].strip()})
+
+        elif req.endswith(" exists"):
+            req_part = req.split(" exists")
+            output.append({"requirement": req_part[0].strip(), "exists": req_part[0].strip()})
+
+        elif req.endswith(" exist"):
+            req_part = req.split(" exist")
+            output.append({"requirement": req_part[0].strip(), "exists": req_part[0].strip()})
+
+        else:  # Assume that it's an exists check
+            output.append({"requirement": req.strip(), "exists": req.strip()})
+
+    return output
+

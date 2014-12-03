@@ -169,7 +169,6 @@ ASPECT_ARRAY = [
     {"name": "See in the Dark", "requirements": "Eye Spectrum=Infrared,Eye Spectrum = Ultraviolet"},
 ]
 
-VALUE_ARRAY = 'none tiny terrible poor mediocre average fair good great superb fantastic epic'.split(" ")
 DNA_16_lOOKUPS = 'AA,AC,AG,AT,CA,CC,CG,CT,GA,GC,GG,GT,TA,TC,TG,TT'.split(',')  # Later, can switch this for obfuscation
 
 
