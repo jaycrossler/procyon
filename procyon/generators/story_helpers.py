@@ -562,7 +562,7 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
         event_id += 1
         world_data["year"] = year + age
         person_event_data = {"id": event_id, "age": age, "year": year + age, "message": "Had an uneventful birthday",
-                             "world_data": str(world_data)}
+                             "world_data": json.dumps(world_data)}
         person_data["events"].append(person_event_data)
 
     person_data["tags"] = str(math_helpers.flatten_tags(tag_manager))
@@ -663,7 +663,7 @@ def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type
         effect_was_applied = True
 
     if event_type == 'birthplace':
-        if isinstance(name, str) and name is not '':
+        if isinstance(name, basestring) and name is not '':
             name_lower = name[0].lower() + name[1:]
         else:
             name_lower = name
@@ -681,4 +681,4 @@ def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type
     addional_messages = [m.strip() for m in addional_messages]
     message = "<br/>".join(addional_messages)
 
-    return {"id": event_id, "age": age, "year": year, "message": message, "world_data": str(world_data)}
+    return {"id": event_id, "age": age, "year": year, "message": message, "world_data": json.dumps(world_data)}

@@ -43,6 +43,14 @@ def rand_range_from_text(rand_text=""):
     return rand_range()
 
 
+def dict_round_floats(source_dict={}, places=2):
+    for key, val in source_dict.iteritems():
+        if isinstance(val, float):
+            source_dict[key] = round(val, places)
+
+    return source_dict
+
+
 def rand_weighted(midpoint=0.5, weight=3):
     """
     Returns a random number between 0 and 1, weighted to be closer to 'goal'.
@@ -377,15 +385,19 @@ def add_tags(tag_manager, category, *tag_list):
     tags = [tag.lower().strip() for tag in tag_array if tag]
 
     existing_tags = tag_manager.get(category, [])
-    tag_manager[category] = existing_tags + tags
+    tag_manager[category] = list(set(existing_tags + tags))
 
     return tag_manager
 
 
-def flatten_tags(tag_manager={}, max_tags=20):
+def flatten_tags(tag_manager={}, max_tags=20, area=None):
     flattened = []
-    for key, val in tag_manager.items():
-        flattened += val
+    if not area:
+        for key, val in tag_manager.items():
+            flattened += val
+    else:
+        if area in tag_manager:
+            flattened += tag_manager[area]
 
     if len(flattened) > max_tags:
         flattened = np.random.choice(flattened, max_tags)
@@ -407,8 +419,6 @@ def word_from_value(value):
         if abs(val-value) < dist_to_upper:
             word = key
             dist_to_upper = abs(val-value)
-        else:
-            break
     return word
 
 

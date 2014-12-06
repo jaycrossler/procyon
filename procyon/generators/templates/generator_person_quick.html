@@ -15,27 +15,34 @@
         p {
             word-wrap: break-word;
         }
+
         input {
             width: 80px;
         }
+
         select {
             width: inherit;
         }
+
         .mother {
             background-color: pink;
             border-radius: 8px;
         }
+
         .father {
             background-color: lightblue;
             border-radius: 8px;
         }
+
         .parent {
             vertical-align: middle;
             padding: 2px;
         }
+
         .center {
             text-align: center;
         }
+
         .attribute {
             width: 130px;
             height: 20px;
@@ -48,12 +55,15 @@
             vertical-align: middle;
             line-height: 10px;
         }
+
         .positive {
             background-color: lightgreen;
         }
+
         .negative {
             background-color: lightpink;
         }
+
         #person_data {
             display: inline-block;
         }
@@ -62,6 +72,7 @@
             display: inline-block;
             width: 500px;
         }
+
         #character_data {
             display: inline-block;
             word-break: break-all;
@@ -71,6 +82,7 @@
             font-size: 12px;
             line-height: 14px;
         }
+
         #events_table {
             border: 2px solid #000000;
             border-spacing: 4px;
@@ -79,25 +91,31 @@
             font-size: 12px;
             line-height: 14px;
         }
+
         #events_table td {
             border: 1px solid #000000;
         }
+
         .smaller {
             font-size: .6em;
         }
+
         #generator {
             margin: 0 0 30px 0;
             font-size: 13px;
             font-weight: bold;
         }
+
         #generator input {
             font-size: 11px;
             margin: 0;
         }
+
         #generator select {
             font-size: 11px;
             margin: 0;
         }
+
         .world_json {
             margin: 0;
             width: 500px;
@@ -105,6 +123,13 @@
             font-size: 9px;
         }
 
+
+        pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; font-size: 7px; line-height: 8px}
+        .string { color: green; }
+        .number { color: darkorange; }
+        .boolean { color: blue; }
+        .null { color: magenta; }
+        .key { color: red; }
     </style>
 {% endblock %}
 
@@ -112,143 +137,179 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/underscore-min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/underscore.string.min.js"></script>
     <script type="text/javascript">
-         var base_link="{{ generator|lower }}";
-         function buildLink(type, $btn){
-             var rand = $btn.attr('id');
-             if (rand) {
-                 rand = rand.split("_")[1];
-                 rand = parseInt(rand);
-             }
-             var $form = $("#generator");
-             var arr = $form.serializeArray();
+        var base_link = "{{ generator|lower }}";
+        function buildLink(type, $btn) {
+            var rand = $btn.attr('id');
+            if (rand) {
+                rand = rand.split("_")[1];
+                rand = parseInt(rand);
+            }
+            var $form = $("#generator");
+            var arr = $form.serializeArray();
 
-             var query_string = "?";
-             _.each(arr,function(input){
-                 var val = input.value;
-                 var name = input.name;
-                 if (name != "csrfmiddlewaretoken" && val && name != "count" && !(name == "pattern" && val == "{{ pattern_default }}")) {
-                     if (name == "rand_seed") {
-                         val = rand;
-                     }
-                     query_string += name + "=" + val + "&";
-                 }
-             });
-             query_string+="format="+type;
+            var query_string = "?";
+            _.each(arr, function (input) {
+                var val = input.value;
+                var name = input.name;
+                if (name != "csrfmiddlewaretoken" && val && name != "count" && !(name == "pattern" && val == "{{ pattern_default }}")) {
+                    if (name == "rand_seed") {
+                        val = rand;
+                    }
+                    query_string += name + "=" + val + "&";
+                }
+            });
+            query_string += "format=" + type;
 
-             window.open(base_link+query_string, "_blank")
-         }
-         $(document).ready(function(){
-            $('.btn_string').on('click',function(){
-                 var $btn = $(this);
-                 buildLink('string', $btn)
-             });
+            window.open(base_link + query_string, "_blank")
+        }
+        $(document).ready(function () {
+            $('.btn_string').on('click', function () {
+                var $btn = $(this);
+                buildLink('string', $btn)
+            });
 
-            $('.btn_json').on('click',function(){
-                 var $btn = $(this);
-                 buildLink('json', $btn)
+            $('.btn_json').on('click', function () {
+                var $btn = $(this);
+                buildLink('json', $btn)
             });
 
             load_event_info();
 
-             $('#att_holder').on('mouseover',function(){
-                 $('#att_holder_details').css('display','inline');
-             }).on('mouseout',function(){
-                 $('#att_holder_details').css('display','none');
-             }).css({cursor:'pointer'});
+            $('#att_holder').on('mouseover', function () {
+                $('#att_holder_details').css('display', 'inline');
+            }).on('mouseout', function () {
+                $('#att_holder_details').css('display', 'none');
+            }).css({cursor: 'pointer'});
 
-             $('#new_dna').on('click',function(){
-                 $('#mother_dna').val('');
-                 $('#father_dna').val('');
-                 $('select').val('')
-             });
-         });
+            $('#new_dna').on('click', function () {
+                $('#mother_dna').val('');
+                $('#father_dna').val('');
+                $('select').val('')
+            });
+        });
 
-        function load_event_info(){
-            var event_info = [];
+
+        function syntaxHighlight(json) {
+            json = json.replace(/&/g, '&').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                var cls = 'number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'key';
+                    } else {
+                        cls = 'string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'null';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+
+
+        var event_info = [];
+        function load_event_info() {
             {% autoescape off %}
-            {% for event in person_data.events %}
-            event_info[{{ event.id }}] = {world: "{{ event.world_data }}"};
-            {% endfor %}
+                {% for event in person_data.events %}
+                    event_info[{{ event.id }}] = {world: {{ event.world_data }}};
+                {% endfor %}
             {% endautoescape %}
 
-            $('.event_data_row').on('mouseover',function(){
+            $('.event_data_row').on('mouseover', function () {
                 var ev_id = $(this).attr('id');
                 var id = ev_id.split("_")[1];
 
-                var event_data = event_info[id].world;;
-                $('#world_data_holder').html(event_data);
+                var event_data = event_info[id].world;
+                var str = JSON.stringify(event_data, undefined, 2);
+                var event_data_str = '<pre>' + syntaxHighlight(str) + '</pre>';
+
+                $('#world_data_holder').html(event_data_str);
                 $(this).css({backgroundColor: 'lightblue'});
-            }).on('mouseout',function(){
+            }).on('mouseout', function () {
                 $(this).css({backgroundColor: ''});
             });
 
             var event_data = _.last(event_info).world;
             $('#world_data_holder').html(event_data);
-        };
-     </script>
+        }
+
+    </script>
 {% endblock %}
 
 {% block banner %}
     <h2><a href="./">Generators</a> :: {{ generator|title }} ::
-    <span class="{% if person_data.gender == 'Male' %}father{% else %}mother{% endif %}">{{ person_data.name }}</span></h2>
+        <span class="{% if person_data.gender == 'Male' %}father{% else %}mother{% endif %}">{{ person_data.name }}</span>
+    </h2>
     <form action="" method="post" id="generator">
         {% csrf_token %}
         {% if note %}<i>{% autoescape off %}{{ note }}{% endautoescape %}</i>{% endif %}
 
         <div class="father parent">
-            Father:&nbsp; <input type="text" id="father_dna" name="father_dna" placeholder="Optional - DNA" value="{{ inputs.father.dna }}">
+            Father:&nbsp; <input type="text" id="father_dna" name="father_dna" placeholder="Optional - DNA"
+                                 value="{{ inputs.father.dna }}">
             <input type="text" name="father_profession" placeholder="Profession" value="{{ inputs.father.profession }}">
             Race: <select name="father_race">
-                {% for race in RACE_ARRAY %}
-                <option value="{{ race.name }}" {% if inputs.father.race == race.name %}selected="selected"{% endif %}>{{ race.name }}</option>
-                {% endfor %}
-            </select>
+            {% for race in RACE_ARRAY %}
+                <option value="{{ race.name }}"
+                        {% if inputs.father.race == race.name %}selected="selected"{% endif %}>{{ race.name }}</option>
+            {% endfor %}
+        </select>
             Education: <select name="father_education">
-                <option value="" {% if inputs.father.education == '' %}selected="selected"{% endif %}>random</option>
-                {% for attribute in VALUE_ARRAY %}
-                    <option value="{{ attribute }}" {% if inputs.father.education == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
-                {% endfor %}
-            </select>
+            <option value="" {% if inputs.father.education == '' %}selected="selected"{% endif %}>random</option>
+            {% for attribute in VALUE_ARRAY %}
+                <option value="{{ attribute }}"
+                        {% if inputs.father.education == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
+            {% endfor %}
+        </select>
             Economic: <select name="father_economic">
-                <option value="" {% if inputs.father.economic == '' %}selected="selected"{% endif %}>random</option>
-                {% for attribute in VALUE_ARRAY %}
-                    <option value="{{ attribute }}" {% if inputs.father.economic == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
-                {% endfor %}
-            </select>
+            <option value="" {% if inputs.father.economic == '' %}selected="selected"{% endif %}>random</option>
+            {% for attribute in VALUE_ARRAY %}
+                <option value="{{ attribute }}"
+                        {% if inputs.father.economic == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
+            {% endfor %}
+        </select>
             Chaos: <select name="father_conflict">
-                <option value="" {% if inputs.father.conflict == '' %}selected="selected"{% endif %}>random</option>
-                {% for attribute in VALUE_ARRAY %}
-                    <option value="{{ attribute }}" {% if inputs.father.conflict == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
-                {% endfor %}
-            </select>
+            <option value="" {% if inputs.father.conflict == '' %}selected="selected"{% endif %}>random</option>
+            {% for attribute in VALUE_ARRAY %}
+                <option value="{{ attribute }}"
+                        {% if inputs.father.conflict == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
+            {% endfor %}
+        </select>
         </div>
 
         <div class="mother parent">
-            Mother: <input type="text" id="mother_dna" name="mother_dna" placeholder="Optional - DNA" value="{{ inputs.mother.dna }}">
+            Mother: <input type="text" id="mother_dna" name="mother_dna" placeholder="Optional - DNA"
+                           value="{{ inputs.mother.dna }}">
             <input type="text" name="mother_profession" placeholder="Profession" value="{{ inputs.mother.profession }}">
             Race: <select name="mother_race">
-                {% for race in RACE_ARRAY %}
-                <option value="{{ race.name }}" {% if inputs.mother.race == race.name %}selected="selected"{% endif %}>{{ race.name }}</option>
-                {% endfor %}
-            </select>
+            {% for race in RACE_ARRAY %}
+                <option value="{{ race.name }}"
+                        {% if inputs.mother.race == race.name %}selected="selected"{% endif %}>{{ race.name }}</option>
+            {% endfor %}
+        </select>
             Education: <select name="mother_education">
-                <option value="" {% if inputs.mother.education == '' %}selected="selected"{% endif %}>random</option>
-                {% for attribute in VALUE_ARRAY %}
-                    <option value="{{ attribute }}" {% if inputs.mother.education == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
-                {% endfor %}
-            </select>
+            <option value="" {% if inputs.mother.education == '' %}selected="selected"{% endif %}>random</option>
+            {% for attribute in VALUE_ARRAY %}
+                <option value="{{ attribute }}"
+                        {% if inputs.mother.education == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
+            {% endfor %}
+        </select>
             Economic: <select name="mother_economic">
-                <option value="" {% if inputs.mother.economic == '' %}selected="selected"{% endif %}>random</option>
-                {% for attribute in VALUE_ARRAY %}
-                    <option value="{{ attribute }}" {% if inputs.mother.economic == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
-                {% endfor %}
-            </select>
+            <option value="" {% if inputs.mother.economic == '' %}selected="selected"{% endif %}>random</option>
+            {% for attribute in VALUE_ARRAY %}
+                <option value="{{ attribute }}"
+                        {% if inputs.mother.economic == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
+            {% endfor %}
+        </select>
             Chaos: <select name="mother_conflict">
-                <option value="" {% if inputs.mother.conflict == '' %}selected="selected"{% endif %}>random</option>
-                {% for attribute in VALUE_ARRAY %}
-                    <option value="{{ attribute }}" {% if inputs.mother.conflict == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
-                {% endfor %}
-            </select>
+            <option value="" {% if inputs.mother.conflict == '' %}selected="selected"{% endif %}>random</option>
+            {% for attribute in VALUE_ARRAY %}
+                <option value="{{ attribute }}"
+                        {% if inputs.mother.conflict == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
+            {% endfor %}
+        </select>
         </div>
 
         Force Child's Gender: <select name="gender">
@@ -256,57 +317,69 @@
             <option value="male" {% if inputs.gender == 'male' %}selected="selected"{% endif %}>Male</option>
             <option value="female" {% if inputs.gender == 'female' %}selected="selected"{% endif %}>Female</option>
         </select>
-        World JSON: <textarea id="world_json" name="world_json" placeholder='Optional - JSON data about the world/person/family. Something like: {"magic":"medium", "technology":"low", "year":1492}'
-                        class="world_json">{{ inputs.world_json }}</textarea><br/>
+        World JSON: <textarea id="world_json" name="world_json"
+                              placeholder='Optional - JSON data about the world/person/family. Something like: {"magic":"medium", "technology":"low", "year":1492}'
+                              class="world_json">{{ inputs.world_json }}</textarea><br/>
 
         <input type="submit" value="Regenerate with this Random Seed"/>
         <input name="regenerate" type="submit" value="Generate with different Seed"/>
-        <input id="new_dna" name="regenerate" type="submit" value="Generate all new"/> Random Seed: <input type="text" name="rand_seed" value="{{ inputs.rand_seed }}" style="margin: 0px"
-                          placeholder='Optional - Number to use to design the object. Same numbers and inputs will generate same objects'/>
+        <input id="new_dna" name="regenerate" type="submit" value="Generate all new"/>
+        Random Seed: <input type="text"
+                            name="rand_seed"
+                            value="{{ inputs.rand_seed }}"
+                            style="margin: 0px"
+                            placeholder='Optional - Number to use to design the object. Same numbers and inputs will generate same objects'/>
 
         <input class="btn_json" type="button" id="json_{{ inputs.rand_seed }}" value="JSON"/>
-        <input class="btn_string" type="button" id="string_{{ inputs.rand_seed }}" value="Text" />
+        <input class="btn_string" type="button" id="string_{{ inputs.rand_seed }}" value="Text"/>
     </form>
 
     <div id="person_data">
         <span id="event_list">
         <table id="events_table">
-            <tr><th>Age</th><th>Year</th><th>What happened?</th></tr>
-        {% autoescape off %}
-        {% for event in person_data.events %}
-            <tr class='event_data_row' id="event_{{ event.id }}"><td class="center">{{ event.age }}</td>
-                <td class="center">{{ event.year }}</td>
-                <td>{{ event.message }}</td></tr>
-        {% endfor %}
-        {%  endautoescape %}
+            <tr>
+                <th>Age</th>
+                <th>Year</th>
+                <th>What happened?</th>
+            </tr>
+            {% autoescape off %}
+                {% for event in person_data.events %}
+                    <tr class='event_data_row' id="event_{{ event.id }}">
+                        <td class="center">{{ event.age }}</td>
+                        <td class="center">{{ event.year }}</td>
+                        <td>{{ event.message }}</td>
+                    </tr>
+                {% endfor %}
+            {% endautoescape %}
         </table>
         </span>
 
         <span id="character_data">
             <b>DNA:</b> {{ person_data.dna }}<br/>
 
-            <br /><b>Description:</b> {{ person_data.description }}<br/>
+            <br/><b>Description:</b> {{ person_data.description }}<br/>
 
             <span id="att_holder">
-            <br /><b>Attributes:</b><br/>
+            <br/><b>Attributes:</b><br/>
             <span id="att_holder_details" style="display: none">
             {% for attribute, value in person_data.attribute_mods.items %}
-                <li class="attribute {% if value > 0 %}positive{% else %}negative{% endif %}"><b>{{ attribute }}</b>: {% if value > 0 %}+{% endif %}{{ value }}</li>
+                <li class="attribute {% if value > 0 %}positive{% else %}negative{% endif %}"><b>{{ attribute }}</b>:
+                    {% if value > 0 %}+{% endif %}{{ value }}</li>
             {% endfor %}
             </span>
             </span>
 
-            <br /><b>Items:</b><br/>
+            <br/><b>Items:</b><br/>
             {% for item in person_data.item_list %}
                 <li class="attribute">{{ item.type|title }} - {{ item.name }}</li>
             {% endfor %}
 
-            <br /><b>Tags:</b><br/>
+            <br/><b>Tags:</b><br/>
             {{ person_data.tags }}
 
-            <br /><b>Skills</b><br/>
+            <br/><b>Skills</b><br/>
 
-            <br /><b>World Data:</b><br/>
+            <br/><b>World Data:</b><br/>
             <span id="world_data_holder">
             {{ person_data.world_data }}
             </span>

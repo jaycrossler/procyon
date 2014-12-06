@@ -2,15 +2,18 @@ import numpy
 from procyon.starsystemmaker import math_helpers
 import story_helpers
 import dna_helpers
+import json
+
+TESTING = False
 
 
 def set_world_data(father, mother, world_data, tag_manager):
-    father_economic = father.get("economic") or numpy.random.choice(math_helpers.VALUE_ARRAY)
-    mother_economic = mother.get("economic") or numpy.random.choice(math_helpers.VALUE_ARRAY)
-    father_education = father.get("education") or numpy.random.choice(math_helpers.VALUE_ARRAY)
-    mother_education = mother.get("education") or numpy.random.choice(math_helpers.VALUE_ARRAY)
-    father_conflict = father.get("conflict") or "low"
-    mother_conflict = mother.get("conflict") or "low"
+    father_economic = math_helpers.value_of_variable(father.get("economic") or weighted_number())
+    mother_economic = math_helpers.value_of_variable(mother.get("economic") or weighted_number())
+    father_education = math_helpers.value_of_variable(father.get("education") or weighted_number())
+    mother_education = math_helpers.value_of_variable(mother.get("education") or weighted_number())
+    father_conflict = math_helpers.value_of_variable(father.get("conflict") or weighted_number(max=20.0))
+    mother_conflict = math_helpers.value_of_variable(mother.get("conflict") or weighted_number(max=20.0))
     father_profession = father.get("profession") or "Farmer"
     mother_profession = mother.get("profession") or "Farmer"
 
@@ -19,8 +22,13 @@ def set_world_data(father, mother, world_data, tag_manager):
     family = world_data.get("family", {})
     city_data = world_data.get("city", {})
 
-    world_tags = world_data.get("tags", "")
-    city_tags = city_data.get("tags", "")
+    world_data["magic"] = math_helpers.value_of_variable(world_data.get("magic", weighted_number()))
+    world_data["technology"] = math_helpers.value_of_variable(world_data.get("technology", weighted_number()))
+
+    if math_helpers.value_of_variable(world_data["magic"]) > 20.0:
+        math_helpers.add_tags(tag_manager, 'world', 'magic')
+    if math_helpers.value_of_variable(world_data["technology"]) > 20.0:
+        math_helpers.add_tags(tag_manager, 'world', 'technology')
 
     try:
         economic = float(math_helpers.value_of_variable(father_economic) + math_helpers.value_of_variable(mother_economic)) / 2.0
@@ -43,25 +51,33 @@ def set_world_data(father, mother, world_data, tag_manager):
     father["economic"] = father_economic
     father["education"] = father_education
     father["conflict"] = father_conflict
-    father_tags = father.get("tags", father_profession.lower())
-    if father_economic > math_helpers.value_of_variable('fair'):
-        father_tags += ",wealthy"
-    if father_education > math_helpers.value_of_variable('fair'):
-        father_tags += ",educated"
-    father["tags"] = father_tags
-    math_helpers.add_tags(tag_manager, 'father', father_tags)
+
+    math_helpers.add_tags(tag_manager, 'father', father.get("tags", father_profession.lower()))
+    if father_economic > math_helpers.value_of_variable('high'):
+        math_helpers.add_tags(tag_manager, 'father', 'wealthy')
+    if father_economic > math_helpers.value_of_variable('great'):
+        math_helpers.add_tags(tag_manager, 'father', 'rich')
+    if father_education > math_helpers.value_of_variable('high'):
+        math_helpers.add_tags(tag_manager, 'father', 'educated')
+    if father_education > math_helpers.value_of_variable('great'):
+        math_helpers.add_tags(tag_manager, 'father', 'smart')
+    father["tags"] = math_helpers.flatten_tags(tag_manager, area='father')
 
     mother["profession"] = mother.get("profession", mother_profession)
     mother["economic"] = mother_economic
     mother["education"] = mother_education
     mother["conflict"] = mother_conflict
-    mother_tags = mother.get("tags", mother_profession.lower())
-    if mother_economic > math_helpers.value_of_variable('fair'):
-        mother_tags += ",wealthy"
-    if mother_education > math_helpers.value_of_variable('fair'):
-        mother_tags += ",educated"
-    mother["tags"] = mother_tags
-    math_helpers.add_tags(tag_manager, 'mother', mother_tags)
+
+    math_helpers.add_tags(tag_manager, 'mother', mother.get("tags", mother_profession.lower()))
+    if mother_economic > math_helpers.value_of_variable('high'):
+        math_helpers.add_tags(tag_manager, 'mother', 'wealthy')
+    if mother_economic > math_helpers.value_of_variable('great'):
+        math_helpers.add_tags(tag_manager, 'mother', 'rich')
+    if mother_education > math_helpers.value_of_variable('high'):
+        math_helpers.add_tags(tag_manager, 'mother', 'educated')
+    if mother_education > math_helpers.value_of_variable('great'):
+        math_helpers.add_tags(tag_manager, 'mother', 'smart')
+    mother["tags"] = math_helpers.flatten_tags(tag_manager, area='mother')
 
     if not father.get("family_name", None):
         father["family_name"] = story_helpers.create_random_name(world_data=world_data, pattern='namefile|family',
@@ -81,34 +97,29 @@ def set_world_data(father, mother, world_data, tag_manager):
     #TODO: Adoptions
     #TODO: Same-sex marriages
 
-
     family["father"] = father
     family["mother"] = mother
 
-    world_data["family"] = family
-    magic_num = numpy.random.choice(math_helpers.VALUE_ARRAY)
-    world_data["magic"] = world_data.get("magic", magic_num)
-    world_data["technology"] = world_data.get("technology", numpy.random.choice(math_helpers.VALUE_ARRAY))
-
-    math_helpers.add_tags(tag_manager, 'world', world_tags)
-    math_helpers.add_tags(tag_manager, 'city', city_tags)
-
-    if math_helpers.value_of_variable(magic_num) > 6:
-        math_helpers.add_tags(tag_manager, 'world', 'magic')
+    math_helpers.add_tags(tag_manager, 'world', world_data.get("tags", ""))
+    math_helpers.add_tags(tag_manager, 'city', world_data.get("city", {}).get("tags", ""))
 
     return world_data, family_events
+
+
+def weighted_number(mid=0.3, max=120.0, weight=4):
+    return math_helpers.rand_weighted(midpoint=mid, weight=weight)*max
 
 
 def build_parent_history(year=1100, father={}, mother={}, world_data={}):
     #Calculate Parents History
     family_events = []
 
-    father_economic = math_helpers.value_of_variable(father.get("economic", 1)) or math_helpers.rand_weighted(midpoint=0.2)*120
-    mother_economic = math_helpers.value_of_variable(mother.get("economic", 1)) or math_helpers.rand_weighted(midpoint=0.2)*120
-    father_education = math_helpers.value_of_variable(father.get("education", 1)) or math_helpers.rand_weighted(midpoint=0.2)*120
-    mother_education = math_helpers.value_of_variable(mother.get("education", 1)) or math_helpers.rand_weighted(midpoint=0.2)*120
-    father_conflict = math_helpers.value_of_variable(father.get("conflict", 1)) or math_helpers.rand_weighted(midpoint=0.2)*120
-    mother_conflict = math_helpers.value_of_variable(mother.get("conflict", 1)) or math_helpers.rand_weighted(midpoint=0.2)*120
+    father_economic = math_helpers.value_of_variable(father.get("economic", None) or weighted_number())
+    mother_economic = math_helpers.value_of_variable(mother.get("economic", None) or weighted_number())
+    father_education = math_helpers.value_of_variable(father.get("education", None) or weighted_number())
+    mother_education = math_helpers.value_of_variable(mother.get("education", None) or weighted_number())
+    father_conflict = math_helpers.value_of_variable(father.get("conflict", None) or weighted_number())
+    mother_conflict = math_helpers.value_of_variable(mother.get("conflict", None) or weighted_number())
 
     father_dna = father.get("dna", dna_helpers.generate_dna())
     mother_dna = mother.get("dna", dna_helpers.generate_dna())
@@ -126,7 +137,7 @@ def build_parent_history(year=1100, father={}, mother={}, world_data={}):
     base_age = int(math_helpers.percent_range(value=year, start_min=1000, start_max=2000, end_min=14, end_max=20))
 
     family = world_data.get("family", {})
-    house = family.get("house", 1) or math_helpers.rand_weighted(midpoint=0.2)*100
+    house = family.get("house", None) or weighted_number()
     house = math_helpers.value_of_variable(house)
 
     #Parents age when they have main child is later with conflict and education, earlier with economic
@@ -358,8 +369,9 @@ def build_parent_history(year=1100, father={}, mother={}, world_data={}):
         elif mother_age > 30:
             mother_attribute_mods["Conscienciousness"] += .5
 
-        father_economic += father_economic * numpy.random.random()/40.0
-        mother_economic += mother_economic * numpy.random.random()/40.0
+        #Inflation and growth from working
+        father_economic += weighted_number(mid=0.03, max=father_economic/2, weight=8)
+        mother_economic += weighted_number(mid=0.03, max=mother_economic/2, weight=9)
 
         if parents_married_together and not father_deceased and not mother_deceased:
             if father_economic > mother_economic:
@@ -369,6 +381,7 @@ def build_parent_history(year=1100, father={}, mother={}, world_data={}):
                 father_economic += mother_economic_tithe
                 mother_economic -= mother_economic_tithe
 
+        #Increase parents stats through marriage
         if father_married and not father_deceased:
             for improvement in numpy.random.choice("Extraversion,Artistic,Happiness,Happiness,Happiness,Business,Meekness,Conscienciousness,Religiousness".split(","), 2):
                 father_attribute_mods[improvement] += 1
@@ -391,7 +404,7 @@ def build_parent_history(year=1100, father={}, mother={}, world_data={}):
         if mother_economic < 2:
             mother_attribute_mods["Happiness"] -= 1
 
-        #TODO: Parents should be deceased as kid isn't born yet... maybe tee that up to happen after birth?
+        #TODO: Parents should not  be deceased as kid isn't born yet... maybe tee that up to happen after birth?
         if not father_deceased and f_emo["Health"] < -10:
             father_deceased = True
             father_married = False
@@ -403,33 +416,32 @@ def build_parent_history(year=1100, father={}, mother={}, world_data={}):
             parents_married_together = False
             mother["deceased"] = y
 
-        #TESTING
-        father["emotions"] = f_emo
-        mother["emotions"] = m_emo
+        father.update(f_emo)
+        mother.update(m_emo)
+
+        math_helpers.dict_round_floats(father, places=3)
+        math_helpers.dict_round_floats(mother, places=3)
 
         family["father"] = father
         family["mother"] = mother
 
-        if house > 60:
-            family["house"] = "Superb"
-        elif house > 40:
-            family["house"] = "Great"
-        elif house > 20:
-            family["house"] = "Average"
-        elif house > 5:
-            family["house"] = "Poor"
-        else:
-            family["house"] = "Tiny"
+        # if house > 5:
+        #     family["house"] = math_helpers.word_from_value(house)
+        # else:
+        family["house"] = house
 
         family["economic"] = father_economic+mother_economic / 2
         family["education"] = father_education+mother_education / 2
         family["conflict"] = father_conflict+mother_conflict / 2
 
+        math_helpers.dict_round_floats(family, 2)
+
         world_data["family"] = family
         world_data["year"] = y
 
-        w_data = str(world_data)
-        TESTING = False
+        math_helpers.dict_round_floats(world_data, 1)
+
+        w_data = json.dumps(world_data)
         if TESTING:
             if not len(details):
                 details.append("Nothing significant")
@@ -454,10 +466,10 @@ def biorhythms_at_age(mods=[], age=17, economic=42.0, education=21.0, conflict=1
     education = math_helpers.value_of_variable(education)
     conflict = math_helpers.value_of_variable(conflict)
 
-    happy = math_helpers.get_formula_from_obj(mods, "Happiness,Anger-,Terror-,Extraversion,Intelligence-,Meekness,Appearance,Realism-", -10, 10)
-    passion = math_helpers.get_formula_from_obj(mods, "Artistic,Extraversion,Constitution,Religiousness-,Constraint-,Realism-,Passion,Meekness-", -10, 10)
-    conscience = math_helpers.get_formula_from_obj(mods, "Conscienciousness,Terror-,Intelligence,Manipulation-,Charisma", -10, 10)
-    health = math_helpers.get_formula_from_obj(mods, "Constitution,Strength,Dexterity,Anger-,Intelligence,Weight-,Lifespan,Neuroticism-,Immune System", -10, 10)
+    happy = math_helpers.get_formula_from_obj(mods, "Happiness,Anger-,Terror-,Extraversion,Intelligence-,Meekness,Appearance,Realism-", -10, 20)
+    passion = math_helpers.get_formula_from_obj(mods, "Artistic,Extraversion,Constitution,Religiousness-,Constraint-,Realism-,Passion,Meekness-", -10, 20)
+    conscience = math_helpers.get_formula_from_obj(mods, "Conscienciousness,Terror-,Intelligence,Manipulation-,Charisma", -10, 20)
+    health = math_helpers.get_formula_from_obj(mods, "Constitution,Strength,Dexterity,Anger-,Intelligence,Weight-,Lifespan,Neuroticism-,Immune System", -10, 20)
 
     if age > 60:
         conscience += 3
@@ -680,7 +692,7 @@ def apply_effects(person_data={}, world_data={}, effect_data={}, tag_manager={})
             if isinstance(variable, basestring):
                 variable = 3.0
             math_helpers.add_or_increment_dict_val(qualities, 'lifespan', -variable)
-            generated_items.append({"type": "family blessing", "name": "wealthy"})
+            generated_items.append({"type": "family blessing", "name": "wealth"})
 
         elif effect == "cost":
             if not variable:
