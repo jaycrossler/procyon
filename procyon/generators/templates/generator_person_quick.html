@@ -149,6 +149,18 @@
             });
 
             load_event_info();
+
+             $('#att_holder').on('mouseover',function(){
+                 $('#att_holder_details').css('display','inline');
+             }).on('mouseout',function(){
+                 $('#att_holder_details').css('display','none');
+             }).css({cursor:'pointer'});
+
+             $('#new_dna').on('click',function(){
+                 $('#mother_dna').val('');
+                 $('#father_dna').val('');
+                 $('select').val('')
+             });
          });
 
         function load_event_info(){
@@ -184,7 +196,7 @@
         {% if note %}<i>{% autoescape off %}{{ note }}{% endautoescape %}</i>{% endif %}
 
         <div class="father parent">
-            Father:&nbsp; <input type="text" name="father_dna" placeholder="Optional - DNA" value="{{ inputs.father.dna }}">
+            Father:&nbsp; <input type="text" id="father_dna" name="father_dna" placeholder="Optional - DNA" value="{{ inputs.father.dna }}">
             <input type="text" name="father_profession" placeholder="Profession" value="{{ inputs.father.profession }}">
             Race: <select name="father_race">
                 {% for race in RACE_ARRAY %}
@@ -203,7 +215,7 @@
                     <option value="{{ attribute }}" {% if inputs.father.economic == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
                 {% endfor %}
             </select>
-            Conflict: <select name="father_conflict">
+            Chaos: <select name="father_conflict">
                 <option value="" {% if inputs.father.conflict == '' %}selected="selected"{% endif %}>random</option>
                 {% for attribute in VALUE_ARRAY %}
                     <option value="{{ attribute }}" {% if inputs.father.conflict == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
@@ -212,7 +224,7 @@
         </div>
 
         <div class="mother parent">
-            Mother: <input type="text" name="mother_dna" placeholder="Optional - DNA" value="{{ inputs.mother.dna }}">
+            Mother: <input type="text" id="mother_dna" name="mother_dna" placeholder="Optional - DNA" value="{{ inputs.mother.dna }}">
             <input type="text" name="mother_profession" placeholder="Profession" value="{{ inputs.mother.profession }}">
             Race: <select name="mother_race">
                 {% for race in RACE_ARRAY %}
@@ -231,7 +243,7 @@
                     <option value="{{ attribute }}" {% if inputs.mother.economic == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
                 {% endfor %}
             </select>
-            Conflict: <select name="mother_conflict">
+            Chaos: <select name="mother_conflict">
                 <option value="" {% if inputs.mother.conflict == '' %}selected="selected"{% endif %}>random</option>
                 {% for attribute in VALUE_ARRAY %}
                     <option value="{{ attribute }}" {% if inputs.mother.conflict == attribute %}selected="selected"{% endif %}>{{ attribute|title }}</option>
@@ -248,7 +260,8 @@
                         class="world_json">{{ inputs.world_json }}</textarea><br/>
 
         <input type="submit" value="Regenerate with this Random Seed"/>
-        <input name="regenerate" type="submit" value="Generate with different Seed"/> Random Seed: <input type="text" name="rand_seed" value="{{ inputs.rand_seed }}" style="margin: 0px"
+        <input name="regenerate" type="submit" value="Generate with different Seed"/>
+        <input id="new_dna" name="regenerate" type="submit" value="Generate all new"/> Random Seed: <input type="text" name="rand_seed" value="{{ inputs.rand_seed }}" style="margin: 0px"
                           placeholder='Optional - Number to use to design the object. Same numbers and inputs will generate same objects'/>
 
         <input class="btn_json" type="button" id="json_{{ inputs.rand_seed }}" value="JSON"/>
@@ -274,10 +287,14 @@
 
             <br /><b>Description:</b> {{ person_data.description }}<br/>
 
+            <span id="att_holder">
             <br /><b>Attributes:</b><br/>
+            <span id="att_holder_details" style="display: none">
             {% for attribute, value in person_data.attribute_mods.items %}
                 <li class="attribute {% if value > 0 %}positive{% else %}negative{% endif %}"><b>{{ attribute }}</b>: {% if value > 0 %}+{% endif %}{{ value }}</li>
             {% endfor %}
+            </span>
+            </span>
 
             <br /><b>Items:</b><br/>
             {% for item in person_data.item_list %}

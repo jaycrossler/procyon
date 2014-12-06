@@ -28,7 +28,8 @@ def list_of_names(file_sub_strings=list(), prefix_chance=0, prefixes=list(), max
             return ['Jon']
 
     with open(name_file_dir + name_file, mode='r') as infile:
-        name_list = [line.strip() for line in infile if len(line)]
+        file_contents = infile.read().splitlines()
+        name_list = [line.strip() for line in file_contents if len(line)]
     name_list = name_list[:max_count]
 
     for idx, name_text in enumerate(name_list):

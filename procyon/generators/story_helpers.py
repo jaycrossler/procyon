@@ -306,7 +306,12 @@ def create_random_item(world_data={}, override={}, set_random_key=True, parse_di
 
     pattern_list, pattern_probability, pattern_prefixes = turn_pattern_to_hash(pattern, override)
 
-    component_types, component_tag_counts = breakout_component_types(world_data, tags, pattern_list)
+    new_pattern_list = []
+    for p in pattern_list:
+        p_parts = p.split("|")
+        new_pattern_list.append(p_parts[0])
+
+    component_types, component_tag_counts = breakout_component_types(world_data, tags, new_pattern_list)
 
     item_data = {}
     effects_data = []
@@ -317,17 +322,19 @@ def create_random_item(world_data={}, override={}, set_random_key=True, parse_di
     tags = []
 
     for idx, ctype in enumerate(pattern_list):
+        ctype_filter = ctype
+        ctype_parts = ctype.split("|")
+        ctype = ctype_parts[0]
+
         if numpy.random.random() <= pattern_probability[idx]:
             if ctype in component_types:
                 components = component_types.get(ctype)
-                if override and ctype in override:
+
+                if override and ctype_filter in override:
                     # Use this component instead
-                    component_name = override.get(ctype)
+                    component_name = override.get(ctype_filter)
                     component = {"name": component_name}
-                    for comp in components:
-                        if comp.name == component_name:
-                            component = comp
-                            break
+                    ctype_filter = 'overrode'
 
                 else:
                     # Randomly pick a component
@@ -349,7 +356,7 @@ def create_random_item(world_data={}, override={}, set_random_key=True, parse_di
 
                 item_prefixes.append(pattern_prefixes[idx])
                 item_names.append(text)
-                item_generators.append(ctype)
+                item_generators.append(ctype_filter)
 
                 component_tags = component.get("tags", '')
                 if component_tags and isinstance(component_tags, basestring):
@@ -418,8 +425,7 @@ def create_random_name(world_data={}, override={}, pattern="", tags="", rand_see
     name_patterns = {}
     name_patterns['jon_snow'] = 'namefile:1,namefile|family:1'
     name_patterns['king_jon_snow_the_pierced'] = 'rank:.1,namefile:1,namefile|family:.7,adjective:.4:the'
-    name_patterns[
-        'king_jon_tyrion_snow_of_winterfell'] = 'rank:.1,namefile:1,namefile:.2,namefile|family:.8,placefile:.4:of'
+    name_patterns['king_jon_tyrion_snow_of_winterfell'] = 'rank:.1,namefile:1,namefile:.2,namefile|family:.8,placefile:.4:of'
     name_patterns['jon_tyrion_snow'] = 'namefile:1,namefile:1,namefile|family:1'
 
     if not pattern:
@@ -484,39 +490,47 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
     person_data["note"] = ""
     person_data["rand_seed"] = rand_seed
     tag_manager = {}
-
-    world_data = story_person_helpers.set_world_data(father, mother, world_data, tag_manager)
-    city_data = world_data.get("city", {})
-
-    year = world_data.get("year")
-    year = int(year)
+    math_helpers.add_tags(tag_manager, 'initial', tags)
 
     father_dna = father.get("dna", "")
     mother_dna = mother.get("dna", "")
     if not father_dna:
         father_dna, temp = dna_helpers.generate_dna(rand_seed=seed_father_dna, race=father.get("race", "human"))
     if not mother_dna:
-        mother_dna, temp = dna_helpers.generate_dna(rand_seed=seed_mother_dna, race=father.get("race", "human"))
+        mother_dna, temp = dna_helpers.generate_dna(rand_seed=seed_mother_dna, race=mother.get("race", "human"))
     if child_dna:
         dna = child_dna
     else:
         dna, temp = dna_helpers.combine_dna(mother_dna, father_dna, seed_child_dna)
     if gender:
         dna = dna_helpers.set_dna_gender(dna, gender)
+    father["dna"] = father_dna
+    mother["dna"] = mother_dna
+
+    #TODO: tag_manager seems to be accumulating tags
+    world_data, family_events = story_person_helpers.set_world_data(father, mother, world_data, tag_manager)
+
+    last_name = father.get("family_name", None)
+    if not last_name:
+        last_name = mother.get("family_name", None)
+    if not last_name:
+        last_name = "Snow"
+
+    year = world_data.get("year")
+    year = int(year)
 
     math_helpers.set_rand_seed(rand_seed)
     dna = dna_helpers.mutate_dna(dna)
     gender = dna_helpers.gender_from_dna(dna)
-    name_data = create_random_name(world_data=world_data, tags=math_helpers.flatten_tags(tag_manager), rand_seed=seed_name,
-                                   gender=gender)
-    name = name_data["name"]
-
+    name_data = create_random_name(world_data=world_data, tags=math_helpers.flatten_tags(tag_manager),
+                                   rand_seed=seed_name, gender=gender,
+                                   pattern='namefile,namefile|last_given', override={'namefile|last_given': last_name})
     birth_place = create_random_item(world_data=world_data, set_random_key=False, pattern='birthplace', name_length=300)
 
     person_data["dna"] = dna
-    person_data["events"] = []
+    person_data["events"] = family_events
     person_data["race"] = dna_helpers.race_from_dna(dna)
-    person_data["name"] = name
+    person_data["name"] = name_data["name"]
     person_data["gender"] = gender
 
     person_data["qualities"], person_data["attribute_mods"] = dna_helpers.qualities_from_dna(dna)
@@ -535,10 +549,7 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
     #     "description": story_person_helpers.person_description(person_data)
     # }
 
-    event_id = 0
-    event_id = story_person_helpers.add_family_history(person_data=person_data, world_data=world_data,
-                                                       event_id=event_id, tag_manager=tag_manager)
-
+    event_id = len(family_events)
     age = 0
     person_event_data = apply_event_effects(person_data=person_data, world_data=world_data, age=age,
                                             event_data=birth_place, event_type='birthplace', year=year,
@@ -560,14 +571,14 @@ def create_person(world_data={}, father={}, mother={}, child_dna="", tags="", ra
 
 
 def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type='birthplace', year=None,
-                        age='undefined', tag_manager={}, event_id=42):
+                        age=None, tag_manager={}, event_id=42):
     message = ""
 
     if not year:
         year = world_data.get("year", 1100)
     world_data["year"] = year
 
-    if age == 'undefined':
+    if age is None:
         age = person_data.get("age", 16 + numpy.random.randint(20))
     person_data["age"] = age
 
@@ -628,6 +639,7 @@ def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type
             addional_messages.append(ef_message)
 
         # Generators can create objects/items for use in the story
+        #TODO: Generate a generator also if it's in a message text and not called out explicitly
         generator_data = {"generator": effect.get("generator", None),
                           "role": effect.get("role", None),
                           "years": effect.get("years", None),
@@ -651,7 +663,10 @@ def apply_event_effects(person_data={}, world_data={}, event_data={}, event_type
         effect_was_applied = True
 
     if event_type == 'birthplace':
-        name_lower = name[0].lower() + name[1:]
+        if isinstance(name, str) and name is not '':
+            name_lower = name[0].lower() + name[1:]
+        else:
+            name_lower = name
         message += "<b>" + person_data.get("name") + " was born " + name_lower + "</b>"
         addional_messages = [message] + addional_messages
 

@@ -304,6 +304,13 @@ def generator_person(request):
         output = HttpResponse(summary, mimetype="text/html")
 
     else:
+        father["economic"] = word_from_value(father.get("economic", 1))
+        mother["economic"] = word_from_value(mother.get("economic", 1))
+        father["education"] = word_from_value(father.get("education", 1))
+        mother["education"] = word_from_value(mother.get("education", 1))
+        father["conflict"] = word_from_value(father.get("conflict", 1))
+        mother["conflict"] = word_from_value(mother.get("conflict", 1))
+
         inputs = {
             "tags": tags,
             "rand_seed": rand_seed,

@@ -149,6 +149,16 @@ def bigger_makes_bigger(start=5, start_min=0, start_max=10, end=5, end_min=0, en
     return new_end
 
 
+def percent_range(value=1500, start_min=1000, start_max=2000, end_min=14, end_max=22):
+    try:
+        value = float(value)
+    except ValueError:
+        value = end_min + (np.random.random()*(end_max-end_min))
+
+    start_pct = clamp(float(value - start_min) / float(start_max - start_min))
+    return (float(start_pct) * float(end_max - end_min)) + float(end_min)
+
+
 def get_float_from_hash(options={}, var_name='', backup_val=0):
     try:
         val = float(options.get(var_name))
@@ -328,7 +338,8 @@ def add_or_increment_dict_val(d, key, val):
                     d_item["name"] = v1 + v2
                 except ValueError:
                     d_item["name"] = str(existing_val) + "," + str(val)
-            found = True
+                found = True
+                break
         if not found:
             try:
                 val = float(val)
@@ -382,6 +393,25 @@ def flatten_tags(tag_manager={}, max_tags=20):
     return tags
 
 
+VALUE_LOOKUPS = {'epic': 144.0, 'fantastic': 89.0, 'superb': 55.0, 'great': 34.0, 'good': 21.0, 'high': 13.0,
+               'fair': 8.0, 'average': 5.0, 'medium': 5.0, 'moderate': 5.0, 'mediocre': 3.0,
+               'low': 3.0, 'poor': 2.0, 'terrible': 1.0, 'tiny': 0.1, 'none': 0.0}
+
+
+def word_from_value(value):
+    word = 'tiny'
+    value = float(value_of_variable(value))
+    dist_to_upper = 1000
+
+    for key, val in VALUE_LOOKUPS.iteritems():
+        if abs(val-value) < dist_to_upper:
+            word = key
+            dist_to_upper = abs(val-value)
+        else:
+            break
+    return word
+
+
 def value_of_variable(var):
     val = var
     if isinstance(var, basestring):
@@ -395,11 +425,8 @@ def value_of_variable(var):
             negative = True
             var = var[1:]
 
-        lookups = {'epic': 144.0, 'fantastic': 89.0, 'superb': 55.0, 'great': 34.0, 'good': 21.0, 'high': 13.0,
-                   'fair': 8.0, 'average': 5.0, 'medium': 5.0, 'moderate': 5.0, 'mediocre': 3.0,
-                   'low': 3.0, 'poor': 2.0, 'terrible': 1.0, 'tiny': 0.1, 'none': 0.0}
-        if var in lookups:
-            val = lookups[var]
+        if var in VALUE_LOOKUPS:
+            val = VALUE_LOOKUPS[var]
         else:
             val = var
 
@@ -545,3 +572,39 @@ def convert_string_to_req_object(requirements):
 
     return output
 
+
+def get_name_from_array(arr_list=list(), key='first', default=''):
+    val = ''
+    found = False
+    for item in arr_list:
+        if item.get("name", "") == key and item.get("value"):
+            val = item.get("value")
+            found = True
+            break
+    if not found:
+        val = default
+
+    return val
+
+
+def get_formula_from_obj(obj={}, formula='A+,B--', min=None, max=None):
+    val = 0.0
+
+    for part in [part.strip() for part in formula.split(",")]:
+        mod_num = part.count('+') - part.count('-')
+        if mod_num is 0:
+            mod_num = 1
+        mod_name = part.replace('+', '').replace('-', '')
+
+        if isinstance(obj, dict):
+            if mod_name and mod_name in obj:
+                amount = obj.get(mod_name) * mod_num
+                val += float(amount)
+        else:
+            amount = get_name_from_array(obj, key=mod_name, default=0) * mod_num
+            val += float(amount)
+
+    if min is not None and max is not None:
+        val = clamp(val, min, max)
+
+    return val

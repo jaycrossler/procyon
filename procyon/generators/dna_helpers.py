@@ -6,12 +6,12 @@ GENE_ARRAY = [
     {"name": "Sex",
      "values": "Male,Female"},
     {"name": "Skin Pigment",
-     "values": "Translucent:Charisma--:Health---,Albino:Charisma-,Alabaster,Pale White,Light,White,Fair,Medium,Tanned:Charisma+,Light Brown,Olive,Moderate Brown,Brown,Brown,Dark Brown,Very Dark Brown,Black,Midnight"},
+     "values": "Translucent:Charisma--:Constitution---,Albino:Charisma-,Alabaster,Pale White,Light,White,Fair,Medium,Tanned:Charisma+,Light Brown,Olive,Moderate Brown,Brown,Brown,Dark Brown,Very Dark Brown,Black,Midnight"},
     {"name": "Skin Toughness",
      "values": "Scaley:Armor++:Charisma--,Leathery:Armor+:Appearance-,Thick:Charisma-:Constitution+,Normal,Normal,Creamy,Silky:Charisma+,Velvet:Charisma+,Marble:Charisma++:Armor+",
      "maternal": True},
     {"name": "Bone Length",
-     "values": "Tiny:Health-:Height---:Speed+:Dexterity++,Stunted:Height--:Dexterity+,Small:Height-,Normal,Normal,Normal,Normal,Normal,Large:Height+,Big:Height++:Speed-,Very Long:Height+++:Speed-:Dexterity-"},
+     "values": "Tiny:Constitution-:Height---:Speed+:Dexterity++,Stunted:Height--:Dexterity+,Small:Height-,Normal,Normal,Normal,Normal,Normal,Large:Height+,Big:Height++:Speed-,Very Long:Height+++:Speed-:Dexterity-:Armor-"},
     {"name": "Eye Color",
      "values": "Hazel:Appearance+,Amber,Green,Blue,Gray,Brown,Brown,Dark Brown,Black,Black,Black,Red:Charisma-:Manipulation+,Violet:Charisma+:Manipulation+"},
     {"name": "Eye Shape",
@@ -25,144 +25,162 @@ GENE_ARRAY = [
     {"name": "Head Size",
      "values": "Small:Manipulation-,Oblong,Round,Oval,Square,Heart-shaped,Triangular,Diamond,Large,Giant Forehead:Manipulation+,Bulbous:Intelligence+"},
     {"name": "Finger Length",
-     "values": "Stubby:Dexterity-,Short,Normal,Normal,Normal,Long:Dexterity+,Talons:Dexterity-:Unarmed Attack+"},
+     "values": "Stubby:Dexterity-:Swimming-,Short,Normal,Normal,Normal,Long:Dexterity+,Talons:Dexterity-:Unarmed Attack+"},
     {"name": "Hand Shape",
-     "values": "Heavily Webbed:Dexterity--:Swimming++,Webbed:Dexterity-:Swimming+,Normal,Normal,Normal,Strong Joints:Strength+,Fist of Stone:Dexterity-:Unarmed Attack+:Strength+"},
+     "values": "Heavily Webbed:Dexterity--:Swimming++,Webbed:Dexterity-:Swimming+,Normal,Normal,Normal,Strong Joints:Strength+,Fist of Stone:Dexterity-:Unarmed Attack+:Strength+:Swimming-"},
     {"name": "Male Hairiness",
-     "values": "Bald,Thin Hair,Thick Hair,Hairy,Fuzzy,Bearded:Appearance-,Covered in Hair:Warm+,Fury:Charisma+:Appearance-:Warm+:Terror+"},
+     "values": "Bald:Swimming+,Thin Hair,Thick Hair,Hairy,Fuzzy,Bearded:Appearance-,Covered in Hair:Warm+,Fury:Charisma+:Appearance-:Warm+:Terror+:Swimming-"},
     {"name": "Female Hairiness",
-     "values": "Bald:Appearance-,Thin Hair,Thick Hair,Thick Hair,Thick Hair,Thick Hair,Thick Hair,Hairy,Fuzzy,Bearded:Appearance-,Covered in Hair:Warm+:Charisma-,Fury:Appearance--:Charisma+:Warm+:Terror+"},
+     "values": "Bald:Appearance-:Swimming+,Thin Hair,Thick Hair,Thick Hair,Thick Hair,Thick Hair,Thick Hair,Hairy,Fuzzy,Bearded:Appearance-,Covered in Hair:Warm+:Charisma-,Fury:Appearance--:Charisma+:Warm+:Terror+:Swimming-"},
     {"name": "Posture",
      "values": "Forward Head:Charisma-:Manipulation+,Scoliosis,Flat Backed,Good Posture,Good Posture,Good Posture,Humpbacked:Charisma-,Sway Back:Charisma-"},
     {"name": "Toe length",
-     "values": "Big Toe longest,Second toe longest,Stubby Toes:Dexterity-"},
+     "values": "Sensitive Toenails::Speed-,Big Toe longest,Second toe longest,Stubby Toes:Dexterity-"},
     {"name": "Feet shapes",
-     "values": "Flat footed,Normal,Normal,High arch,Runner Feet:Speed+"},
+     "values": "Flat footed:Speed-:Swimming+,Normal,Normal,High arch,Runner Feet:Speed+:Swimming-"},
     {"name": "Leg Shape",
-     "values": "Bow-legged:Dexterity-,Straight Legs,Straight Legs,Knees knocked in,Floating kneecap,Massive Thighs:Constitution+"},
+     "values": "Bow legged:Dexterity-,Straight Legs,Straight Legs,Knees knocked in,Floating kneecap,Massive Thighs:Constitution+:Swimming--"},
     {"name": "Torso Shape",
      "values": "Long:Constitution++:Height+:Appearance-,Barrel Chested:Constitution+:Strength+,Apple shaped,Pear shaped,Thin,Short,Extremely Thin:Constitution-:Strength-"},
     {"name": "Neck Size",
-     "values": "Thick:Strength+:Appearance-,Thin,Normal,Normal,Long:Strength-,Short:Appearance-"},
+     "values": "Thick:Strength+:Appearance-,Thin,Normal,Normal,Long:Strength-:Constitution+,Short:Appearance-"},
     {"name": "Nose Shape",
-     "values": "Empty Cavity:Terror+:Appearance-,Flat,Wide,Thin,Turned up/perky:Appearance+,Hooked down,Bulbous:Appearance-:Terror-"},
+     "values": "Empty Cavity:Terror+:Appearance-:Swimming-,Flat,Wide,Thin,Turned up/perky:Appearance+,Hooked down,Bulbous:Appearance-:Terror-,Giant Nostrils:Appearance-:Constitution+"},
 
     {"name": "Nerve Response",
      "values": "Very Fast Reflexes:Dexterity++:Lifespan-,Fast Reflexes:Dexterity+,Normal,Normal,Normal,Normal,Normal,Normal,Normal,Slow Reflexes:Dexterity-:Constitution+"},
     {"name": "Skin Texture",
-     "values": "Bad Acne:Appearance--,Acne:Appearance-,Birth Mark:Appearance-,Smooth,Normal,Normal,Normal,Soft,Rough,Barky:Charisma-:Lifespan+,Textured with Runes:Magic Power+:Magic Resistance+:Charisma-:Terror+"},
+     "values": "Bad Acne:Appearance--,Acne:Appearance-,Birth Mark:Appearance-,Smooth,Normal,Normal,Normal,Soft,Rough,Barky:Charisma-:Lifespan+,Textured with Runes:Magic Power+:Magic Resistant+:Charisma-:Terror+"},
     {"name": "Teeth Shape",
      "values": "Sharp and Pointed:Manipulation++,Large with Two Rows:Manipulation+:Terror+,Large Canines:Manipulation+,Normal,Normal,Normal,Well Spaced Teeth,Perfect Teeth:Appearance+"},
     {"name": "Lung Capacity",
      "values": "Huge:Dexterity+:Constitution+:Strength+:Lifespan-:Swimming+,Large:Constitution++:Strength+:Swimming+,Normal,Normal,Stilted:Constitution-,Small:Constitution-,Withered:Constitution-:Strength--:Lifespan-:Swimming++"},
     {"name": "Heart Size",
-     "values": "Thin and Fast:Dexterity++:Lifespan-,Small:Lifespan-:Dexterity-,Strong:Lifespan+:Temprament+:Disease Resistant+,Normal,Normal,Big:Lifespan+:Disease Resistant+:Constitution+,Large:Lifespan-:Strength+,Very Large:Constitution++:Strength+:Lifespan--"},
+     "values": "Thin and Fast:Dexterity++:Lifespan-,Small:Lifespan-:Dexterity-,Strong:Lifespan+:Happiness+:Immune System+,Normal,Normal,Big:Lifespan+:Immune System+:Constitution+,Large:Lifespan-:Strength+,Very Large:Constitution++:Strength+:Lifespan--:Constitution-"},
     {"name": "Cell Longevity",
-     "values": ""},
+     "values": "Quick Burner:Lifespan---:Constitution+:Strength+:Dexterity+:Immune System+:Regeneration+,Half-lived:Regeneration+:Lifespan--:Constitution+:Immune System+,Multiplicator:Lifespan-:Strength+,Normal,Normal,Normal,Normal,Normal,Normal,Slow Replicator:Lifespan+:Radiation Resistant-,Frozen:Lifespan++:Constitution-:Regeneration-,Methuselah:Lifespan+++:Constitution-:Strength-:Immune System-:Regeneration-"},
     {"name": "Gestation Rate",
-     "values": "6 Months:Lifespan-:Health-,9 Months,9.5 Months,10 Months,11 Months,12 Months:Lifespan+,14 Months:Lifespan+,16 Months:Lifespan++,20 Months:Lifespan+++,24 Months:Lifespan++++",
+     "values": "6 Months:Wisdom-:Lifespan-:Constitution-,9 Months,9.5 Months,9.5 Months,9.5 Months,9.5 Months:Constitution+,10 Months,11 Months,12 Months:Lifespan+,14 Months:Lifespan+,16 Months:Lifespan++,20 Months:Lifespan+++,24 Months:Lifespan++++:Wisdom+",
      "maternal": True},
     {"name": "Multiple Children",
-     "values": "Single,Single,Single,Single,Single,Single,Single,Single,Single,Single,Single,Single,Single,Twins,Twins,Multiple"},
+     "values": "Single,Single,Single,Single,Single,Single,Single,Single,Single,Single,Single,Single,Single,Twins:Twins+,Twins:Twins++,Multiple:Regeneration+:Twins+++"},
+    {"name": "Dwarfism",
+     "values": "Normal,Normal,Normal,Normal,Normal,Normal,Normal,Normal,Normal,Normal,Normal,Normal,Normal,Normal,Shorter:Height-:Twins-,Dwarfed Height:Height---:Twins--"},
 
     {"name": "Blood Type",
-     "values": "C:Regeneration+,A,A,A,A,A,A,B,B,AB,AB,O,O,O,O,O"},
+     "values": "C:Regeneration+,A,A,A,A,A,A,B,B,AB,AB,O,O,O,O,O:Regeneration+"},
 
     {"name": "Blood Rh Factor",
-     "values": "Exotic::Regeneration+:Lifespan+,Plus,Plus,Plus,Plus,Plus,Plus,Plus,Plus,Plus,Plus,Plus,Plus,Negative,Negative,Negative"},
-
-    {"name": "Nerve Mapping",
-     "values": ""},
+     "values": "Exotic::Regeneration+:Lifespan+:Warm-,Plus,Plus,Plus,Plus,Plus,Plus,Plus,Plus,Plus,Plus,Plus,Plus,Negative,Negative,Negative:Constitution+"},
 
     {"name": "Stomach Composition",
-     "values": "Broken Stomach:Immune System--:Hunger-:Disease Resistant-:Weight-:Lifespan-,Weak Abdomen:Strength-:Immune System-,Hernias:Lifespan-:Strength-,Gastric Acid:Disease Resistant+:Weight-:Happiness-,Normal,Normal,Normal,Normal,Lead Belly:Radiation Resistance+:Disease Resistant+:Hunger+,Ravishing Appetite:Hunger++:Constitution+:Disease Resistant+:Immune System+:Weight+"},
+     "values": "Broken Belly:Immune System--:Hunger-:Weight-:Lifespan-,Weak Abdomen:Strength-:Immune System-,Hernias:Lifespan-:Strength-,Gastric Acid:Immune System+:Weight-:Happiness-,Normal,Normal,Normal,Normal,Lead Belly:Radiation Resistant+:Immune System+:Hunger+,Ravishing Appetite:Hunger++:Constitution+:Immune System++:Weight+"},
 
     {"name": "Skull Thickness",
      "values": "Thin Bones:Constitution--:Lifespan-:Weight:-,Soft Spot:Constitution-,Normal,Normal,Normal,Normal,Thick Skull:Constitution+,Solid Skull:Constitution++,Intelligence-"},
 
     {"name": "Arterial Size",
-     "values": ""},
+     "values": "Cold Blooded:Constitution-:Lifespan+++:Terror+:Warm++,Collapsed:Lifespan--:Warm-,Constricted:Constitution-,Thin:Immune System+:Constitution-,Normal,Normal,Normal,Thick:Immune System-:Constitution+:Warm+,Dilated:Constitution+:Warm++:Armor-"},
 
     {"name": "Realistic Thinking",
-     "values": ""},
+     "values": "Objective Worldview:Wisdom+:Intelligence++:Realism+:Charisma-:Artistic-:Magic Resistant+:Magic Power-,Realist:Realism+:Intelligence+,Objectivist:Constraint+:Extraversion-,Normal,Normal,Fantasist:Artistic+:Realism-,Day Dreamer:Artistic+:Neuroticism-:Happiness+,Dreamer:Conscienciousness-:Realism-:Magic Resistant-:Wisdom-",
+     "mental": True},
 
     {"name": "Investigative Thinking",
-     "values": ""},
+     "values": "Detailed Worldview:Intelligence++:Neuroticism+:Realism+:Charisma-:Awareness+:Manipulation+,Detective:Realism+:Intelligence+:Awareness+,Structured Thinker:Constraint+:Dexterity-:Extraversion-,Normal,Normal,Normal,Dull:Dexterity-:Realism-,Imaginator:Artistic+:Neuroticism-:Happiness+:Extraversion+,Creator:Realism-:Constraint-:Anger-:Openness+",
+     "mental": True},
 
     {"name": "Artistic Expression",
-     "values": ""},
+     "values": "Tabula Rosa:Artistic-:Neuroticism-:Openness+:Wisdom-:Terror-:Religiousness+,Inspired:Artistic+:Openness+:Religiousness+,Creator:Artistic++:Realism-:Happiness+:Neuroticism+,Normal,Normal:Wisdom+,Boring:Artistic-:Intelligence-:Conscienciousness+,Energetic:Artistic-:Anger-:Constitution+,Fanatic:Realism+:Conscienciousness-,Openness-,Terror+:Wisdom-",
+     "mental": True},
 
     {"name": "Social Awareness",
-     "values": ""},
+     "values": "Closed:Conscienciousness--:Anger-:Openness-,Alone:Conscienciousness-:Openness-:Extraversion-,Aloof:Extraversion-,Embedded:Extraversion-,Reflexive:Religiousness+,Normal:Religiousness+,Normal,Self Aware,Engaged:Extraversion+,Self Accepted,Collaborative:Extraversion++:Conscienciousness+,Resonant:Conscienciousness++:Anger-:Openness++:Wisdom+",
+     "social": True},
 
     {"name": "Enterprising Thought",
-     "values": ""},
+     "values": "Entrepreneur:Business++:Terror+:Openness+:Manipulation+:Conscienciousness-:Wisdom-,Business Leader:Business+:Manipulation+:Conscienciousness-:Awareness+,Manager:Business+:Extraversion+,Normal:Business-,Normal,Normal,Normal:Business-,Normal:Business-,Calculator:Openness-:Business+,Interconnected Thinker:Business++:Artistic+:Realism+:Neuorticism++:Wisdom+",
+     "mental": True},
 
     {"name": "Conventionality",
-     "values": ""},
+     "values": "",
+     "social": True},
 
     {"name": "Conservatism",
-     "values": ""},
+     "values": "",
+     "social": True},
 
     {"name": "Authoritarianism",
-     "values": ""},
+     "values": "",
+     "social": True},
 
     {"name": "Religiousness",
-     "values": ""},
+     "values": "",
+     "mental": True},
 
     {"name": "Extraversion",
-     "values": ""},
+     "values": "",
+     "social": True},
 
     {"name": "Agreeableness",
-     "values": ""},
+     "values": "",
+     "social": True},
 
     {"name": "Conscienciousness",
-     "values": ""},
+     "values": "",
+     "social": True},
 
     {"name": "Neuroticism",
-     "values": ""},
+     "values": "",
+     "mental": True},
 
     {"name": "Openness",
-     "values": ""},
+     "values": "",
+     "social": True},
 
     {"name": "Constraint",
-     "values": ""},
+     "values": "",
+     "mental": True},
 
     {"name": "Positive Emotionality",
-     "values": "Normal,Normal,Happy,Excited,Loving,Big Hearted"},
+     "values": "Normal,Normal,Happy:Happiness+,Excited:Happiness+:Conscienciousness+:Meekness+:Wisdom+,Loving:Happiness++:Meekness++:Conscienciousness+:Wisdom+,Big Hearted:Happiness++:Conscienciousness+:Meekness+++:Wisdom+",
+     "social": True},
 
     {"name": "Negative Emotionality",
-     "values": "Depressive,Angry:Terror+,Sad,Tired,Grumpy,Normal,Normal,Normal,Normal,Peaceful:Manipulation-"},
+     "values": "Depressive,Angry:Terror+,Sad,Tired,Grumpy,Normal,Normal,Normal,Normal:Wisdom+,Peaceful:Manipulation-:Wisdom+",
+     "social": True},
 
     {"name": "Chi",
-     "values": "Empty:Magic Resistant+++,Null:Magic Resistant++,Blank:Magic Resistant+,Normal,Normal,Normal,Normal,Normal,Normal,In Tune:Magic Resistant-:Magic Power+,Powerful:Magic Power++:Magic Resistant--"},
+     "values": "Empty:Magic Resistant+++,Null:Magic Resistant++,Blank:Magic Resistant+,Normal,Normal,Normal,Normal,Normal,Normal,In Tune:Magic Resistant-:Magic Power+,Powerful:Magic Power++:Magic Resistant--",
+     "maternal": True},
 
     {"name": "Gnosis",
-     "values": "Rooted:Magic Resistant++,Normal,Normal,Normal,Normal,Normal,Normal,Powerful:Magic Resistant+:Magic Power+,Alar:Magic Resistant++:Magic Power++,Awakened:Magic Resistant+:Magic Power+++"}
+     "values": "Rooted:Magic Resistant++,Normal,Normal,Normal,Normal,Normal,Normal,Powerful:Magic Resistant+:Magic Power+,Alar:Magic Resistant++:Magic Power++,Awakened:Magic Resistant+:Magic Power+++",
+     "paternal": True}
 
 ]
 
 RACE_ARRAY = [
     {"name": "Human",
-     "values": "Bone Length:Normal,Gestation Rate:10 Months,Skin Toughness:Normal,Eye Spectrum:Normal,Teeth Shape:Normal,Gnosis:Normal"},
+     "values": "Bone Length:Normal,Gestation Rate:10 Months,Skin Toughness:Normal,Eye Spectrum:Normal,Teeth Shape:Normal,Gnosis:Normal,Cell Longevity:Normal"},
 
     {"name": "Elf",
-     "values": "Positive Emotionality:Happy,Bone Length:Big,Gestation Rate:24 Months,Nerve Response:Fast Reflexes,Eye Shape:Hooded,Eye Spectrum:Infrared,Chi:In Tune,Lung Capacity:Stilted"},
+     "values": "Positive Emotionality:Happy,Bone Length:Big,Gestation Rate:24 Months,Nerve Response:Fast Reflexes,Eye Shape:Hooded,Eye Spectrum:Infrared,Chi:In Tune,Lung Capacity:Stilted,Cell Longevity:Slow-Replicator"},
 
     {"name": "Dwarf",
-     "values": "Negative Emotionality:Grumpy,Neck Size:Thick,Bone Length:Stunted,Skin Toughness:Thick,Hairiness:Bearded,Female Hairiness:Bearded,Torso Shape:Barrel Chested,Heart Size:Large,Chi:Blank"},
+     "values": "Negative Emotionality:Grumpy,Neck Size:Thick,Bone Length:Stunted,Skin Toughness:Thick,Hairiness:Bearded,Female Hairiness:Bearded,Torso Shape:Barrel Chested,Heart Size:Large,Chi:Blank,Cell Longevity:Methuselah,Dwarfism:Dwarfed Height"},
 
     {"name": "Ork",
-     "values": "Negative Emotionality:Angry,Skin Toughness:Leathery,Gestation Rate:6 Months,Neck Size:Thick,Torso Shape:Long,Stomach Composition:Ravishing Appetite,Teeth Shape:Large Canines,Multiple Children:Twins,Hand Shape:Strong Joints"},
+     "values": "Negative Emotionality:Angry,Skin Toughness:Leathery,Gestation Rate:6 Months,Neck Size:Thick,Torso Shape:Long,Stomach Composition:Ravishing Appetite,Teeth Shape:Large Canines,Multiple Children:Twins,Hand Shape:Strong Joints,Cell Longevity:Half-lived"},
 
     {"name": "Halfling",
-     "values": ""},
+     "values": "Dwarfism:Dwarfed Height"},
 
     {"name": "Dragonborn",
-     "values": "Skin Toughness:Scaley,Gestation Rate:12 Months,Eye Color:Red,Neck Size:Thick,Head Size:Diamond,Torso Shape:Barrel Chested,Stomach Composition:Ravishing Appetite,Teeth Shape:Large Canines,Eye Spectrum:Infrared,Hand Shape:Webbed,Nose Shape:Empty Cavity,Posture:Forward Head,Male Hairiness:Bald,Finger Length:Talons"},
+     "values": "Skin Toughness:Scaley,Gestation Rate:12 Months,Eye Color:Red,Neck Size:Thick,Head Size:Diamond,Torso Shape:Barrel Chested,Stomach Composition:Ravishing Appetite,Teeth Shape:Large Canines,Eye Spectrum:Infrared,Hand Shape:Webbed,Nose Shape:Empty Cavity,Posture:Forward Head,Male Hairiness:Bald,Finger Length:Talons,Cell Longevity:Quick Burner"},
 
     {"name": "Gnome",
-     "values": ""},
+     "values": "Dwarfism:Dwarfed Height"},
 
     {"name": "Tiefling",
      "values": ""},
@@ -195,7 +213,7 @@ def init_quality_arrays():
 
 # ----------------------
 init_quality_arrays()
-#----------------------
+# ----------------------
 
 
 def dna_string_from_array(dna_values):
@@ -228,9 +246,9 @@ def aspects_from_dna(dna):
         dna_arr = dna
 
     aspects = []
-    qualities = qualities_from_dna(dna) #TODO: Cache this?
+    qualities = qualities_from_dna(dna)  # TODO: Cache this?
 
-    #TODO: Build this out
+    # TODO: Build this out
     return aspects
 
 
@@ -263,7 +281,14 @@ def qualities_from_dna(dna):
                     else:
                         attribute_mods[mod_name] = mod_num
 
-    #TODO: Derive Rand Seed
+    # TODO: Derive Rand Seed
+
+    #Ensure frequently used variables are set:
+    #TODO: Loop through all possible mods
+    for var in "Conscienciousness,Wisdom,Happiness,Passion,Appearance,Realism,Anger,Strength,Constitution,Intelligence,Extraversion,Artistic,Business,Meekness,Religiousness".split(
+            ","):
+        attribute_mods[var] = attribute_mods.get(var, 0)
+
     return qualities, attribute_mods
 
 
@@ -278,7 +303,7 @@ def generate_dna(rand_seed='', race='Human', overrides={}):
 
     dna_values = []
     for quality in GENE_ARRAY:
-        gene_num = np.random.randint(0, 15)  #Should this be randint(1,8)+randint(0,8) ?
+        gene_num = np.random.randint(0, 15)  # Should this be randint(1,8)+randint(0,8) ?
 
         name = quality.get("name", "Quality")
 
@@ -299,7 +324,7 @@ def generate_dna(rand_seed='', race='Human', overrides={}):
                         gene_num = np.random.choice(value_indexes)
 
             else:
-                #Int provided
+                # Int provided
                 override_value = clamp(override_value, 0, 15)
                 gene_num = override_value
 
@@ -370,7 +395,7 @@ def metrics_of_attributes():
 
     totals = []
     for key, val in used.iteritems():
-        data = (key+":").ljust(30) + ("Used: " + str(val)).ljust(10)
+        data = (key + ":").ljust(30) + ("Used: " + str(val)).ljust(10)
         data += ("Avg: " + str(average.get(key, 0))).ljust(10)
         range_data = (str(lowest.get(key, 0))).rjust(3) + " - " + str(highest.get(key, 0))
         data += ("Range: " + range_data)
@@ -469,7 +494,7 @@ def race_from_dna(dna):
                         if race_value_name == gene_name:
                             race_attribute_name = race_val_arr[1].lower()
 
-                            #Get the gene ids that match and DNA value for this gene, and find distance to target
+                            # Get the gene ids that match and DNA value for this gene, and find distance to target
                             shortest_dist = 15
                             shorter_dist_found = False
                             for idx_gene_vals, gene_val in enumerate(gene_values):
@@ -497,16 +522,16 @@ def race_from_dna(dna):
         amt_human = race_variations.get(closest_race)
         amt_second = race_variations.get(closest_race_second)
         amt_third = race_variations.get(closest_race_third)
-        if amt_second-amt_human < 2.5 and amt_third-amt_second > 1.1:
-            closest_race = "Half-"+closest_race_second
+        if amt_second - amt_human < 2.5 and amt_third - amt_second > 1.1:
+            closest_race = "Half-" + closest_race_second
 
     if closest_race_second == 'Human' and not closest_race == 'Human':
         amt_second = race_variations.get(closest_race)
         amt_human = race_variations.get(closest_race_second)
         amt_third = race_variations.get(closest_race_third)
 
-        if amt_human-amt_second < 2.5 and amt_third-amt_second > 1.1:
-            closest_race = "Half-"+closest_race
+        if amt_human - amt_second < 2.5 and amt_third - amt_second > 1.1:
+            closest_race = "Half-" + closest_race
 
     return closest_race
 
@@ -519,14 +544,17 @@ def gender_from_dna(dna):
     return gender
 
 
-def set_dna_gender(dna, gender):
-    gender_gene = GENE_ARRAY[0].get('values')
-    gender_vals = []
-    for idx, gene_val in enumerate(gender_gene):
-        if gene_val.lower() == gender.lower():
-            gender_vals.append(idx)
-    new_dna_num = np.random.choice(gender_vals)
-    snippet = DNA_16_lOOKUPS[new_dna_num]
+def set_dna_gender(dna, gender=''):
+    if gender:
+        gender_gene = GENE_ARRAY[0].get('values')
+        gender_vals = []
+        for idx, gene_val in enumerate(gender_gene):
+            if gene_val.lower() == gender.lower():
+                gender_vals.append(idx)
+        new_dna_num = np.random.choice(gender_vals)
+        snippet = DNA_16_lOOKUPS[new_dna_num]
+    else:
+        snippet = DNA_16_lOOKUPS[np.random.randint(0, 15)]
     dna = snippet + dna[2:]
 
     return dna
@@ -534,8 +562,10 @@ def set_dna_gender(dna, gender):
 
 def combine_dna(mother="", father="", rand_seed=''):
     len_genes = len(GENE_ARRAY) * 2
-    if len(father) < len_genes or len(mother) < len_genes:
-        return "GAG" #Invalid input DNA
+    if len(father) < len_genes:
+        father = generate_dna()[0]
+    if len(mother) < len_genes:
+        mother = generate_dna()[0]
 
     try:
         rand_seed = float(rand_seed)
@@ -553,6 +583,8 @@ def combine_dna(mother="", father="", rand_seed=''):
         snippet = gene_single_merge(snippet_m, snippet_f, gene.get('maternal', False), gene.get('paternal', False))
         new_dna += snippet
 
+    new_dna = set_dna_gender(new_dna, gender='')
+
     return new_dna, rand_seed
 
 
@@ -567,16 +599,16 @@ def mutate_dna(dna="", mutation_factor=0.003):
         first = dna[i * 2]
         second = dna[i * 2 + 1]
 
-        quarter = mutation_factor/4.0
+        quarter = mutation_factor / 4.0
 
-        if roll >= 1-quarter:
+        if roll >= 1 - quarter:
             out += second + first
-        elif roll >= 1-(2*quarter):
+        elif roll >= 1 - (2 * quarter):
             out += first + first
-        elif roll >= 1-(3*quarter):
+        elif roll >= 1 - (3 * quarter):
             out += second + second
-        elif roll >= 1-(4*quarter):
-            out += DNA_16_lOOKUPS[np.random.randint(16)-1]
+        elif roll >= 1 - (4 * quarter):
+            out += DNA_16_lOOKUPS[np.random.randint(16) - 1]
         else:
             out += first + second
 
