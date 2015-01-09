@@ -12,6 +12,7 @@ urlpatterns = patterns('',
                        url(r'trap/?$', generator_trap, name='trap-generator'),
                        url(r'junk/?$', generator_junk, name='junk-generator'),
                        url(r'dna/?$', generator_dna, name='dna-generator'),
+                       url(r'family/?$', generator_family, name='family-generator'),
 
                        url(r'solarsystem/?$', generator_solarsystem, name='solarsystem-generator'),
                        url(r'planet/?$', generator_item, name='plan-generator'),

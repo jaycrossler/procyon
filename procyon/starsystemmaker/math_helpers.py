@@ -406,8 +406,8 @@ def flatten_tags(tag_manager={}, max_tags=20, area=None):
 
 
 VALUE_LOOKUPS = {'epic': 144.0, 'fantastic': 89.0, 'superb': 55.0, 'great': 34.0, 'good': 21.0, 'high': 13.0,
-               'fair': 8.0, 'average': 5.0, 'medium': 5.0, 'moderate': 5.0, 'mediocre': 3.0,
-               'low': 3.0, 'poor': 2.0, 'terrible': 1.0, 'tiny': 0.1, 'none': 0.0}
+                 'fair': 8.0, 'average': 5.0, 'medium': 5.0, 'moderate': 5.0, 'mediocre': 3.0,
+                 'low': 3.0, 'poor': 2.0, 'terrible': 1.0, 'tiny': 0.1, 'none': 0.0}
 
 
 def word_from_value(value):
@@ -422,26 +422,28 @@ def word_from_value(value):
     return word
 
 
-def value_of_variable(var):
-    val = var
-    if isinstance(var, basestring):
-        var = var.lower().strip()
+def value_of_variable(orig_var):
+    val = orig_var
+    was_changed = False
+    if isinstance(val, basestring):
+        var = val.lower().strip()
         if len(var) < 1:
             return var
 
         negative = False
-
         if var[0] == "-":
             negative = True
             var = var[1:]
 
         if var in VALUE_LOOKUPS:
             val = VALUE_LOOKUPS[var]
+            was_changed = True
         else:
             val = var
 
         try:
             val = float(val)
+            was_changed = True
         except ValueError:
             pass
 
@@ -450,13 +452,85 @@ def value_of_variable(var):
 
     else:
         try:
-            val = float(var)
+            val = float(orig_var)
+            was_changed = True
         except ValueError:
             pass
         except TypeError:
             pass
 
+    if not was_changed:
+        val = orig_var
+
     return val
+
+
+def extend(dict_source={}, *list_of_dict_updates):
+    dict_new = dict_source.copy()
+    for dict_update in list_of_dict_updates:
+        if dict_update is not None:
+            dict_new.update(dict_update)
+
+    return dict_new
+
+
+def set_val(dict_in, val, amount, use_words=False):
+    if use_words:
+        amount = word_from_value(amount)
+
+    val_parts = val.split(".")
+    if dict_in is None:
+        dict_in = {}
+    pointer = dict_in
+
+    for idx, value in enumerate(val_parts[:-1]):
+        if isinstance(pointer, dict):
+            if value in pointer:
+                pointer = pointer.get(value)
+            else:
+                pointer[value] = {}
+                pointer = pointer.get(value)
+
+    last = val_parts[-1]
+    pointer[last] = amount
+
+
+def get_val(dict_in, val='', default='', random_number=False, mid=0.3, min=0.0, max=120.0, weight=4,
+            set_if_blank=True, use_words=False):
+    if not isinstance(val, str):
+        return dict_in
+
+    val_parts = val.split(".")
+    pointer = dict_in
+    all_found = True
+    for value in val_parts:
+        if isinstance(pointer, dict) and value in pointer:
+            pointer = pointer.get(value)
+        else:
+            all_found = False
+            break
+
+    if set_if_blank:
+        reset = False
+        if pointer is None:
+            if random_number:
+                pointer = min + rand_weighted(midpoint=mid, weight=weight) * (max-min)
+                reset = True
+            elif default is not None:
+                pointer = default
+                reset = True
+        elif not all_found:
+            pointer = default
+            reset = True
+        if reset:
+            set_val(dict_in, val, amount=pointer)
+
+    if isinstance(pointer, basestring):
+        pointer = value_of_variable(pointer)
+        if use_words:
+            pointer = word_from_value(pointer)
+
+    return pointer
 
 
 def convert_string_to_properties_object(props):
@@ -618,3 +692,119 @@ def get_formula_from_obj(obj={}, formula='A+,B--', min=None, max=None):
         val = clamp(val, min, max)
 
     return val
+
+
+def weighted_number(mid=0.3, max=120.0, weight=4):
+    return rand_weighted(midpoint=mid, weight=weight)*max
+
+
+def check_requirements(requirements, world_data):
+    # Allow: [{concept:person,name:age,exceeds:20},{concept:world,name:magic,below:poor}]
+    # Allow: 'magic > low, building has Church'
+    # Allow: 'person.age > 20, world.magic < poor, person.business exists, person.siblings empty'
+    # TODO: Work with 'family.*.profession sailor'
+
+    if not requirements:
+        return True
+
+    checks = []
+    if isinstance(requirements, basestring):
+        if len(requirements) < 4:
+            return True
+        else:
+            requirements = convert_string_to_req_object(requirements)
+
+    if isinstance(requirements, list):
+        for req in requirements:
+            concept = req.get('concept', '')
+            name = req.get('name', '')
+            requirement = req.get('requirement', '')
+            req_array = []
+            if requirement and isinstance(requirement, list):
+                req_array = requirement
+            elif requirement and isinstance(requirement, basestring):
+                req_array = requirement.split(".")
+            elif concept and name:
+                req_array = [concept, name]
+            elif name:
+                req_array = [name]
+
+            r_is = req.get('is', '')
+            r_exists = req.get('exists', '')
+            r_has = req.get('has', '')
+            r_exceeds = req.get('exceeds', '')
+            r_empty = req.get('empty', '')
+            r_below = req.get('below', '')
+            r_gt = req.get('>', '')
+            r_lt = req.get('<', '')
+
+            if req_array:
+                to_check = get_info_from_name_array(req_array, world_data)
+
+                if not to_check:
+                    if r_empty:
+                        checks.append(True)
+                    else:
+                        checks.append(False)
+                else:
+                    if r_has and isinstance(to_check, list):
+                        checks.append(r_has in to_check)  # TODO: Check for lower case and plural
+
+                    elif r_exceeds or r_below or r_is or r_gt or r_lt or r_exists or r_empty:
+                        try:
+                            to_check = value_of_variable(to_check)
+                            if r_exceeds:
+                                r_exceeds = value_of_variable(r_exceeds)
+                                checks.append(r_exceeds <= to_check)
+                            if r_gt:
+                                r_gt = value_of_variable(r_gt)
+                                checks.append(r_gt < to_check)
+                            if r_lt:
+                                r_lt = value_of_variable(r_lt)
+                                checks.append(r_lt > to_check)
+                            if r_below:
+                                r_below = value_of_variable(r_below)
+                                r_below = float(r_below)
+                                checks.append(r_below >= to_check)
+                            if r_is:
+                                try:
+                                    temp = value_of_variable(r_is)
+                                    r_is = float(temp)
+                                    checks.append(r_is == to_check)
+                                except ValueError:
+                                    if isinstance(r_is, basestring) and isinstance(to_check, basestring):
+                                        checks.append(r_is.lower() == to_check.lower())
+                                    else:
+                                        checks.append(r_is == to_check)
+
+                            if r_exists:
+                                checks.append(to_check is not False)
+
+                        except Exception:
+                            checks.append(False)
+    else:
+        return False
+
+    is_valid = False
+    if checks:
+        is_valid = all(item for item in checks)
+
+    return is_valid
+
+
+def get_info_from_name_array(req_array, data_array, return_closest_match=False):
+    pointer = data_array
+    for req in req_array:
+        if req.lower() == 'count' and isinstance(pointer, list):
+            pointer = len(pointer)
+        elif req.lower() == 'length' and isinstance(pointer, list):
+            pointer = len(pointer)
+        elif req in pointer:
+            pointer = pointer.get(req)
+        else:
+            if return_closest_match:
+                pass
+            else:
+                return False
+    # TODO, Handle if arrays and * is passed in
+    return pointer

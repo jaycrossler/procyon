@@ -6,6 +6,8 @@ from dna_helpers import *
 import json
 import story_helpers
 import traceback
+from world import World, initialize_family_settings_from_request
+from procyon.generators.story_person_helpers import generate_world_and_events
 
 from django.template import RequestContext
 
@@ -247,85 +249,56 @@ def generator_name(request):
     return output
 
 
-def generator_person(request):
+def generator_family(request):
+    #TODO: Change to generate_family
     format_type = request.REQUEST.get('format') or 'html'
 
-    world_json = request.REQUEST.get('world_json') or ''
+    world_data = initialize_family_settings_from_request(request.REQUEST)
+    world_obj = World(world_data)
 
-    tags = request.REQUEST.get('tags') or ''
-    rand_seed = request.REQUEST.get('rand_seed') or ''
-
-    mother_dna = request.REQUEST.get('mother_dna') or ''
-    mother_race = request.REQUEST.get('mother_race') or 'Human'
-    mother_profession = request.REQUEST.get('mother_profession') or ''
-    mother_education = request.REQUEST.get('mother_education') or ''
-    mother_economic = request.REQUEST.get('mother_economic') or ''
-    mother_conflict = request.REQUEST.get('mother_conflict') or ''
-    mother = {"dna": mother_dna, "race": mother_race,  "profession": mother_profession, "education": mother_education, "economic": mother_economic, "conflict": mother_conflict}
-
-    father_dna = request.REQUEST.get('father_dna') or ''
-    father_race = request.REQUEST.get('father_race') or 'Human'
-    father_profession = request.REQUEST.get('father_profession') or ''
-    father_education = request.REQUEST.get('father_education') or ''
-    father_economic = request.REQUEST.get('father_economic') or ''
-    father_conflict = request.REQUEST.get('father_conflict') or ''
-    father = {"dna": father_dna, "race": father_race,  "profession": father_profession, "education": father_education, "economic": father_economic, "conflict": father_conflict}
-
-    gender = request.REQUEST.get('gender') or ''
-    child_dna = request.REQUEST.get('child_dna') or ''
-
-    regenerate = request.REQUEST.get('regenerate') or ''
-    if regenerate:
-        #A button was pushed with the name 'regenerate'
-        rand_seed = ''
-
+    people_by_years_data = {"note": ""}
     try:
-        world_data = json.loads(world_json) if world_json else {}
+        people_by_years_data["rand_seed"] = world_obj.get('rand_seed', '')
 
-        person_data = story_helpers.create_person(world_data=world_data, father=father, mother=mother, child_dna=child_dna,
-                                                  tags=tags, rand_seed=rand_seed, gender=gender)
+        #Generate World data and events
+        people_by_years_data["years"] = generate_world_and_events(world_obj)
 
-        note = person_data.get('note')
-        rand_seed = person_data.get('rand_seed')
-
+        note = people_by_years_data.get('note', '')
     except ValueError, e:
-        person_data = {"name": "Jon Snow", "description": "Male Human Ranger"}
+        people_by_years_data = [{"year": 1000, "people": [{"name": "Jon Snow", "description": "Male Human Ranger"}]}]
         note = json.dumps(dict(error=500, message='Exception', details=traceback.format_exc(), exception=str(e)))
     except Exception, e:
-        person_data = {"name": "Jon Snow", "description": "Male Human Ranger"}
+        people_by_years_data = [{"year": 1000, "people": [{"name": "Jon Snow", "description": "Male Human Ranger"}]}]
         note = json.dumps(dict(error=500, message='Exception', details=traceback.format_exc(), exception=str(e)))
 
     if format_type == "json":
-        data = json.dumps(person_data)
+        data = json.dumps(people_by_years_data)
         output = HttpResponse(data, mimetype="application/json")
-
     elif format_type == "string":
-        summary = person_data["name"] + " : " + person_data["description"]
+        summary = ""
+        for year_data in people_by_years_data:
+            year = year_data.get("year", 1000)
+            people = year_data.get("people", [])
+            out = str(year) + ": "
+            for p in people:
+                out += p.get('name') + "(" + str(p.get('age')) + "), "
+            summary += out + "<br/>\n"
+
         output = HttpResponse(summary, mimetype="text/html")
-
     else:
-        father["economic"] = word_from_value(father.get("economic", 1))
-        mother["economic"] = word_from_value(mother.get("economic", 1))
-        father["education"] = word_from_value(father.get("education", 1))
-        mother["education"] = word_from_value(mother.get("education", 1))
-        father["conflict"] = word_from_value(father.get("conflict", 1))
-        mother["conflict"] = word_from_value(mother.get("conflict", 1))
-
-        inputs = {
-            "tags": tags,
-            "rand_seed": rand_seed,
-            "gender": gender,
-            "father": father,
-            "mother": mother,
-            "child_dna": child_dna,
-            "world_json": world_json
-        }
+        inputs = world_obj.export_object()
         note = str(note).replace('\n', '<br />')
-        output = render_to_response('generator_person_quick.html',
-                                    {"person_data": person_data, "inputs": inputs, "note": note, "generator": "person",
-                                     "RACE_ARRAY": RACE_ARRAY, "VALUE_ARRAY": VALUE_ARRAY},
+        json_people_years = json.dumps(people_by_years_data, ensure_ascii=True)
+
+        output = render_to_response('generator_family.html',
+                                    {"people_by_years_data": people_by_years_data, "inputs": inputs, "note": note, "generator": "family",
+                                     "json_people_years": json_people_years, "RACE_ARRAY": RACE_ARRAY, "VALUE_ARRAY": VALUE_ARRAY},
                                     RequestContext(request))
     return output
+
+
+def generator_person(request):
+    return HttpResponse("Not Yet Implemented", mimetype="text/html")
 
 
 def generator_city(request):

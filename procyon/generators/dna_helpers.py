@@ -473,12 +473,18 @@ def race_from_dna(dna):
         if race_val_count > 3:
             race_variations[race_name] = 0
 
+    if len(dna) < len(GENE_ARRAY) * 2 + 2:
+        return 'Human'
+
     for gene_index, val in enumerate(GENE_ARRAY):
         gene_name = val.get("name", "name").lower()
         gene_values = val.get("values", [])
         start = gene_index * 2
         end = gene_index * 2 + 2
         snippet = dna[start:end]
+        if not snippet:
+            continue
+        snippet = snippet.upper()
         current_gene_val = DNA_16_lOOKUPS.index(snippet)
 
         for race in RACE_ARRAY:
@@ -539,6 +545,7 @@ def race_from_dna(dna):
 def gender_from_dna(dna):
     snippet = dna[0:2]
     gender_gene = GENE_ARRAY[0].get('values')
+    snippet = snippet.upper()
     val = DNA_16_lOOKUPS.index(snippet)
     gender = gender_gene[val].title()
     return gender

@@ -3,7 +3,7 @@
 {% load i18n bootstrap_pagination %}
 {% load url from future %}
 
-{% block head_title_base %}Generator :: Person :: {{ person_data.name }}{% endblock %}
+{% block head_title_base %}Generator :: Family {% endblock %}
 
 {% block head_title %}{% trans "Welcome" %}{% endblock %}
 
@@ -65,7 +65,8 @@
         }
 
         #person_data {
-            display: inline-block;
+            display: block;
+            overflow-x: scroll;
         }
 
         #event_list {
@@ -74,7 +75,7 @@
         }
 
         #character_data {
-            display: inline-block;
+            display: block;
             word-break: break-all;
             float: right;
             width: 300px;
@@ -212,9 +213,7 @@
         var event_info = [];
         function load_event_info() {
             {% autoescape off %}
-                {% for event in person_data.events %}
-                    event_info[{{ event.id }}] = {world: {{ event.world_data }}};
-                {% endfor %}
+                event_info = {{ json_people_years }};
             {% endautoescape %}
 
             $('.event_data_row').on('mouseover', function () {
@@ -231,17 +230,77 @@
                 $(this).css({backgroundColor: ''});
             });
 
-            var event_data = _.last(event_info).world;
-            $('#world_data_holder').html(event_data);
+            var years = [];
+            var people = [];
+            _.each(event_info.years, function(year_data){
+                //Add all years
+                var year = year_data.year;
+                years.push(year);
+
+                //Add new people
+                var people_list = year_data.people || [];
+                _.each(people_list, function(person){
+                    var name = person.name;
+                    if (people.indexOf(name)==-1){
+                        people.push(name);
+                    }
+                });
+            });
+
+
+            //Add Year row to table
+            var $events_table = $("#events_table");
+            var $first_row = $("<tr>").appendTo($events_table);
+            $("<th>")
+                    .html("Year:")
+                    .appendTo($first_row);
+
+            _.each(years,function(y){
+                $("<th>")
+                    .html(y)
+                    .appendTo($first_row);
+            });
+
+            //Add row for each person
+            _.each(people,function(person){
+
+                var $row = $("<tr>").appendTo($events_table);
+                 $("<td>")
+                     .html(person)
+                     .appendTo($row);
+
+                 _.each(years,function(y){
+                     var year_person_info = "";
+
+                     var year_data;
+                     _.each(event_info.years, function(year_info){
+                         if (year_info.year == y) {
+                             year_data = year_info;
+                         }
+                     });
+                     if (year_data) {
+                         _.each(year_data.people, function(year_person){
+                             if (year_person.name == person) {
+                                 year_person_info = year_person.age;
+                             }
+                         });
+                     }
+
+                     $("<td>")
+                         .html(year_person_info)
+                         .appendTo($row);
+                 });
+
+
+            });
+
         }
 
     </script>
 {% endblock %}
 
 {% block banner %}
-    <h2><a href="./">Generators</a> :: {{ generator|title }} ::
-        <span class="{% if person_data.gender == 'Male' %}father{% else %}mother{% endif %}">{{ person_data.name }}</span>
-    </h2>
+    <h2><a href="./">Generators</a> :: {{ generator|title }}</h2>
     <form action="" method="post" id="generator">
         {% csrf_token %}
         {% if note %}<i>{% autoescape off %}{{ note }}{% endautoescape %}</i>{% endif %}
@@ -331,56 +390,12 @@
 
     <div id="person_data">
         <span id="event_list">
-        <table id="events_table">
-            <tr>
-                <th>Age</th>
-                <th>Year</th>
-                <th>What happened?</th>
-            </tr>
-            {% autoescape off %}
-                {% for event in person_data.events %}
-{#                    CHANGE TO LIST OF PEOPLE#}
-                    <tr class='event_data_row' id="event_{{ event.id }}">
-                        <td class="center">{{ event.age }}</td>
-                        <td class="center">{{ event.year }}</td>
-                        <td>{{ event.message }}</td>
-                    </tr>
-                {% endfor %}
-            {% endautoescape %}
-        </table>
+        <table id="events_table"></table>
         </span>
 
-        <span id="character_data">
-            <b>DNA:</b> {{ person_data.dna }}<br/>
-
-            <br/><b>Description:</b> {{ person_data.description }}<br/>
-
-            <span id="att_holder">
-            <br/><b>Attributes:</b><br/>
-            <span id="att_holder_details" style="display: none">
-            {% for attribute, value in person_data.attribute_mods.items %}
-                <li class="attribute {% if value > 0 %}positive{% else %}negative{% endif %}"><b>{{ attribute }}</b>:
-                    {% if value > 0 %}+{% endif %}{{ value }}</li>
-            {% endfor %}
-            </span>
-            </span>
-
-            <br/><b>Items:</b><br/>
-            {% for item in person_data.item_list %}
-                <li class="attribute">{{ item.type|title }} - {{ item.name }}</li>
-            {% endfor %}
-
-            <br/><b>Tags:</b><br/>
-            {{ person_data.tags }}
-
-            <br/><b>Skills</b><br/>
-
-            <br/><b>World Data:</b><br/>
-            <span id="world_data_holder">
-            {{ person_data.world_data }}
-            </span>
-
-        </span>
+    </div>
+    <div id="character_data">
+        <b>Character Info:</b> Goes here<br/>
 
     </div>
 

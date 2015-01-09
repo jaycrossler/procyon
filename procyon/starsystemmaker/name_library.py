@@ -13,7 +13,7 @@ def list_of_names(file_sub_strings=list(), prefix_chance=0, prefixes=list(), max
     sub_file_list = []
     for search_string in file_sub_strings:
         for n in name_file_list:
-            if search_string == 'male':
+            if search_string.lower() == 'male':
                 if '_male' in n:
                     sub_file_list.append(n)
             elif search_string in n:

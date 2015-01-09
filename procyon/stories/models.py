@@ -6,7 +6,7 @@ from django.db import models
 from jsonfield import JSONField
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from procyon.generators.story_helpers import check_requirements
+from procyon.starsystemmaker.math_helpers import check_requirements
 import uuid
 
 
